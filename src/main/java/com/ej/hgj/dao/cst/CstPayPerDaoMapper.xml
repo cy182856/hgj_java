@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.cst.CstPayPerDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.cst.CstPayPer">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="project_num" jdbcType="VARCHAR" property="projectNum"/>
+        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
+        <result column="function_id" jdbcType="INTEGER" property="functionId"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, project_num, cst_code, function_id, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 删除-->
+    <update id="delete" parameterType="java.lang.String" >
+        delete from t_cst_pay_per where cst_code=#{cstCode}
+    </update>
+
+    <!-- 批量插入-->
+    <insert id="insertList" parameterType="java.util.List">
+        insert into t_cst_pay_per (
+        id, project_num, cst_code, function_id, create_time, update_time, create_by,
+        update_by, delete_flag
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.projectNum,jdbcType=VARCHAR},
+            #{item.cstCode,jdbcType=VARCHAR},
+            #{item.functionId,jdbcType=INTEGER},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.deleteFlag,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+    <!-- 根据客户编号查询对应账单权限-->
+    <select id="findByCstCode" resultMap="BaseMap"  parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List" />
+        from t_cst_pay_per
+        where delete_flag = 0
+        and cst_code = #{cstCode,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

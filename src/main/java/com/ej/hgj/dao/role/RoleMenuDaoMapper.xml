@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.role.RoleMenuDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.role.RoleMenu">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="project_num" jdbcType="VARCHAR" property="projectNum"/>
+        <result column="role_id" jdbcType="VARCHAR" property="roleId"/>
+        <result column="menu_id" jdbcType="INTEGER" property="menuId"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, project_num, role_id, menu_id, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 删除-->
+    <update id="delete" parameterType="java.lang.String" >
+        delete from t_role_menu where role_id=#{roleId}
+    </update>
+
+    <!-- 批量插入-->
+    <insert id="insertList" parameterType="java.util.List">
+        insert into t_role_menu (
+        id, project_num, role_id, menu_id, create_time, update_time, create_by,
+        update_by, delete_flag
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.projectNum,jdbcType=VARCHAR},
+            #{item.roleId,jdbcType=VARCHAR},
+            #{item.menuId,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.deleteFlag,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+
+
+</mapper>

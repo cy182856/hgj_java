@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.menu.mini.MenuMiniDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.menu.mini.MenuMini">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="parent_id" jdbcType="INTEGER" property="parentId"/>
+        <result column="fun_name" jdbcType="VARCHAR" property="funName"/>
+        <result column="bind_event" jdbcType="VARCHAR" property="bindEvent"/>
+        <result column="logo_path" jdbcType="VARCHAR" property="logoPath"/>
+        <result column="page_path" jdbcType="VARCHAR" property="pagePath"/>
+        <result column="index" jdbcType="INTEGER" property="index"/>
+        <result column="sort" jdbcType="INTEGER" property="sort"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        id, parent_id, fun_name, bind_event, logo_path, page_path, `index`, sort, create_time, update_time, delete_flag
+    </sql>
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.menu.mini.MenuMini">
+        select
+        <include refid="Base_Column_List" />
+        from t_menu_mini
+        where delete_flag = 0
+        order by sort
+    </select>
+
+    <!-- 删除-->
+    <update id="delete" parameterType="java.lang.String" >
+        delete from t_cst_menu_mini where cst_code=#{cstCode}
+    </update>
+
+    <!-- 批量插入-->
+    <insert id="insertList" parameterType="java.util.List">
+        insert into t_cst_menu_mini (
+        id, project_num, cst_code, menu_id, create_time, update_time, create_by,
+        update_by, delete_flag
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.projectNum,jdbcType=VARCHAR},
+            #{item.cstCode,jdbcType=VARCHAR},
+            #{item.menuId,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.deleteFlag,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 根据客户编号查询对应菜单权限-->
+    <select id="findMenuByCstCode" resultMap="BaseMap"  parameterType="java.lang.String">
+        select
+            m.*
+        from t_cst_menu_mini rm
+                 inner join s_cst r on rm.cst_code=r.code
+                 inner join t_menu_mini m on rm.menu_id=m.id
+        where m.delete_flag = 0
+          and rm.cst_code = #{cstCode,jdbcType=VARCHAR}
+        order by m.sort
+    </select>
+
+</mapper>

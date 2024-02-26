@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.sy.dao.workord.WorkPosDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.workord.WorkPos">
+        <result column="workPos" jdbcType="VARCHAR" property="workPos"/>
+        <result column="houseId" jdbcType="VARCHAR" property="houseId"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        workPos, houseId
+    </sql>
+
+
+    <!-- 工作位置-客户区域-->
+    <select id="getWorkPos" resultMap="BaseMap" parameterType="java.lang.String" >
+        SELECT
+                o.OrganizationName + '_' + h.grpname + '_' + h.budname + '_' + h.unitno + '_' + h.resname workPos,
+                h.id houseId
+        FROM
+            house h
+                JOIN HR_Organization o ON o.id = h.OrgID
+        WHERE
+            o.id = #{proNum}
+          AND h.rescode = #{resCode}
+    </select>
+
+</mapper>

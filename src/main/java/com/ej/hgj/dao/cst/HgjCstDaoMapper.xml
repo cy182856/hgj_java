@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.cst.HgjCstDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.cst.HgjCst">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="org_id" jdbcType="VARCHAR" property="orgId"/>
+        <result column="Code" jdbcType="VARCHAR" property="code"/>
+        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
+        <result column="cst_type" jdbcType="VARCHAR" property="cstType"/>
+        <result column="cst_level" jdbcType="VARCHAR" property="cstLevel"/>
+        <result column="is_affect" jdbcType="INTEGER" property="isAffect"/>
+        <result column="contract_character" jdbcType="VARCHAR" property="contractCharacter"/>
+        <result column="cer_type" jdbcType="VARCHAR" property="cerType"/>
+        <result column="cer_no" jdbcType="VARCHAR" property="cerNo"/>
+        <result column="lic_no" jdbcType="VARCHAR" property="licNo"/>
+        <result column="mobile" jdbcType="VARCHAR" property="mobile"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, org_id, code, cst_name, cst_type, cst_level, is_affect, contract_character, cer_type, cer_no, lic_no, mobile, create_time, update_time
+    </sql>
+    <select id="findByCstCode" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from s_cst where code=#{cstCode}
+    </select>
+    <insert id="insertList" parameterType="java.util.List">
+        insert into s_cst (
+        id, org_id, code, cst_name, cst_type, cst_level, is_affect, contract_character, cer_type, cer_no, lic_no, mobile, create_time, update_time
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.orgId,jdbcType=VARCHAR},
+            #{item.code,jdbcType=VARCHAR},
+            #{item.cstName,jdbcType=VARCHAR},
+            #{item.cstType,jdbcType=VARCHAR},
+            #{item.cstLevel,jdbcType=VARCHAR},
+            #{item.isAffect,jdbcType=INTEGER},
+            #{item.contractCharacter,jdbcType=VARCHAR},
+            #{item.cerType,jdbcType=VARCHAR},
+            #{item.cerNo,jdbcType=VARCHAR},
+            #{item.licNo,jdbcType=VARCHAR},
+            #{item.mobile,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 删除-->
+    <delete id="delete" parameterType="java.lang.String" >
+        delete from s_cst
+    </delete>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.cst.HgjCst">
+        select
+        <include refid="Base_Column_List" />
+        from s_cst
+        where is_affect = 1
+        <if test="code != null">
+            and code like CONCAT('%', #{code,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="cstName != null">
+            and cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="cerNo != null">
+            and cer_no = #{cerNo,jdbcType=VARCHAR}
+        </if>
+        <if test="licNo != null">
+            and lic_no = #{licNo,jdbcType=VARCHAR}
+        </if>
+        <if test="orgId != null and orgId != '' ">
+            and org_id = #{orgId,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+    <!-- 根据资源ID查询客户名称-->
+    <select id="getCstNameByResId" resultMap="BaseMap" parameterType="java.lang.String" >
+        SELECT
+            DISTINCT(c.`code`) as code,hu.org_id,c.cst_name
+        FROM
+            s_rcr rcr
+                INNER  JOIN s_house hu ON hu.id = rcr.res_id
+                INNER JOIN s_cst c on c.id=rcr.cst_id
+        where rcr.res_id=#{resId} and rcr.is_affect =1
+    </select>
+</mapper>

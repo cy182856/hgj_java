@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.sy.dao.cst.SyCstDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.cst.SyCst">
+        <result column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="OrgID" jdbcType="VARCHAR" property="orgId"/>
+        <result column="Code" jdbcType="VARCHAR" property="code"/>
+        <result column="CstName" jdbcType="VARCHAR" property="cstName"/>
+        <result column="CstType" jdbcType="VARCHAR" property="cstType"/>
+        <result column="CstLevel" jdbcType="VARCHAR" property="cstLevel"/>
+        <result column="IsAffect" jdbcType="INTEGER" property="isAffect"/>
+        <result column="ContractCharacter" jdbcType="VARCHAR" property="contractCharacter"/>
+        <result column="CerType" jdbcType="VARCHAR" property="cerType"/>
+        <result column="CerNO" jdbcType="VARCHAR" property="cerNo"/>
+        <result column="LicNO" jdbcType="VARCHAR" property="licNo"/>
+        <result column="Mobile" jdbcType="VARCHAR" property="mobile"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        ID, OrgID, Code, CstName, CstType, CstLevel, IsAffect, ContractCharacter, CerType, CerNO, LicNO, Mobile
+    </sql>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from (
+            select
+                c.ID,
+                c.OrgID,
+                c.Code,
+                c.CstName,
+                c.CstType,
+                c.CstLevel,
+                c.IsAffect,
+                c.ContractCharacter,
+                m.CerType,
+                m.CerNO,
+                m.LicNO,
+                m.Mobile
+            from Cst c
+            left join CstCom m on m.CstID = c.ID
+            where c.OrgID != ''
+        )t
+    </select>
+
+</mapper>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.user.UserLogDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.user.UserLog">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="operate_menu" jdbcType="VARCHAR" property="operateMenu"/>
+        <result column="operate_content" jdbcType="VARCHAR" property="operateContent"/>
+        <result column="operate_id" jdbcType="VARCHAR" property="operateId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <select id="queryUserLog" resultMap="BaseMap" >
+        select  id,user_id,operate_menu,operate_content,operate_id,create_time,update_time
+        from t_user_log
+        where user_id = #{userName,jdbcType=VARCHAR}
+    </select>
+
+    <!-- 根据主键查询-->
+    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
+        select  id,user_id,operate_menu,operate_content,operate_id,create_time,update_time
+        from t_user_log
+        where id = #{id}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.user.UserLog">
+        select  id,user_id,operate_menu,operate_content,operate_id,create_time,update_time
+        from t_user_log
+        where delete_flag = 0
+        order by update_time desc
+    </select>
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.user.UserLog" >
+        insert into  t_user_log(
+        <if test="id != null">
+            `id`,
+        </if>
+        <if test="userId != null">
+            `user_id`,
+        </if>
+        <if test="operateUrl != null">
+            `operate_url`,
+        </if>
+        <if test="operateMenu != null">
+            `operate_menu`,
+        </if>
+        <if test="operateContent != null">
+            `operate_content`,
+        </if>
+        <if test="operateId != null">
+            `operate_id`,
+        </if>
+        <if test="createTime != null">
+            `create_time`,
+        </if>
+        <if test="updateTime != null">
+            `update_time`,
+        </if>
+        <if test="deleteFlag != null">
+            `delete_flag`
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null" >
+                #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="operateUrl != null">
+                #{operateUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="operateMenu != null">
+                #{operateMenu,jdbcType=VARCHAR},
+            </if>
+            <if test="operateContent != null">
+                #{operateContent,jdbcType=VARCHAR},
+            </if>
+            <if test="operateId != null">
+                #{operateId,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.user.UserLog" >
+        update
+        t_user_log
+        <set>
+            <if test="userId != null" >
+                user_id = #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="operateUrl != null">
+                operate_url = #{operateUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="operateMenu != null">
+                operate_menu = #{operateMenu,jdbcType=VARCHAR},
+            </if>
+            <if test="operateContent != null">
+                operate_content = #{operateContent,jdbcType=VARCHAR},
+            </if>
+            <if test="operateId != null">
+                operate_id = #{operateContent,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id=#{id,jdbcType=VARCHAR}
+    </update>
+    <!-- 删除-->
+    <update id="delete" parameterType="java.lang.String" >
+        delete from t_user_log where id=#{id}
+    </update>
+
+</mapper>

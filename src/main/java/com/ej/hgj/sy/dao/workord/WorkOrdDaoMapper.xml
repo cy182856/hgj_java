@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.sy.dao.workord.WorkOrdDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.workord.WorkOrd">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="woNo" jdbcType="VARCHAR" property="woNo"/>
+        <result column="workOrdState" jdbcType="VARCHAR" property="workOrdState"/>
+        <result column="orders" jdbcType="VARCHAR" property="orders"/>
+        <result column="ordersTime" jdbcType="VARCHAR" property="ordersTime"/>
+        <result column="completionTime" jdbcType="VARCHAR" property="completionTime"/>
+        <result column="labourCost" jdbcType="DECIMAL" property="labourCost"/>
+        <result column="materialCost" jdbcType="DECIMAL" property="materialCost"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, woNo, workOrdState, orders, ordersTime, completionTime, labourCost, materialCost
+    </sql>
+
+    <!-- 根据报修单号查询-->
+    <select id="getCsWorkOrd" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            ID as id, WONo as woNo, workordstate workOrdState
+        from cs_workord
+        where WONo = #{woNo}
+    </select>
+
+    <!-- 根据报修单ID查询-->
+    <select id="getCostSum" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            sum(c.LabourCost) as labourCost,
+            sum(c.MaterialCostSum) materialCost
+        from CS_WorkQuestion c
+        where c.WorkOrdID = #{woId}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            -- ID
+            ID as id,
+            -- 报修单号
+            WONo as woNo,
+            -- 报修状态
+            workordstate as workOrdState,
+            -- 接单人
+            Orders as orders,
+            -- 开工时间-接单时间
+            OrdersTime as ordersTime,
+            -- 完工时间
+            CompletionTime as completionTime
+        from cs_workord
+        where WONo in
+        <foreach collection="woNoList" item="woNo" index="index" open="(" close=")" separator=",">
+            #{woNo}
+        </foreach>
+    </select>
+
+    <!-- 查询公共报修单号-->
+    <select id="getGgBxWoNo" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+               top 1 woNo
+        from cs_workord
+        where RSDate between CONVERT(VARCHAR(10), getdate(),120)+' 00:00:00.000' and CONVERT(VARCHAR(10), getdate(),120)+' 23:59:59.999'
+          and WONo like 'GGBX%' and orgid = #{proNum} order by rsdate desc
+    </select>
+
+    <!-- 查询客户报修单号-->
+    <select id="getKhBxWoNo" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            top 1 woNo
+        from cs_workord
+        where RSDate between CONVERT(VARCHAR(10), getdate(),120)+' 00:00:00.000' and CONVERT(VARCHAR(10), getdate(),120)+' 23:59:59.999'
+          and WONo like 'KHBX%' and orgid = #{proNum} order by rsdate desc
+    </select>
+
+</mapper>

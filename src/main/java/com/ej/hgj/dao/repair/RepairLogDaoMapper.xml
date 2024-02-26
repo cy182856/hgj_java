@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.repair.RepairLogDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.repair.RepairLog">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="project_num" jdbcType="VARCHAR" property="projectNum"/>
+        <result column="project_name" jdbcType="VARCHAR" property="projectName"/>
+        <result column="repair_num" jdbcType="VARCHAR" property="repairNum"/>
+        <result column="wx_open_id" jdbcType="VARCHAR" property="wxOpenId"/>
+        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
+        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
+        <result column="cst_mobile" jdbcType="VARCHAR" property="cstMobile"/>
+        <result column="house_id" jdbcType="VARCHAR" property="houseId"/>
+        <result column="service_type" jdbcType="VARCHAR" property="serviceType"/>
+        <result column="ques_type" jdbcType="VARCHAR" property="quesType"/>
+        <result column="work_pos" jdbcType="VARCHAR" property="workPos"/>
+        <result column="repair_type" jdbcType="VARCHAR" property="repairType"/>
+        <result column="image" jdbcType="VARCHAR" property="image"/>
+        <result column="repair_desc" jdbcType="VARCHAR" property="repairDesc"/>
+        <result column="repair_status" jdbcType="VARCHAR" property="repairStatus"/>
+        <result column="satis_faction" jdbcType="VARCHAR" property="satisFaction"/>
+        <result column="repair_score" jdbcType="VARCHAR" property="repairScore"/>
+        <result column="repair_msg" jdbcType="VARCHAR" property="repairMsg"/>
+        <result column="orders" jdbcType="VARCHAR" property="orders"/>
+        <result column="orders_time" jdbcType="VARCHAR" property="ordersTime"/>
+        <result column="completion_time" jdbcType="VARCHAR" property="completionTime"/>
+        <result column="labour_cost" jdbcType="DECIMAL" property="labourCost"/>
+        <result column="material_cost" jdbcType="DECIMAL" property="materialCost"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, project_num, project_name, repair_num, wx_open_id, cst_code, cst_name, cst_mobile, house_id,
+        service_type, ques_type, work_pos, repair_type, image, repair_desc, repair_status, satis_faction, repair_score,
+        repair_msg, orders, orders_time, completion_time, labour_cost, material_cost, create_time, update_time, create_by, update_by, delete_flag
+    </sql>
+
+    <!-- 根据报修单号查询-->
+    <select id="getByRepNum" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            <include refid="Base_Column_List" />
+        from t_repair_log
+        where repair_num = #{repairNum}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.repair.RepairLog">
+<!--        select-->
+<!--        <include refid="Base_Column_List" />-->
+<!--        from t_repair_log-->
+<!--        where delete_flag = 0-->
+<!--        <if test="projectNum != null">-->
+<!--            and project_num = #{projectNum,jdbcType=VARCHAR}-->
+<!--        </if>-->
+<!--        <if test="wxOpenId != null">-->
+<!--            and wx_open_id = #{wxOpenId,jdbcType=VARCHAR}-->
+<!--        </if>-->
+<!--        <if test="cstCode != null">-->
+<!--            and cst_code = #{cstCode,jdbcType=VARCHAR}-->
+<!--        </if>-->
+<!--        <if test="repairNum != null">-->
+<!--            and repair_num = #{repairNum,jdbcType=VARCHAR}-->
+<!--        </if>-->
+<!--        <if test='repairStatus == "1"'>-->
+<!--            and repair_status = 'WOSta_Sub'-->
+<!--        </if>-->
+<!--        <if test='repairStatus == "2"'>-->
+<!--            and repair_status = 'WOSta_Proc'-->
+<!--        </if>-->
+<!--        <if test='repairStatus == "3"'>-->
+<!--            and repair_status in ('WOSta_Finish', 'WOSta_Visit')-->
+<!--        </if>-->
+<!--        <if test='repairStatus == "10"'>-->
+<!--            and repair_status = 'WOSta_Finish'-->
+<!--        </if>-->
+<!--        <if test="projectName != null">-->
+<!--            and project_name like CONCAT('%', #{projectName,jdbcType=VARCHAR},'%') ESCAPE '/'-->
+<!--        </if>-->
+<!--        order by update_time desc-->
+
+
+        select
+            <include refid="Base_Column_List" />
+        from(
+            select
+            <include refid="Base_Column_List" />
+            from
+                t_repair_log
+            where delete_flag = 0
+                <if test="projectNum != null">
+                    and project_num = #{projectNum,jdbcType=VARCHAR}
+                </if>
+                <if test="wxOpenId != null">
+                    and wx_open_id = #{wxOpenId,jdbcType=VARCHAR}
+                </if>
+                <if test="cstCode != null">
+                    and cst_code = #{cstCode,jdbcType=VARCHAR}
+                </if>
+                <if test="repairNum != null">
+                    and repair_num = #{repairNum,jdbcType=VARCHAR}
+                </if>
+                <if test='repairStatus == "1"'>
+                    and repair_status = 'WOSta_Sub'
+                </if>
+                <if test='repairStatus == "2"'>
+                    and repair_status = 'WOSta_Proc'
+                </if>
+                <if test='repairStatus == "3"'>
+                    and repair_status in ('WOSta_Finish', 'WOSta_Visit')
+                </if>
+                <if test='repairStatus == "10"'>
+                    and repair_status = 'WOSta_Finish'
+                </if>
+                <if test="projectName != null">
+                    and project_name like CONCAT('%', #{projectName,jdbcType=VARCHAR},'%') ESCAPE '/'
+                </if>
+
+            union
+
+            select
+                <include refid="Base_Column_List" />
+            from
+                t_repair_log
+            where delete_flag = 0
+                and  house_id in (
+                    select
+                        hu.id
+                    from
+                        s_rcr rcr
+                    left join s_contract con on con.id = rcr.ctt_id
+                    left join s_house hu on hu.id = rcr.res_id
+                    where
+                    rcr.cst_id = (
+                        select
+                            id
+                        from
+                            s_cst
+                        where
+                            code = #{cstCode,jdbcType=VARCHAR}
+                    )
+                )
+                <if test="projectNum != null">
+                    and project_num = #{projectNum,jdbcType=VARCHAR}
+                </if>
+                <if test="repairNum != null">
+                    and repair_num = #{repairNum,jdbcType=VARCHAR}
+                </if>
+                <if test='repairStatus == "1"'>
+                    and repair_status = 'WOSta_Sub'
+                </if>
+                <if test='repairStatus == "2"'>
+                    and repair_status = 'WOSta_Proc'
+                </if>
+                <if test='repairStatus == "3"'>
+                    and repair_status in ('WOSta_Finish', 'WOSta_Visit')
+                </if>
+                <if test='repairStatus == "10"'>
+                    and repair_status = 'WOSta_Finish'
+                </if>
+                <if test="projectName != null">
+                    and project_name like CONCAT('%', #{projectName,jdbcType=VARCHAR},'%') ESCAPE '/'
+                </if>
+
+        ) t
+        order by t.update_time desc
+
+    </select>
+
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.repair.RepairLog" >
+        insert into  t_repair_log(
+        <if test="id != null">
+            id,
+        </if>
+        <if test="projectNum != null">
+            project_num,
+        </if>
+        <if test="projectName != null">
+            project_name,
+        </if>
+        <if test="repairNum != null">
+            repair_num,
+        </if>
+        <if test="wxOpenId != null">
+            wx_open_id,
+        </if>
+        <if test="cstCode != null">
+            cst_code,
+        </if>
+        <if test="cstName != null">
+            cst_name,
+        </if>
+        <if test="cstMobile != null">
+            cst_mobile,
+        </if>
+        <if test="houseId != null">
+            house_id,
+        </if>
+        <if test="serviceType != null">
+            service_type,
+        </if>
+        <if test="quesType != null">
+            ques_type,
+        </if>
+        <if test="workPos != null">
+            work_pos,
+        </if>
+        <if test="repairType != null">
+            repair_type,
+        </if>
+        <if test="image != null">
+            image,
+        </if>
+        <if test="repairDesc != null">
+            repair_desc,
+        </if>
+        <if test="repairStatus != null">
+            repair_status,
+        </if>
+        <if test="createTime != null">
+            create_time,
+        </if>
+        <if test="createBy != null">
+            create_by,
+        </if>
+        <if test="updateTime != null">
+            update_time,
+        </if>
+        <if test="updateBy != null">
+            update_by,
+        </if>
+        <if test="deleteFlag != null">
+            delete_flag
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="projectNum != null" >
+                #{projectNum,jdbcType=VARCHAR},
+            </if>
+            <if test="projectName != null" >
+                #{projectName,jdbcType=VARCHAR},
+            </if>
+            <if test="repairNum != null" >
+                #{repairNum,jdbcType=VARCHAR},
+            </if>
+            <if test="wxOpenId != null" >
+                #{wxOpenId,jdbcType=VARCHAR},
+            </if>
+            <if test="cstCode != null" >
+                #{cstCode,jdbcType=VARCHAR},
+            </if>
+            <if test="cstName != null" >
+                #{cstName,jdbcType=VARCHAR},
+            </if>
+            <if test="cstMobile != null" >
+                #{cstMobile,jdbcType=VARCHAR},
+            </if>
+            <if test="houseId != null" >
+                #{houseId,jdbcType=VARCHAR},
+            </if>
+            <if test="serviceType != null" >
+                #{serviceType,jdbcType=VARCHAR},
+            </if>
+            <if test="quesType != null" >
+                #{quesType,jdbcType=VARCHAR},
+            </if>
+            <if test="workPos != null" >
+                #{workPos,jdbcType=VARCHAR},
+            </if>
+            <if test="repairType != null" >
+                #{repairType,jdbcType=VARCHAR},
+            </if>
+            <if test="image != null" >
+                #{image,jdbcType=VARCHAR},
+            </if>
+            <if test="repairDesc != null" >
+                #{repairDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="repairStatus != null" >
+                #{repairStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.repair.RepairLog" >
+        update
+        t_repair_log
+        <set>
+            <if test="repairStatus != null">
+                repair_status = #{repairStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="repairScore != null">
+                repair_score = #{repairScore,jdbcType=VARCHAR},
+            </if>
+            <if test="satisFaction != null">
+                satis_faction = #{satisFaction,jdbcType=VARCHAR},
+            </if>
+            <if test="repairMsg != null">
+                repair_msg = #{repairMsg,jdbcType=VARCHAR},
+            </if>
+            <if test="labourCost != null">
+                labour_cost = #{labourCost,jdbcType=DECIMAL},
+            </if>
+            <if test="materialCost != null">
+                material_cost = #{materialCost,jdbcType=DECIMAL},
+            </if>
+            <if test="orders != null">
+                orders = #{orders,jdbcType=VARCHAR},
+            </if>
+            <if test="ordersTime != null">
+                orders_time = #{ordersTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="completionTime != null">
+                completion_time = #{completionTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where repair_num = #{repairNum,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 删除-->
+    <update id="delete" parameterType="java.lang.String" >
+        delete from t_repair_log where id=#{id}
+    </update>
+
+</mapper>

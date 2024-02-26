@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.cstInto.CstIntoDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.cstInto.CstInto">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="project_name" jdbcType="VARCHAR" property="projectName"/>
+        <result column="wx_open_id" jdbcType="VARCHAR" property="wxOpenId"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
+        <result column="house_id" jdbcType="VARCHAR" property="houseId"/>
+        <result column="res_name" jdbcType="VARCHAR" property="resName"/>
+        <result column="into_role" jdbcType="INTEGER" property="intoRole"/>
+        <result column="into_status" jdbcType="INTEGER" property="intoStatus"/>
+        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, wx_open_id, user_name, cst_code, house_id, into_role, into_status, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 根据主键查询-->
+    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_cst_into
+        where id = #{id}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.cstInto.CstInto">
+        SELECT
+            c.*, s.cst_name,
+            pc.project_name,
+            h.res_name
+        FROM
+            t_cst_into c
+        LEFT JOIN s_cst s ON s.`code` = c.cst_code
+        LEFT JOIN t_pro_config pc ON pc.project_num = s.org_id
+        LEFT JOIN s_house h on h.id = c.house_id
+        WHERE c.delete_flag = 0
+        <if test="projectNum != null and projectNum != ''">
+            and pc.project_num = #{projectNum}
+        </if>
+        <if test="cstName != null">
+            and s.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="userName != null">
+            and c.user_name like CONCAT('%', #{userName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="intoRole != null">
+            and c.into_role = #{intoRole}
+        </if>
+        <if test="intoStatus != null">
+            and c.into_status = #{intoStatus}
+        </if>
+        <if test="cstCode != null">
+            and c.cst_code = #{cstCode}
+        </if>
+        order by c.update_time desc
+    </select>
+
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.cstInto.CstInto" >
+        insert into  t_cst_into(
+        <if test="id != null">
+            id,
+        </if>
+        <if test="wxOpenId != null">
+            wx_open_id,
+        </if>
+        <if test="userName != null">
+            user_name,
+        </if>
+        <if test="cstCode != null">
+            cst_code,
+        </if>
+        <if test="houseId != null">
+            house_id,
+        </if>
+        <if test="intoRole != null">
+            into_role,
+        </if>
+        <if test="intoStatus != null">
+            into_status,
+        </if>
+        <if test="createTime != null">
+            create_time,
+        </if>
+        <if test="createBy != null">
+            create_by,
+        </if>
+        <if test="updateTime != null">
+            update_time,
+        </if>
+        <if test="updateBy != null">
+            update_by,
+        </if>
+        <if test="deleteFlag != null">
+            delete_flag
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="wxOpenId != null" >
+                #{wxOpenId,jdbcType=VARCHAR},
+            </if>
+            <if test="userName != null" >
+                #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="cstCode != null" >
+                #{cstCode,jdbcType=VARCHAR},
+            </if>
+            <if test="houseId != null" >
+                #{houseId,jdbcType=VARCHAR},
+            </if>
+            <if test="intoRole != null" >
+                #{intoRole,jdbcType=INTEGER},
+            </if>
+            <if test="intoStatus != null" >
+                #{intoStatus,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 逻辑删除-->
+    <update id="delete" parameterType="java.lang.String" >
+        update t_cst_into set delete_flag = 1 ,update_time = NOW() where id=#{id,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 根据微信号客户号删除-->
+    <update id="deleteByCstCodeAndWxOpenId" parameterType="java.lang.String" >
+        update
+            t_cst_into
+        set delete_flag = 1 , update_time = NOW()
+        where cst_code=#{cstCode,jdbcType=VARCHAR}
+          and wx_open_id=#{wxOpenId,jdbcType=VARCHAR}
+    </update>
+
+</mapper>

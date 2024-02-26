@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.user.UserDutyPhoneDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.user.UserDutyPhone">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="mobile" jdbcType="VARCHAR" property="mobile"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, mobile, phone, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 根据手机号查询-->
+    <select id="getByMobile" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_user_duty_phone
+        where delete_flag = 0 and mobile = #{mobile}
+    </select>
+
+    <!-- 根据手机号企业号查询-->
+    <select id="getByMobileAndCorpId" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_user_duty_phone
+        where delete_flag = 0 and mobile = #{mobile} and corp_id = #{corpId}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.user.UserDutyPhone">
+        select
+        <include refid="Base_Column_List" />
+        from t_user_duty_phone
+        where delete_flag = 0
+        <if test="mobile != null">
+            and mobile = #{mobile,jdbcType=VARCHAR}
+        </if>
+        <if test="phone != null">
+            and phone = #{phone,jdbcType=VARCHAR}
+        </if>
+        order by update_time desc
+    </select>
+
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.user.UserDutyPhone" >
+        insert into  t_user_duty_phone(
+        <if test="id != null">
+            `id`,
+        </if>
+        <if test="mobile != null">
+            `mobile`,
+        </if>
+        <if test="phone != null">
+            `phone`,
+        </if>
+        <if test="createTime != null">
+            `create_time`,
+        </if>
+        <if test="createBy != null">
+            `create_by`,
+        </if>
+        <if test="updateTime != null">
+            `update_time`,
+        </if>
+        <if test="updateBy != null">
+            `update_by`,
+        </if>
+        <if test="deleteFlag != null">
+            `delete_flag`
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                #{mobile,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null" >
+                #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.user.UserDutyPhone" >
+        update
+        t_user_duty_phone
+        <set>
+            <if test="mobile != null">
+                mobile = #{mobile,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null">
+                phone = #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where mobile = #{mobile,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 删除-->
+    <delete id="delete" parameterType="java.lang.String" >
+        delete from t_user_duty_phone where mobile = #{mobile}
+    </delete>
+
+    <!-- 删除-->
+    <delete id="deleteByMobileAndCorpId" parameterType="java.lang.String" >
+        delete from t_user_duty_phone where mobile = #{mobile} and corp_id = #{corpId}
+    </delete>
+
+</mapper>

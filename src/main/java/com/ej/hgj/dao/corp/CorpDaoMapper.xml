@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.corp.CorpDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.corp.Corp">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="corp_id" jdbcType="VARCHAR" property="corpId"/>
+        <result column="corp_name" jdbcType="VARCHAR" property="corpName"/>
+        <result column="permanent_code" jdbcType="VARCHAR" property="permanentCode"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, corp_id, corp_name, permanent_code, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 根据主键查询-->
+    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            <include refid="Base_Column_List" />
+        from t_corp
+        where id = #{id}
+    </select>
+
+    <!-- 根据企业号查询-->
+    <select id="getByCorpId" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_corp
+        where delete_flag = 0 and  auth_corp_id = #{authCorpId}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.corp.Corp">
+        select
+        <include refid="Base_Column_List" />
+        from t_corp
+        where delete_flag = 0
+        order by update_time desc
+    </select>
+
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.corp.Corp" >
+        insert into  t_corp(
+        <if test="id != null">
+            id,
+        </if>
+        <if test="corpId != null">
+            corp_id,
+        </if>
+        <if test="corpName != null">
+            corp_name,
+        </if>
+        <if test="permanentCode != null">
+            permanent_code,
+        </if>
+        <if test="createTime != null">
+            create_time,
+        </if>
+        <if test="createBy != null">
+            create_by,
+        </if>
+        <if test="updateTime != null">
+            update_time,
+        </if>
+        <if test="updateBy != null">
+            update_by,
+        </if>
+        <if test="deleteFlag != null">
+            delete_flag
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="corpId != null" >
+                #{corpId,jdbcType=VARCHAR},
+            </if>
+            <if test="corpName != null" >
+                #{corpName,jdbcType=VARCHAR},
+            </if>
+            <if test="permanentCode != null" >
+                #{permanentCode,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.corp.Corp" >
+        update
+        t_corp
+        <set>
+            <if test="permanentCode != null">
+                permanent_code = #{permanentCode,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where corp_id=#{authCorpId,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 删除-->
+    <update id="delete" parameterType="java.lang.String" >
+        delete from t_corp where id=#{id}
+    </update>
+
+</mapper>

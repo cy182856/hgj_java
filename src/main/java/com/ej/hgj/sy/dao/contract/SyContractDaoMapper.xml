@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.sy.dao.contract.SyContractDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.contract.SyContract">
+        <result column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="OrgID" jdbcType="VARCHAR" property="orgId"/>
+        <result column="Code" jdbcType="VARCHAR" property="code"/>
+        <result column="CttType" jdbcType="VARCHAR" property="cttType"/>
+        <result column="CttName" jdbcType="VARCHAR" property="cttName"/>
+        <result column="STime" jdbcType="TIMESTAMP" property="sTime"/>
+        <result column="ETime" jdbcType="TIMESTAMP" property="eTime"/>
+        <result column="Status" jdbcType="VARCHAR" property="status"/>
+        <result column="IsAffect" jdbcType="INTEGER" property="isAffect"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        ID, OrgID, Code, CttType, CttName, STime, ETime, Status, IsAffect
+    </sql>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from Contract
+    </select>
+
+</mapper>

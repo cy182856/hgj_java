@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.wechat.WechatPubDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.wechat.WechatPub">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
+        <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="app_id" jdbcType="VARCHAR" property="appId"/>
+        <result column="app_secret" jdbcType="VARCHAR" property="appSecret"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, pro_num, pro_name, `name`, app_id, app_secret, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 根据主键查询-->
+    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            <include refid="Base_Column_List" />
+        from t_wechat_pub
+        where id = #{id}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.wechat.WechatPub">
+        select
+        <include refid="Base_Column_List" />
+        from t_wechat_pub
+        where delete_flag = 0
+        <if test="name != null">
+            and `name` like CONCAT('%', #{name,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="id != null">
+            and id = #{id}
+        </if>
+    </select>
+
+</mapper>

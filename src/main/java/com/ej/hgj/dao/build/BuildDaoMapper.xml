@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.build.BuildDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.build.Build">
+        <result column="bud_id" jdbcType="VARCHAR" property="budId"/>
+        <result column="grp_name" jdbcType="VARCHAR" property="grpName"/>
+        <result column="org_id" jdbcType="VARCHAR" property="orgId"/>
+        <result column="bud_name" jdbcType="VARCHAR" property="budName"/>
+        <result column="unit_no" jdbcType="VARCHAR" property="unitNo"/>
+        <result column="mobile" jdbcType="VARCHAR" property="mobile"/>
+        <result column="bud_name_unit" jdbcType="VARCHAR" property="budNameUnit"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        bud_id, grp_name, bud_name, unit_no, mobile, bud_name_unit, create_time, update_time, delete_flag
+    </sql>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.build.Build">
+        select distinct
+            (bud_id),
+            org_id,
+            grp_name,
+            bud_name as bud_name_unit
+           -- unit_no,
+           -- concat(bud_name,"-",unit_no) as bud_name_unit
+        from
+            s_house
+        where org_id = #{orgId}
+          and bud_id in (
+            select bud_id from t_build where delete_flag = 0
+            )
+        order by grp_name,bud_name
+    </select>
+
+
+    <!-- 查询所有楼栋绑定信息-->
+    <select id="getListAll" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.build.Build">
+        select
+            distinct(s.bud_id),
+            s.org_id,
+            s.grp_name,
+            s.bud_name as bud_name_unit,
+           -- s.unit_no,
+           -- concat(s.bud_name,"-",s.unit_no) as bud_name_unit,
+            u.mobile
+        from t_user_build u
+        left join s_house s on u.bud_id = s.bud_id
+        where u.delete_flag = 0
+        <if test="mobile != null">
+            and u.mobile = #{mobile,jdbcType=VARCHAR}
+        </if>
+        <if test="orgId != null">
+            and s.org_id = #{orgId,jdbcType=VARCHAR}
+        </if>
+        order by s.grp_name,s.bud_name
+    </select>
+
+</mapper>

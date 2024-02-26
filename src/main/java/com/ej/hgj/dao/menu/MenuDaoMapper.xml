@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.menu.MenuDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.menu.Menu">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="parent_id" jdbcType="INTEGER" property="parentId"/>
+        <result column="plat_form" jdbcType="INTEGER" property="platForm"/>
+        <result column="path" jdbcType="VARCHAR" property="path"/>
+        <result column="component" jdbcType="VARCHAR" property="component"/>
+        <result column="redirect" jdbcType="VARCHAR" property="redirect"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="meta" jdbcType="VARCHAR" property="metaStr"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <!-- 查询列表-->
+    <select id="menuList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.menu.Menu">
+        select  * from t_menu
+        where delete_flag = 0
+        order by update_time desc
+    </select>
+
+    <!-- 菜单查询-->
+    <select id="getMenuList" resultMap="BaseMap" parameterType="com.ej.hgj.entity.menu.Menu">
+        select
+            m.id,
+            m.parent_id,
+            m.plat_form,
+            m.path,
+            m.component,
+            m.redirect,
+            m.`name`,
+            m.meta
+        from t_menu m
+        where m.delete_flag=0
+        <if test="platForm != null">
+            and plat_form = #{platForm,jdbcType=INTEGER}
+        </if>
+        order by m.sort
+    </select>
+
+    <!-- 用户web菜单查询-->
+    <select id="getUserMenuList" resultMap="BaseMap" parameterType="java.lang.String">
+        SELECT
+            t.*
+        FROM
+            (
+                SELECT
+                    m.*
+                FROM
+                    t_role_menu rm
+                        LEFT JOIN t_menu m ON m.id = rm.menu_id
+                        LEFT JOIN t_role r ON r.id = rm.role_id
+                        LEFT JOIN t_user_role ur ON ur.role_id = r.id
+                        LEFT JOIN t_user u ON u.staff_id = ur.staff_id
+                WHERE
+                    u.staff_id = #{staffId,jdbcType=VARCHAR}
+                  AND m.plat_form = 1
+
+                UNION
+
+                SELECT
+                    m.*
+                FROM
+                    t_menu m
+                WHERE
+                        m.id IN (
+                        SELECT
+                            m.parent_id
+                        FROM
+                            t_role_menu rm
+                                LEFT JOIN t_menu m ON m.id = rm.menu_id
+                                LEFT JOIN t_role r ON r.id = rm.role_id
+                                LEFT JOIN t_user_role ur ON ur.role_id = r.id
+                                LEFT JOIN t_user u ON u.staff_id = ur.staff_id
+                        WHERE
+                            u.staff_id = #{staffId,jdbcType=VARCHAR}
+                          AND m.plat_form = 1
+                    )
+            ) t
+        ORDER BY
+            t.sort
+    </select>
+
+
+    <!-- 根据角色id查询对应菜单权限-->
+    <select id="findMenuByRoleId" resultMap="BaseMap"  parameterType="java.lang.String">
+        select
+            m.*
+        from t_role_menu rm
+                 inner join t_role r on rm.role_id=r.id
+                 inner join t_menu m on rm.menu_id=m.id
+        where m.delete_flag = 0
+          and rm.role_id = #{roleId,jdbcType=VARCHAR}
+        order by m.sort
+    </select>
+</mapper>

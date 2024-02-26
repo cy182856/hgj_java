@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.cron.CronDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.cron.Cron">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="cron" jdbcType="VARCHAR" property="cron"/>
+        <result column="explain" jdbcType="VARCHAR" property="explain"/>
+        <result column="desc" jdbcType="VARCHAR" property="desc"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, cron, `explain`, `desc`, `type`, update_time, create_by, update_by, delete_flag
+    </sql>
+
+    <!-- 根据主键查询-->
+    <select id="getByType" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            <include refid="Base_Column_List" />
+        from t_cron
+        where delete_flag = 0 and type = #{type}
+    </select>
+
+</mapper>

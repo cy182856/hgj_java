@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.master.DeptInfoDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.master.DeptInfo">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="code" jdbcType="VARCHAR" property="code"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.master.DeptInfo">
+        select
+               id,
+               code,
+               `name`,
+               create_time,
+               update_time
+        from t_dept_info
+        where delete_flag = 0
+        <if test="code != null">
+            and `code` like CONCAT('%', #{code,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="name != null">
+            and `name` like CONCAT('%', #{name,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        order by update_time desc
+    </select>
+
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.master.DeptInfo" >
+        insert into  t_dept_info(
+        <if test="id != null">
+            `id`,
+        </if>
+        <if test="code != null">
+            `code`,
+        </if>
+        <if test="name != null">
+            `name`,
+        </if>
+        <if test="createTime != null">
+            `create_time`,
+        </if>
+        <if test="updateTime != null">
+            `update_time`,
+        </if>
+        <if test="deleteFlag != null">
+            `delete_flag`
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null" >
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null" >
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.master.DeptInfo" >
+        update
+            t_dept_info
+        set
+            `code`=#{code},
+            `name`=#{name}
+        where id=#{id}
+    </update>
+
+    <!-- 删除-->
+    <update id="delete" parameterType="String" >
+        update t_dept_info set `delete_flag` = 1 where id=#{id}
+    </update>
+
+</mapper>

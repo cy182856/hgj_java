@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.sy.dao.rcr.SyRcrDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.rcr.SyRcr">
+        <result column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="OrgID" jdbcType="VARCHAR" property="orgId"/>
+        <result column="CttID" jdbcType="VARCHAR" property="cttId"/>
+        <result column="CstID" jdbcType="VARCHAR" property="cstId"/>
+        <result column="ResType" jdbcType="VARCHAR" property="resType"/>
+        <result column="ResID" jdbcType="VARCHAR" property="resId"/>
+        <result column="IsAffect" jdbcType="INTEGER" property="isAffect"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        ID, OrgID, CttID, CstID, ResType, ResID, IsAffect
+    </sql>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from RCR
+    </select>
+
+</mapper>

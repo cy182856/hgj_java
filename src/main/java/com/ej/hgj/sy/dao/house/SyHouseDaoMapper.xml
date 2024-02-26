@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.sy.dao.house.SyHouseDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.house.SyHouse">
+        <result column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="OrgID" jdbcType="VARCHAR" property="orgId"/>
+        <result column="BudID" jdbcType="VARCHAR" property="budId"/>
+        <result column="BudCode" jdbcType="VARCHAR" property="budCode"/>
+        <result column="BudName" jdbcType="VARCHAR" property="budName"/>
+        <result column="GrpID" jdbcType="VARCHAR" property="grpId"/>
+        <result column="GrpCode" jdbcType="VARCHAR" property="grpCode"/>
+        <result column="GrpName" jdbcType="VARCHAR" property="grpName"/>
+        <result column="ResCode" jdbcType="VARCHAR" property="resCode"/>
+        <result column="ResName" jdbcType="VARCHAR" property="resName"/>
+        <result column="ResNO" jdbcType="VARCHAR" property="resNo"/>
+        <result column="UnitNO" jdbcType="VARCHAR" property="unitNo"/>
+        <result column="BudArea" jdbcType="DECIMAL" property="budArea"/>
+        <result column="HouseFloor" jdbcType="VARCHAR" property="houseFloor"/>
+        <result column="FloorNum" jdbcType="INTEGER" property="floorNum"/>
+        <result column="RentalArea" jdbcType="DECIMAL" property="rentalArea"/>
+        <result column="FeeArea" jdbcType="DECIMAL" property="feeArea"/>
+        <result column="UseArea" jdbcType="DECIMAL" property="useArea"/>
+        <result column="ResType" jdbcType="VARCHAR" property="resType"/>
+        <result column="PorpUser" jdbcType="VARCHAR" property="porpUser"/>
+        <result column="RentStatus" jdbcType="VARCHAR" property="rentStatus"/>
+        <result column="ResStatus" jdbcType="VARCHAR" property="resStatus"/>
+        <result column="DecoStaus" jdbcType="VARCHAR" property="decoStatus"/>
+        <result column="FinStaus" jdbcType="VARCHAR" property="finStatus"/>
+        <result column="SerStatus" jdbcType="VARCHAR" property="serStatus"/>
+        <result column="IsAffect" jdbcType="INTEGER" property="isAffect"/>
+        <result column="Status" jdbcType="VARCHAR" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        ID, OrgID, BudID, BudCode, BudName, GrpID, GrpCode, GrpName, ResCode, ResName, ResNO, UnitNO, BudArea, HouseFloor, FloorNum, RentalArea, FeeArea, UseArea,
+        ResType, PorpUser, RentStatus, ResStatus, DecoStaus, FinStaus, SerStatus, IsAffect, Status
+    </sql>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from House
+    </select>
+
+</mapper>

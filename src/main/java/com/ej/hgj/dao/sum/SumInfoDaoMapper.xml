@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.sum.SumInfoDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.sum.SumInfo">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="file_date" jdbcType="TIMESTAMP" property="fileDate"/>
+        <result column="company_code" jdbcType="VARCHAR" property="companyCode"/>
+        <result column="project_code" jdbcType="VARCHAR" property="projectCode"/>
+        <result column="aff_dept" jdbcType="VARCHAR" property="affDept"/>
+        <result column="archive_type_code" jdbcType="VARCHAR" property="archiveTypeCode"/>
+        <result column="tenant_floor" jdbcType="VARCHAR" property="tenantFloor"/>
+        <result column="tenant_unit" jdbcType="VARCHAR" property="tenantUnit"/>
+        <result column="deposit_cabinet_num" jdbcType="VARCHAR" property="depositCabinetNum"/>
+        <result column="deposit_num" jdbcType="VARCHAR" property="depositNum"/>
+        <result column="deposit_box_num" jdbcType="VARCHAR" property="depositBoxNum"/>
+        <result column="files_code" jdbcType="VARCHAR" property="filesCode"/>
+        <result column="file_name" jdbcType="VARCHAR" property="fileName"/>
+        <result column="position_num" jdbcType="VARCHAR" property="positionNum"/>
+        <result column="file_num" jdbcType="VARCHAR" property="fileNum"/>
+        <result column="script_num" jdbcType="INTEGER" property="scriptNum"/>
+        <result column="script_page" jdbcType="INTEGER" property="scriptPage"/>
+        <result column="copy_num" jdbcType="INTEGER" property="copyNum"/>
+        <result column="copy_page" jdbcType="INTEGER" property="copyPage"/>
+        <result column="file_sec_level" jdbcType="VARCHAR" property="fileSecLevel"/>
+        <result column="contract_start_date" jdbcType="TIMESTAMP" property="contractStartDate"/>
+        <result column="contract_end_date" jdbcType="TIMESTAMP" property="contractEndDate"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.sum.SumInfo">
+        select
+        s.id,
+        s.file_date,
+        s.company_code,
+        s.project_code,
+        s.aff_dept,
+        s.archive_type_code,
+        s.tenant_floor,
+        s.tenant_unit,
+        s.deposit_cabinet_num,
+        s.deposit_num,
+        s.deposit_box_num,
+        concat(s.company_code,'/',s.project_code,'/',s.aff_dept,'/',s.archive_type_code,'/',s.tenant_floor,'/',s.tenant_unit) as files_code,
+        concat(s.deposit_cabinet_num,s.deposit_num,s.deposit_box_num,f.dir_num) as position_num,
+        f.file_name,
+        s.file_num,
+        s.script_num,
+        s.script_page,
+        s.copy_num,
+        s.copy_page,
+        s.file_sec_level,
+        s.contract_start_date,
+        s.contract_end_date,
+        s.create_time,
+        s.update_time
+        from t_sum_info s left join t_sum_file f on s.id = f.sum_id and f.delete_flag = 0
+        where s.delete_flag = 0
+        <if test="companyCode != null">
+            and s.company_code like CONCAT('%', #{companyCode,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="projectCode != null">
+            and s.project_code like CONCAT('%', #{projectCode,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="fileName != null">
+            and f.file_name like CONCAT('%', #{fileName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="filesCode != null">
+            and concat(s.company_code,s.project_code,s.aff_dept,s.archive_type_code,s.tenant_floor,s.tenant_unit) like CONCAT('%', #{filesCode,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        order by s.update_time desc
+    </select>
+
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.sum.SumInfo" >
+        insert into  t_sum_info(
+        <if test="id != null">
+            `id`,
+        </if>
+        <if test="fileDate != null">
+            file_date,
+        </if>
+        <if test="companyCode != null">
+            company_code,
+        </if>
+        <if test="projectCode != null">
+            project_code,
+        </if>
+        <if test="affDept != null">
+            aff_dept,
+        </if>
+        <if test="archiveTypeCode != null">
+            archive_type_code,
+        </if>
+        <if test="tenantFloor != null">
+            tenant_floor,
+        </if>
+        <if test="tenantUnit != null">
+            tenant_unit,
+        </if>
+        <if test="depositCabinetNum != null">
+            deposit_cabinet_num,
+        </if>
+        <if test="depositNum != null">
+            deposit_num,
+        </if>
+        <if test="depositBoxNum != null">
+            deposit_box_num,
+        </if>
+        <if test="fileNum != null">
+            file_num,
+        </if>
+        <if test="scriptNum != null">
+            script_num,
+        </if>
+        <if test="scriptPage != null">
+            script_page,
+        </if>
+        <if test="copyNum != null">
+            copy_num,
+        </if>
+        <if test="copyPage != null">
+            copy_page,
+        </if>
+        <if test="fileSecLevel != null">
+            file_sec_level,
+        </if>
+        <if test="contractStartDate != null">
+            contract_start_date,
+        </if>
+        <if test="contractEndDate != null">
+            contract_end_date,
+        </if>
+        <if test="createBy != null">
+            `create_by`,
+        </if>
+        <if test="createTime != null">
+            `create_time`,
+        </if>
+        <if test="updateBy != null">
+            `update_by`,
+        </if>
+        <if test="updateTime != null">
+            `update_time`,
+        </if>
+        <if test="deleteFlag != null">
+            `delete_flag`
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="fileDate != null">
+                #{fileDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="companyCode != null" >
+                #{companyCode,jdbcType=VARCHAR},
+            </if>
+            <if test="projectCode != null" >
+                #{projectCode,jdbcType=VARCHAR},
+            </if>
+            <if test="affDept != null" >
+                #{affDept,jdbcType=VARCHAR},
+            </if>
+            <if test="archiveTypeCode != null" >
+                #{archiveTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantFloor != null" >
+                #{tenantFloor,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantUnit != null" >
+                #{tenantUnit,jdbcType=VARCHAR},
+            </if>
+            <if test="depositCabinetNum != null" >
+                #{depositCabinetNum,jdbcType=VARCHAR},
+            </if>
+            <if test="depositNum != null" >
+                #{depositNum,jdbcType=VARCHAR},
+            </if>
+            <if test="depositBoxNum != null" >
+                #{depositBoxNum,jdbcType=VARCHAR},
+            </if>
+            <if test="fileNum != null" >
+                #{fileNum,jdbcType=INTEGER},
+            </if>
+            <if test="scriptNum != null">
+                #{scriptNum,jdbcType=INTEGER},
+            </if>
+            <if test="scriptPage != null">
+                #{scriptPage,jdbcType=INTEGER},
+            </if>
+            <if test="copyNum != null">
+                #{copyNum,jdbcType=INTEGER},
+            </if>
+            <if test="copyPage != null">
+                #{copyPage,jdbcType=INTEGER},
+            </if>
+            <if test="fileSecLevel != null">
+                #{fileSecLevel,jdbcType=VARCHAR},
+            </if>
+            <if test="contractStartDate != null">
+                #{contractStartDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="contractEndDate != null">
+                #{contractEndDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.sum.SumInfo" >
+        update
+            t_sum_info
+        <set>
+            <if test="fileDate != null">
+                file_date = #{fileDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="companyCode != null" >
+                company_code = #{companyCode,jdbcType=VARCHAR},
+            </if>
+            <if test="projectCode != null" >
+                project_code = #{projectCode,jdbcType=VARCHAR},
+            </if>
+            <if test="affDept != null" >
+                aff_dept = #{affDept,jdbcType=VARCHAR},
+            </if>
+            <if test="archiveTypeCode != null" >
+                archive_type_code = #{archiveTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantFloor != null" >
+                tenant_floor = #{tenantFloor,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantUnit != null" >
+                tenant_unit = #{tenantUnit,jdbcType=VARCHAR},
+            </if>
+            <if test="depositCabinetNum != null" >
+                deposit_cabinet_num = #{depositCabinetNum,jdbcType=VARCHAR},
+            </if>
+            <if test="depositNum != null" >
+                deposit_num = #{depositNum,jdbcType=VARCHAR},
+            </if>
+            <if test="depositBoxNum != null" >
+                deposit_box_num = #{depositBoxNum,jdbcType=VARCHAR},
+            </if>
+            <if test="fileNum != null" >
+                file_num = #{fileNum,jdbcType=INTEGER},
+            </if>
+            <if test="scriptNum != null">
+                script_num = #{scriptNum,jdbcType=INTEGER},
+            </if>
+            <if test="scriptPage != null">
+                script_page = #{scriptPage,jdbcType=INTEGER},
+            </if>
+            <if test="copyNum != null">
+                copy_num = #{copyNum,jdbcType=INTEGER},
+            </if>
+            <if test="copyPage != null">
+                copy_page = #{copyPage,jdbcType=INTEGER},
+            </if>
+            <if test="fileSecLevel != null">
+                file_sec_level = #{fileSecLevel,jdbcType=VARCHAR},
+            </if>
+            <if test="contractStartDate != null">
+                contract_start_date = #{contractStartDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="contractEndDate != null">
+                contract_end_date = #{contractEndDate,jdbcType=TIMESTAMP},
+            </if>
+            <!--<if test="createBy != null" >
+                create_by = #{createBy,jdbcType=VARCHAR},
+            </if>-->
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <!--<if test="updateBy != null" >
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>-->
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id=#{id,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 删除-->
+    <update id="delete" parameterType="String" >
+        update t_sum_info set `delete_flag` = 1 where id=#{id}
+    </update>
+
+    <!-- 根据id查询-->
+    <select id="findById" resultMap="BaseMap" parameterType="String" >
+        select
+            id,
+            file_date,
+            company_code,
+            project_code,
+            aff_dept,
+            archive_type_code,
+            tenant_floor,
+            tenant_unit,
+            deposit_cabinet_num,
+            deposit_num,
+            deposit_box_num,
+            file_num,
+            create_time,
+            update_time
+        from t_sum_info
+        where delete_flag = 0 and id=#{id}
+    </select>
+
+</mapper>

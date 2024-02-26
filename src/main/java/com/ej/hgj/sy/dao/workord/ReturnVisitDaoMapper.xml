@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.sy.dao.workord.ReturnVisitDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.workord.ReturnVisit">
+        <result column="totalScore" jdbcType="VARCHAR" property="totalScore"/>
+        <result column="memo" jdbcType="VARCHAR" property="memo"/>
+        <result column="returnSatisfaction" jdbcType="VARCHAR" property="returnSatisfaction"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        totalScore, memo, returnSatisfaction
+    </sql>
+
+    <!-- 查询回访记录-->
+    <select id="getList" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            c.TotalScore as totalScore,
+            c.Memo as memo,
+            c.ReturnSatisfaction as returnSatisfaction
+        from  CS_ReturnVisit c
+        where c.WorkOrdID = #{woId}
+        order by c.CreateTime desc
+    </select>
+
+</mapper>

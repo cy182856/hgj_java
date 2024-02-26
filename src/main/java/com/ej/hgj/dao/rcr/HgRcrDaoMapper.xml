@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.rcr.HgjRcrDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.rcr.HgjRcr">
+        <result column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="OrgID" jdbcType="VARCHAR" property="orgId"/>
+        <result column="CttID" jdbcType="VARCHAR" property="cttId"/>
+        <result column="CstID" jdbcType="VARCHAR" property="cstId"/>
+        <result column="ResType" jdbcType="VARCHAR" property="resType"/>
+        <result column="ResID" jdbcType="VARCHAR" property="resId"/>
+        <result column="IsAffect" jdbcType="INTEGER" property="isAffect"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, org_id, code, cst_name, cst_type, cst_level, is_affect, contract_character, create_time, update_time
+    </sql>
+
+    <insert id="insertList" parameterType="java.util.List">
+        insert into s_rcr (
+        id, org_id, ctt_id, cst_id, res_type, res_id, is_affect, create_time, update_time
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.orgId,jdbcType=VARCHAR},
+            #{item.cttId,jdbcType=VARCHAR},
+            #{item.cstId,jdbcType=VARCHAR},
+            #{item.resType,jdbcType=VARCHAR},
+            #{item.resId,jdbcType=VARCHAR},
+            #{item.isAffect,jdbcType=INTEGER},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 删除-->
+    <delete id="delete" parameterType="java.lang.String" >
+        delete from s_rcr
+    </delete>
+</mapper>
