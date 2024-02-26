@@ -211,7 +211,7 @@ public class UserController {
         // 获取已有通讯录列表
         List<User> alreadyUserList = userService.getList(new User());
         for(Corp corp : corpList) {
-            // 获取第三方凭证token 
+            // 获取第三方凭证token
             JSONObject jsonObjectSuiteAcToken = getSuiteAccessToken(miniProgramAppEj.getAppId(), miniProgramAppEj.getAppSecret(), suiteTicket.getConfigValue());
             String suiteAccessToken = jsonObjectSuiteAcToken.get("suite_access_token").toString();
             // 获取企业凭证
