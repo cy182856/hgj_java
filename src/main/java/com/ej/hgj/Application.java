@@ -9,7 +9,7 @@ import javax.annotation.PostConstruct;
 import java.util.TimeZone;
 
 @SpringBootApplication
-public class FilesApplication extends SpringBootServletInitializer {
+public class Application extends SpringBootServletInitializer {
 
     /**
      * 设置时区
@@ -21,7 +21,7 @@ public class FilesApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT+8"));
-        SpringApplication.run(FilesApplication.class, args);
+        SpringApplication.run(Application.class, args);
     }
 
     @Override // 为了打包springboot项目

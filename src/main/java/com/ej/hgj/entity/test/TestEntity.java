@@ -5,12 +5,8 @@ import lombok.Data;
 @Data
 public class TestEntity {
 
-    protected Integer id ;
+    protected String UserId ;
 
-    protected String name ;
-
-    protected Integer age ;
-
-    protected Double weight ;
+    protected String Pwd ;
 
 }

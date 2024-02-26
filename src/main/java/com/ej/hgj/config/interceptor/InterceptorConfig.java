@@ -15,7 +15,7 @@ public class InterceptorConfig extends WebMvcConfigurerAdapter {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/**")    //拦截所有请求 通过判断token是否合法来决定是否登陆
-                .excludePathPatterns("/user/login","/user/getInfo","/**/upload","/**/error","/**/export","/**/excel/download","/**/import", "/**/download", "/role/**","/menu/**"); //放行接口
+                .excludePathPatterns("/user/login","/user/getInfo","/**/upload","/**/wechatPub/**"); //放行接口
         super.addInterceptors(registry);
     }
 
