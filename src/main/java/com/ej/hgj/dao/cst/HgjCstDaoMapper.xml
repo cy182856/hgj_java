@@ -61,7 +61,7 @@
         select
         <include refid="Base_Column_List" />
         from s_cst
-        where is_affect = 1
+        where 1 = 1
         <if test="code != null">
             and code like CONCAT('%', #{code,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>

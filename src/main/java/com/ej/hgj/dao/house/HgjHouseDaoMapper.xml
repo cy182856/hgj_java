@@ -155,7 +155,7 @@
         from s_house h
         LEFT JOIN s_rcr r on r.res_id = h.id
         LEFT JOIN s_cst cst on r.cst_id = cst.id
-        where h.is_affect = 1 and r.is_affect = 1 and cst.is_affect = 1
+        where h.is_affect = 1 and r.is_affect = 1
         <if test="budName != null">
             and h.bud_name like CONCAT('%', #{budName,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>

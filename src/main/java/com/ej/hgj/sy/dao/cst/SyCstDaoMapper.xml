@@ -19,30 +19,55 @@
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
     <sql id="Base_Column_List" >
-        ID, OrgID, Code, CstName, CstType, CstLevel, IsAffect, ContractCharacter, CerType, CerNO, LicNO, Mobile
+--         ID, OrgID, Code, CstName, CstType, CstLevel, IsAffect, ContractCharacter, CerType, CerNO, LicNO, Mobile
+        ID, OrgID, Code, CstName, CstType, CstLevel, ContractCharacter, CerNO, LicNO
     </sql>
 
     <!-- 查询列表-->
+<!--    <select id="getList" resultMap="BaseMap" parameterType="java.lang.String" >-->
+<!--        select-->
+<!--        <include refid="Base_Column_List" />-->
+<!--        from (-->
+<!--            select-->
+<!--                c.ID,-->
+<!--                c.OrgID,-->
+<!--                c.Code,-->
+<!--                c.CstName,-->
+<!--                c.CstType,-->
+<!--                c.CstLevel,-->
+<!--                c.IsAffect,-->
+<!--                c.ContractCharacter,-->
+<!--                m.CerType,-->
+<!--                m.CerNO,-->
+<!--                m.LicNO,-->
+<!--                m.Mobile-->
+<!--            from Cst c-->
+<!--            left join CstCom m on m.CstID = c.ID-->
+<!--            where c.OrgID != ''-->
+<!--        )t-->
+<!--    </select>-->
+
     <select id="getList" resultMap="BaseMap" parameterType="java.lang.String" >
         select
         <include refid="Base_Column_List" />
         from (
             select
-                c.ID,
-                c.OrgID,
-                c.Code,
-                c.CstName,
-                c.CstType,
-                c.CstLevel,
-                c.IsAffect,
-                c.ContractCharacter,
-                m.CerType,
-                m.CerNO,
-                m.LicNO,
-                m.Mobile
+            max(c.ID) AS ID,
+            MAX(c.OrgID) AS OrgID ,
+            c.Code,
+            CstName=stuff((select ','+convert(varchar, [CstName]) from Cst b where  b.code= C.code for xml path('')), 1, 1, ''),
+            MAX(c.CstType) AS CstType,
+            MAX(c.CstLevel) AS CstLevel,
+            -- MAX(c.IsAffect) AS IsAffect
+            MAX(c.ContractCharacter) AS ContractCharacter,
+            -- m.CerType,
+            MAX(m.CerNO) AS CerNO,
+            MAX(m.LicNO) AS LicNO
+            --  m.Mobile
             from Cst c
             left join CstCom m on m.CstID = c.ID
-            where c.OrgID != ''
+            where c.OrgID != '' and c.IsAffect = 1
+            group by c.code
         )t
     </select>
 
