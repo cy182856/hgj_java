@@ -56,9 +56,10 @@ public class Constant {
     public static final String BIND_PAGE_TENANT = "pages/hu/hubindTenant/hubindTenant";
 
     // 小程序appId
-    public static final String MINI_PROGRAM_APP = "mini_program_app";
+    //public static final String MINI_PROGRAM_APP = "mini_program_app";
     //public static final String MINIPROGRAM_APPID = "wx9dea656366f2c395";
-
+    // 微信小程序智慧社区
+    public static final String MINI_PROGRAM_APP_EJ_ZHSQ = "mini_program_app_ej_zhsq";
     // 企业微信id,东方渔人码头
     public static final String WE_COM_APP = "we_com_app";
     // 企业微信通讯录秘钥,东方渔人码头

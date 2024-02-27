@@ -157,96 +157,96 @@ public class UserController {
     }
 
     //同步通讯录
-//    @RequestMapping(value = "/sync",method = RequestMethod.GET)
-//    public AjaxResult sync() {
-//        logger.info("---------------------------同步通讯录开始--------------------");
-//        AjaxResult ajaxResult = new AjaxResult();
-//        //记住，先去企业微信后台管理端开启api同步权限
-//        //corpid---企业微信corpid
-//        ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.WE_COM_APP);
-//        //corpsecret  ---企业微信通讯录secret
-//        ConstantConfig secret = constantConfDaoMapper.getByKey(Constant.WE_COM_ADDRESS_BOOK_SECRET);
-//        // 1查询出access_Token的值
-//        String access_token = getAccessToken(constantConfig.getAppId(),secret.getConfigValue());
-//        // 获取部门列表信息(不填则是查询出所有的部门列表)
-//        List<Department> departmentList = getDepartmentList(access_token, "");
-//        logger.info("---------------------------获取部门列表--------------------" + JSON.toJSONString(departmentList));
-//        // 通讯录新增
-//        List<User> usersAll = new ArrayList<>();
-//        // 获取已有通讯录列表
-//        List<User> alreadyUserList = userService.getList(new User());
-//        // 根据部门列表获取部门成员详情
-//        List<User> userInfoList = getDepartmentUserDetails(departmentList,access_token);
-//        // 跟据企业通讯录的用户ID查找已有通讯录，不存在就新增
-//        for(User wxUserInfo : userInfoList){
-//            List<User> alreadyUserFilterList = alreadyUserList.stream().filter(alreadyWxUserInfo -> alreadyWxUserInfo.getMobile().equals(wxUserInfo.getMobile())).collect(Collectors.toList());
-//            if(alreadyUserFilterList.isEmpty()){
-//                usersAll.add(wxUserInfo);
-//            }
-//        }
-//        // 将其保存到数据库中
-//        if (!usersAll.isEmpty()) {
-//            userService.insertList(usersAll);
-//        }
-//        logger.info("---------------------------同步通讯录结束--------------------" + JSON.toJSONString(usersAll));
-//        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
-//        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
-//        HashMap map = new HashMap();
-//        map.put("user",usersAll);
-//        ajaxResult.setData(map);
-//        return ajaxResult;
-//    }
-
-    //企业微信服务商同步授权企业通讯录
     @RequestMapping(value = "/sync",method = RequestMethod.GET)
     public AjaxResult sync() {
         logger.info("---------------------------同步通讯录开始--------------------");
         AjaxResult ajaxResult = new AjaxResult();
-        ConstantConfig miniProgramAppEj = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP_EJ);
-        ConstantConfig suiteTicket = constantConfDaoMapper.getByKey(Constant.SUITE_TICKET);
+        //记住，先去企业微信后台管理端开启api同步权限
+        //corpid---企业微信corpid
+        ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.WE_COM_APP);
+        //corpsecret  ---企业微信通讯录secret
+        ConstantConfig secret = constantConfDaoMapper.getByKey(Constant.WE_COM_ADDRESS_BOOK_SECRET);
+        // 1查询出access_Token的值
+        String access_token = getAccessToken(constantConfig.getAppId(),secret.getConfigValue());
+        // 获取部门列表信息(不填则是查询出所有的部门列表)
+        List<Department> departmentList = getDepartmentList(access_token, "");
+        logger.info("---------------------------获取部门列表--------------------" + JSON.toJSONString(departmentList));
         // 通讯录新增
         List<User> usersAll = new ArrayList<>();
-        // 查询授权企业corpId
-        List<Corp> corpList = corpDaoMapper.getList(new Corp());
         // 获取已有通讯录列表
         List<User> alreadyUserList = userService.getList(new User());
-        for(Corp corp : corpList) {
-            // 获取第三方凭证token
-            JSONObject jsonObjectSuiteAcToken = getSuiteAccessToken(miniProgramAppEj.getAppId(), miniProgramAppEj.getAppSecret(), suiteTicket.getConfigValue());
-            String suiteAccessToken = jsonObjectSuiteAcToken.get("suite_access_token").toString();
-            // 获取企业凭证
-            JSONObject jsonObjectAccToken = getCorpToken(corp.getCorpId(), corp.getPermanentCode(), suiteAccessToken);
-            String access_token = jsonObjectAccToken.getString("access_token").toString();
-            // 获取部门列表信息(不填则是查询出所有的部门列表)
-            List<Department> departmentList = getDepartmentList(access_token, "");
-            logger.info("---------------------------获取部门列表--------------------" + JSON.toJSONString(departmentList));
-            // 根据部门列表获取部门成员详情
-            List<User> userInfoList = getDepartmentUserDetails(departmentList, access_token);
-            // 跟据企业通讯录的用户ID查找已有通讯录，不存在就新增
-            for (User wxUserInfo : userInfoList) {
-                List<User> alreadyUserFilterList = alreadyUserList.stream().filter(alreadyWxUserInfo -> alreadyWxUserInfo.getMobile().equals(wxUserInfo.getMobile())).collect(Collectors.toList());
-                if (alreadyUserFilterList.isEmpty()) {
-                    wxUserInfo.setCorpId(corp.getCorpId());
-                    usersAll.add(wxUserInfo);
-                }
+        // 根据部门列表获取部门成员详情
+        List<User> userInfoList = getDepartmentUserDetails(departmentList,access_token);
+        // 跟据企业通讯录的用户ID查找已有通讯录，不存在就新增
+        for(User wxUserInfo : userInfoList){
+            List<User> alreadyUserFilterList = alreadyUserList.stream().filter(alreadyWxUserInfo -> alreadyWxUserInfo.getMobile().equals(wxUserInfo.getMobile())).collect(Collectors.toList());
+            if(alreadyUserFilterList.isEmpty()){
+                usersAll.add(wxUserInfo);
             }
         }
         // 将其保存到数据库中
         if (!usersAll.isEmpty()) {
-            // 根据手机号去重复
-            usersAll = usersAll.stream().collect(
-                    Collectors.collectingAndThen(Collectors.toCollection(
-                            () -> new TreeSet<>(Comparator.comparing(User::getMobile))), ArrayList::new));
             userService.insertList(usersAll);
         }
         logger.info("---------------------------同步通讯录结束--------------------" + JSON.toJSONString(usersAll));
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         HashMap map = new HashMap();
-        map.put("user", usersAll);
+        map.put("user",usersAll);
         ajaxResult.setData(map);
         return ajaxResult;
     }
+
+    //企业微信服务商同步授权企业通讯录
+//    @RequestMapping(value = "/sync",method = RequestMethod.GET)
+//    public AjaxResult sync() {
+//        logger.info("---------------------------同步通讯录开始--------------------");
+//        AjaxResult ajaxResult = new AjaxResult();
+//        ConstantConfig miniProgramAppEj = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP_EJ);
+//        ConstantConfig suiteTicket = constantConfDaoMapper.getByKey(Constant.SUITE_TICKET);
+//        // 通讯录新增
+//        List<User> usersAll = new ArrayList<>();
+//        // 查询授权企业corpId
+//        List<Corp> corpList = corpDaoMapper.getList(new Corp());
+//        // 获取已有通讯录列表
+//        List<User> alreadyUserList = userService.getList(new User());
+//        for(Corp corp : corpList) {
+//            // 获取第三方凭证token
+//            JSONObject jsonObjectSuiteAcToken = getSuiteAccessToken(miniProgramAppEj.getAppId(), miniProgramAppEj.getAppSecret(), suiteTicket.getConfigValue());
+//            String suiteAccessToken = jsonObjectSuiteAcToken.get("suite_access_token").toString();
+//            // 获取企业凭证
+//            JSONObject jsonObjectAccToken = getCorpToken(corp.getCorpId(), corp.getPermanentCode(), suiteAccessToken);
+//            String access_token = jsonObjectAccToken.getString("access_token").toString();
+//            // 获取部门列表信息(不填则是查询出所有的部门列表)
+//            List<Department> departmentList = getDepartmentList(access_token, "");
+//            logger.info("---------------------------获取部门列表--------------------" + JSON.toJSONString(departmentList));
+//            // 根据部门列表获取部门成员详情
+//            List<User> userInfoList = getDepartmentUserDetails(departmentList, access_token);
+//            // 跟据企业通讯录的用户ID查找已有通讯录，不存在就新增
+//            for (User wxUserInfo : userInfoList) {
+//                List<User> alreadyUserFilterList = alreadyUserList.stream().filter(alreadyWxUserInfo -> alreadyWxUserInfo.getMobile().equals(wxUserInfo.getMobile())).collect(Collectors.toList());
+//                if (alreadyUserFilterList.isEmpty()) {
+//                    wxUserInfo.setCorpId(corp.getCorpId());
+//                    usersAll.add(wxUserInfo);
+//                }
+//            }
+//        }
+//        // 将其保存到数据库中
+//        if (!usersAll.isEmpty()) {
+//            // 根据手机号去重复
+//            usersAll = usersAll.stream().collect(
+//                    Collectors.collectingAndThen(Collectors.toCollection(
+//                            () -> new TreeSet<>(Comparator.comparing(User::getMobile))), ArrayList::new));
+//            userService.insertList(usersAll);
+//        }
+//        logger.info("---------------------------同步通讯录结束--------------------" + JSON.toJSONString(usersAll));
+//        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+//        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+//        HashMap map = new HashMap();
+//        map.put("user", usersAll);
+//        ajaxResult.setData(map);
+//        return ajaxResult;
+//    }
 
     /**
      * 获取部门列表

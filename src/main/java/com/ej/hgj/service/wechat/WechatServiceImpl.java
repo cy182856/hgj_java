@@ -264,7 +264,7 @@ public class WechatServiceImpl implements WechatService{
             String sign = sign(cstCode, wxOpenId);
             String miniprogramUrl = Constant.BIND_PAGE_OWNER + "?cstCode=" + cstCode + "&cstName=" + cstName + "&isCHeck=" + isCHeck + "&sign=" + sign;
             logger.info("miniprogramUrl=", miniprogramUrl);
-            ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP);
+            ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP_EJ_ZHSQ);
             Miniprogram miniprogram = new Miniprogram(constantConfig.getAppId(), miniprogramUrl);
             ModelMessage modelMessage = new ModelMessage(wxOpenId, Constant.TEMP_LATE_ID, templeModel, miniprogram);
             int resp = sendModel(modelMessage, "", Constant.TEMP_LATE_ID);
@@ -386,7 +386,7 @@ public class WechatServiceImpl implements WechatService{
             }else {
                 miniprogramUrl = Constant.BIND_PAGE_OWNER + "?cstCode=" + cstCode + "&cstName=" + cstName + "&proNum=" + proNum;
             }
-            ConstantConfig miniProgramApp = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP);
+            ConstantConfig miniProgramApp = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP_EJ_ZHSQ);
             Miniprogram miniprogram = new Miniprogram(miniProgramApp.getAppId(), miniprogramUrl);
             ConstantConfig constantConfig = constantConfDaoMapper.getByProNumAndKey(proNum,Constant.TEMP_LATE_ID);
             String tempLateId = constantConfig.getConfigValue();
@@ -427,6 +427,7 @@ public class WechatServiceImpl implements WechatService{
                 throw new BusinessException(TempMonsterBasicRespCode.WECHAT_TEMPLATE_MSG_FAIL);
             }
         } catch (Exception e) {
+            logger.info(e.getMessage());
             throw new BusinessException(TempMonsterBasicRespCode.WECHAT_TEMPLATE_MSG_FAIL);
         }
     }
@@ -438,7 +439,7 @@ public class WechatServiceImpl implements WechatService{
             templeModel.setKeyword2(new ModelData(DateUtils.transfer2LongDateGbkDateTime(DateUtils.getCurrentDateTime())));
             templeModel.setKeyword3(new ModelData("请点击完成您想投诉、建议、表扬以及报修的事件"));
             String miniprogramUrl = Constant.ADVICE_PAGE + "?cstCode=" + cstCode + "&wxOpenId=" + wxOpenId;
-            ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP);
+            ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP_EJ_ZHSQ);
             Miniprogram miniprogram = new Miniprogram(constantConfig.getAppId(), miniprogramUrl);
             ModelMessage modelMessage = new ModelMessage(wxOpenId, Constant.TEMP_LATE_ID, templeModel, miniprogram);
             //int resp = sendModel(modelMessage, "", Constant.TEMP_LATE_ID);
