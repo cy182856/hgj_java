@@ -35,7 +35,7 @@ public class HouseController {
         HashMap map = new HashMap();
         PageHelper.offsetPage((page-1) * limit,limit);
         List<HgjHouse> list = houseService.getList(house);
-        //logger.info("list:"+ JSON.toJSONString(list));
+        // logger.info("list:"+ JSON.toJSONString(list));
         PageInfo<HgjHouse> pageInfo = new PageInfo<>(list);
         //计算总页数
         int pageNumTotal = (int) Math.ceil((double)pageInfo.getTotal()/(double)limit);
