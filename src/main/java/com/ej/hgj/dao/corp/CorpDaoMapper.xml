@@ -31,7 +31,7 @@
         select
         <include refid="Base_Column_List" />
         from t_corp
-        where delete_flag = 0 and  auth_corp_id = #{authCorpId}
+        where delete_flag = 0 and  corp_id = #{corpId}
     </select>
 
     <!-- 查询列表-->

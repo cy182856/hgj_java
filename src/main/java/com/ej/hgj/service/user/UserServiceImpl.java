@@ -52,10 +52,10 @@ public class UserServiceImpl implements UserService {
         return userDaoMapper.queryUser(userName, password);
     }
 
-    @Override
-    public User getById(String id){
-        return userDaoMapper.getById(id);
-    }
+//    @Override
+//    public User getById(String id){
+//        return userDaoMapper.getById(id);
+//    }
 
     public List<User> getList(User user){
         return userDaoMapper.getList(user);
@@ -76,27 +76,123 @@ public class UserServiceImpl implements UserService {
         userDaoMapper.save(user);
     }
 
-    @Override
-    public void update(User user) {
-        userDaoMapper.update(user);
-    }
+//    @Override
+//    public void update(User user) {
+//        userDaoMapper.update(user);
+//    }
 
     @Override
     public void delete(String id) {
         userDaoMapper.delete(id);
     }
 
+//    @Override
+//    public AjaxResult updateRolePro(AjaxResult ajaxResult, User user, String loginUserId) {
+//        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+//        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+//        User u = new User();
+//        String staffId = user.getStaffId();
+//        if(StringUtils.isBlank(staffId)){
+//            staffId = user.getMobile();
+//            u = userDaoMapper.getByUserId(user.getUserId());
+//            u.setStaffId(staffId);
+//            u.setMobile(user.getMobile());
+//        }else {
+//            u = userService.getById(staffId);
+//            u.setStaffId(user.getMobile());
+//            u.setMobile(user.getMobile());
+//        }
+//        // 角色
+//        if (StringUtils.isBlank(user.getRoleId())) {
+//            userRoleService.delete(user.getStaffId());
+//        } else {
+//            // 更新用户角色关联数据
+//            UserRole ur = userRoleService.getByStaffId(staffId);
+//            if (ur != null) {
+//                ur.setRoleId(user.getRoleId());
+//                ur.setUpdateTime(new Date());
+//                ur.setUpdateBy(loginUserId);
+//                userRoleService.update(ur);
+//            } else {
+//                // 新增用户角色关联数据
+//                UserRole userRole = new UserRole();
+//                userRole.setId(TimestampGenerator.generateSerialNumber());
+//                //userRole.setProjectNum(Constant.PROJECT_NUM);
+//                userRole.setStaffId(staffId);
+//                userRole.setRoleId(user.getRoleId());
+//                userRole.setCreateTime(new Date());
+//                userRole.setUpdateTime(new Date());
+//                userRole.setCreateBy(loginUserId);
+//                userRole.setUpdateBy(loginUserId);
+//                userRole.setDeleteFlag(0);
+//                userRoleService.save(userRole);
+//            }
+//        }
+//
+//        // 楼栋
+//        String[] build = user.getBudId();
+//        if(build == null || build.length == 0){
+//            userBuildDaoMapper.delete(staffId);
+//        }else{
+//            // 更新用户楼栋关联数据
+//            UserBuild userBuild = new UserBuild();
+//            userBuild.setMobile(staffId);
+//            List<UserBuild> userBuildList = userBuildDaoMapper.getList(userBuild);
+//            if (!userBuildList.isEmpty() ) {
+//                // 如果有楼栋绑定数据先删除
+//                userBuildDaoMapper.delete(staffId);
+//            }
+//            // 插入
+//            saveUserBuilds(build, user.getProjectNum(), staffId);
+//        }
+//
+//        // 值班电话
+//        if(StringUtils.isBlank(user.getPhone())){
+//            userDutyPhoneDaoMapper.delete(staffId);
+//        }else{
+//            // 更新用户值班电话
+//            UserDutyPhone userDutyPhone = userDutyPhoneDaoMapper.getByMobile(staffId);
+//            if (userDutyPhone != null ) {
+//                // 先删除
+//                userDutyPhoneDaoMapper.delete(staffId);
+//            }
+//            // 插入
+//            UserDutyPhone dutyPhone = new UserDutyPhone();
+//            dutyPhone.setId(TimestampGenerator.generateSerialNumber());
+//            dutyPhone.setMobile(staffId);
+//            dutyPhone.setPhone(user.getPhone());
+//            dutyPhone.setCreateTime(new Date());
+//            dutyPhone.setUpdateTime(new Date());
+//            dutyPhone.setCreateBy("");
+//            dutyPhone.setUpdateBy("");
+//            dutyPhone.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+//            userDutyPhoneDaoMapper.save(dutyPhone);
+//        }
+//
+//        // 项目
+//        u.setUpdateTime(new Date());
+//        if (StringUtils.isBlank(user.getProjectNum())) {
+//            u.setProjectNum("");
+//        } else {
+//            u.setProjectNum(user.getProjectNum());
+//        }
+//        userDaoMapper.updateById(u);
+//        return ajaxResult;
+//    }
+
+
     @Override
     public AjaxResult updateRolePro(AjaxResult ajaxResult, User user, String loginUserId) {
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
-        User u = userService.getById(user.getStaffId());
+        String userId = user.getUserId();
+        User u = userDaoMapper.getByUserId(userId);
         // 角色
         if (StringUtils.isBlank(user.getRoleId())) {
-            userRoleService.delete(user.getStaffId());
+            userRoleDaoMapper.deleteByUserId(userId);
         } else {
             // 更新用户角色关联数据
-            UserRole ur = userRoleService.getByStaffId(user.getStaffId());
+            UserRole ur = userRoleDaoMapper.getByUserId(userId);
             if (ur != null) {
                 ur.setRoleId(user.getRoleId());
                 ur.setUpdateTime(new Date());
@@ -107,7 +203,7 @@ public class UserServiceImpl implements UserService {
                 UserRole userRole = new UserRole();
                 userRole.setId(TimestampGenerator.generateSerialNumber());
                 //userRole.setProjectNum(Constant.PROJECT_NUM);
-                userRole.setStaffId(u.getStaffId());
+                userRole.setStaffId(userId);
                 userRole.setRoleId(user.getRoleId());
                 userRole.setCreateTime(new Date());
                 userRole.setUpdateTime(new Date());
@@ -121,34 +217,34 @@ public class UserServiceImpl implements UserService {
         // 楼栋
         String[] build = user.getBudId();
         if(build == null || build.length == 0){
-            userBuildDaoMapper.delete(user.getStaffId());
+            userBuildDaoMapper.deleteByUserId(userId);
         }else{
             // 更新用户楼栋关联数据
             UserBuild userBuild = new UserBuild();
-            userBuild.setMobile(user.getStaffId());
+            userBuild.setMobile(userId);
             List<UserBuild> userBuildList = userBuildDaoMapper.getList(userBuild);
             if (!userBuildList.isEmpty() ) {
                 // 如果有楼栋绑定数据先删除
-                userBuildDaoMapper.delete(user.getStaffId());
+                userBuildDaoMapper.deleteByUserId(userId);
             }
             // 插入
-            saveUserBuilds(build, user);
+            saveUserBuilds(build, user.getProjectNum(), userId);
         }
 
         // 值班电话
         if(StringUtils.isBlank(user.getPhone())){
-            userDutyPhoneDaoMapper.delete(user.getMobile());
+            userDutyPhoneDaoMapper.deleteByUserId(userId);
         }else{
             // 更新用户值班电话
-            UserDutyPhone userDutyPhone = userDutyPhoneDaoMapper.getByMobile(user.getMobile());
+            UserDutyPhone userDutyPhone = userDutyPhoneDaoMapper.getByUserId(userId);
             if (userDutyPhone != null ) {
                 // 先删除
-                userDutyPhoneDaoMapper.delete(user.getMobile());
+                userDutyPhoneDaoMapper.deleteByUserId(userId);
             }
             // 插入
             UserDutyPhone dutyPhone = new UserDutyPhone();
             dutyPhone.setId(TimestampGenerator.generateSerialNumber());
-            dutyPhone.setMobile(user.getMobile());
+            dutyPhone.setMobile(user.getUserId());
             dutyPhone.setPhone(user.getPhone());
             dutyPhone.setCreateTime(new Date());
             dutyPhone.setUpdateTime(new Date());
@@ -165,19 +261,19 @@ public class UserServiceImpl implements UserService {
         } else {
             u.setProjectNum(user.getProjectNum());
         }
-        userService.update(u);
-
+        u.setMobile(user.getMobile());
+        userDaoMapper.updateById(u);
         return ajaxResult;
     }
 
-    public void saveUserBuilds(String[] build, User user){
+    public void saveUserBuilds(String[] build, String proNum, String userId){
         List<UserBuild> userBuilds = new ArrayList<>();
         for(int i = 0; i<build.length; i++){
             UserBuild ub = new UserBuild();
             ub.setId(TimestampGenerator.generateSerialNumber());
-            ub.setProjectNum(user.getProjectNum());
+            ub.setProjectNum(proNum);
             ub.setBudId(build[i]);
-            ub.setMobile(user.getStaffId());
+            ub.setMobile(userId);
             ub.setCreateTime(new Date());
             ub.setUpdateTime(new Date());
             ub.setCreateBy("");

@@ -13,6 +13,8 @@ public interface UserDutyPhoneDaoMapper {
 
     UserDutyPhone getByMobile(String mobile);
 
+    UserDutyPhone getByUserId(String userId);
+
     UserDutyPhone getByMobileAndCorpId(String mobile, String corpId);
 
     List<UserDutyPhone> getList(UserDutyPhone userDutyPhone);
@@ -22,6 +24,8 @@ public interface UserDutyPhoneDaoMapper {
     void update(UserDutyPhone userDutyPhone);
 
     void delete(String mobile);
+
+    void deleteByUserId(String userId);
 
     void deleteByMobileAndCorpId(String mobile, String corpId);
 

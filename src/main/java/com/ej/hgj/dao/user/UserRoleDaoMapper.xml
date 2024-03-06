@@ -27,20 +27,28 @@
     </select>
 
     <!-- 根据主键查询-->
-    <select id="getByStaffId" resultMap="BaseMap" parameterType="java.lang.String" >
+<!--    <select id="getByStaffId" resultMap="BaseMap" parameterType="java.lang.String" >-->
+<!--        select-->
+<!--        <include refid="Base_Column_List" />-->
+<!--        from t_user_role-->
+<!--        where staff_id = #{staffId}-->
+<!--    </select>-->
+
+    <!-- 根据userId查询-->
+    <select id="getByUserId" resultMap="BaseMap" parameterType="java.lang.String" >
         select
         <include refid="Base_Column_List" />
         from t_user_role
-        where staff_id = #{staffId}
+        where staff_id = #{userId}
     </select>
 
     <!-- 根据用户号企业号查询-->
-    <select id="getByStaffIdAndCorpId" resultMap="BaseMap" parameterType="java.lang.String" >
-        select
-        <include refid="Base_Column_List" />
-        from t_user_role
-        where delete_flag = 0 and staff_id = #{staffId} and corp_id = #{corpId}
-    </select>
+<!--    <select id="getByStaffIdAndCorpId" resultMap="BaseMap" parameterType="java.lang.String" >-->
+<!--        select-->
+<!--        <include refid="Base_Column_List" />-->
+<!--        from t_user_role-->
+<!--        where delete_flag = 0 and staff_id = #{staffId} and corp_id = #{corpId}-->
+<!--    </select>-->
 
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.user.UserRole">
@@ -144,37 +152,41 @@
     </update>
 
     <!-- 更新-->
-    <update id="updateByStaffIdAndCorpId" parameterType="com.ej.hgj.entity.user.UserRole" >
-        update
-        t_user_role
-        <set>
-            <if test="projectNum != null">
-                project_num = #{projectNum,jdbcType=VARCHAR},
-            </if>
-            <if test="staffId != null">
-                staff_id = #{staffId,jdbcType=VARCHAR},
-            </if>
-            <if test="roleId != null">
-                role_id = #{roleId,jdbcType=VARCHAR},
-            </if>
-            <if test="updateBy != null">
-                update_by = #{updateBy,jdbcType=VARCHAR},
-            </if>
-            <if test="updateTime != null">
-                update_time = #{updateTime,jdbcType=TIMESTAMP},
-            </if>
-        </set>
-        where staff_id = #{staffId,jdbcType=VARCHAR} and corp_id = #{corpId,jdbcType=VARCHAR}
-    </update>
+<!--    <update id="updateByStaffIdAndCorpId" parameterType="com.ej.hgj.entity.user.UserRole" >-->
+<!--        update-->
+<!--        t_user_role-->
+<!--        <set>-->
+<!--            <if test="projectNum != null">-->
+<!--                project_num = #{projectNum,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="staffId != null">-->
+<!--                staff_id = #{staffId,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="roleId != null">-->
+<!--                role_id = #{roleId,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="updateBy != null">-->
+<!--                update_by = #{updateBy,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="updateTime != null">-->
+<!--                update_time = #{updateTime,jdbcType=TIMESTAMP},-->
+<!--            </if>-->
+<!--        </set>-->
+<!--        where staff_id = #{staffId,jdbcType=VARCHAR} and corp_id = #{corpId,jdbcType=VARCHAR}-->
+<!--    </update>-->
 
     <!-- 删除-->
-    <update id="delete" parameterType="java.lang.String" >
-        delete from t_user_role where staff_id=#{id}
+<!--    <update id="delete" parameterType="java.lang.String" >-->
+<!--        delete from t_user_role where staff_id=#{id}-->
+<!--    </update>-->
+
+    <update id="deleteByUserId" parameterType="java.lang.String" >
+        delete from t_user_role where staff_id=#{userId}
     </update>
 
     <!-- 根据用户号企业号删除-->
-    <update id="deleteByStaffIdAndCorpId" parameterType="java.lang.String" >
-        delete from t_user_role where staff_id = #{staffId} and corp_id = #{corpId}
-    </update>
+<!--    <update id="deleteByStaffIdAndCorpId" parameterType="java.lang.String" >-->
+<!--        delete from t_user_role where staff_id = #{staffId} and corp_id = #{corpId}-->
+<!--    </update>-->
 
 </mapper>

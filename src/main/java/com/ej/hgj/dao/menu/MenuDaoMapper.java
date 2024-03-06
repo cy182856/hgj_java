@@ -16,7 +16,7 @@ public interface MenuDaoMapper {
 
     List<Menu> getMenuList(Menu menu);
 
-    List<Menu> getUserMenuList(String staffId);
+    List<Menu> getUserMenuList(String userId);
 
     List<Menu> findMenuByRoleId(String roleId);
 

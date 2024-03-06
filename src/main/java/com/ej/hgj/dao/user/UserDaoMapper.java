@@ -11,15 +11,17 @@ import java.util.List;
 @Component
 public interface UserDaoMapper {
 
-    User getById(String id);
+    //User getById(String id);
 
-    User getByStaffIdAndCorpId(String staffId, String corpId);
+    User getByUserId(String userId);
+
+    //User getByStaffIdAndCorpId(String staffId, String corpId);
 
     User queryUser(@Param("userName") String userName, @Param("password") String password);
 
     List<User> queryUserList(@Param("userName") String userName, @Param("password") String password);
 
-    List<User> queryUserByStaffId(@Param("staffId") String staffId);
+    List<User> queryUserByUserId(@Param("userId") String userId);
 
     void insertList(@Param("list") List<User> users);
 
@@ -29,7 +31,9 @@ public interface UserDaoMapper {
 
     void save(User user);
 
-    void update(User user);
+    //void update(User user);
+
+    void updateById(User user);
 
     void delete(String id);
 

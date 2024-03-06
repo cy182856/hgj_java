@@ -163,6 +163,11 @@
     </update>
 
     <!-- 删除-->
+    <update id="deleteByUserId" parameterType="java.lang.String" >
+        delete from t_user_build where mobile=#{userId}
+    </update>
+
+    <!-- 删除-->
     <update id="deleteByMobileAndCorpId" parameterType="java.lang.String" >
         delete from t_user_build where mobile = #{mobile} and corp_id = #{corpId}
     </update>

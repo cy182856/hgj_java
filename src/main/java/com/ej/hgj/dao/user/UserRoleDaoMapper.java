@@ -12,9 +12,11 @@ public interface UserRoleDaoMapper {
 
     UserRole getById(String id);
 
-    UserRole getByStaffId(String staffId);
+    //UserRole getByStaffId(String staffId);
 
-    UserRole getByStaffIdAndCorpId(String staffId, String corpId);
+    UserRole getByUserId(String userId);
+
+    //UserRole getByStaffIdAndCorpId(String staffId, String corpId);
 
     List<UserRole> getList(UserRole userRole);
 
@@ -22,10 +24,12 @@ public interface UserRoleDaoMapper {
 
     void update(UserRole userRole);
 
-    void updateByStaffIdAndCorpId(UserRole userRole);
+    //void updateByStaffIdAndCorpId(UserRole userRole);
 
-    void delete(String id);
+    //void delete(String id);
 
-    void deleteByStaffIdAndCorpId(String staffId, String corpId);
+    void deleteByUserId(String userId);
+
+    //void deleteByStaffIdAndCorpId(String staffId, String corpId);
 
 }

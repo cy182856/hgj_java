@@ -6,9 +6,10 @@ public class Constant {
     public static Integer DELETE_FLAG_NOT = 0;
     // 删除标识 1-已删除
     public static Integer DELETE_FLAG_YES = 1;
-
-    // 项目号
-    //public static String PROJECT_NUM = "1000100000";
+    // 项目号-东方渔人码头
+    public static String PRO_NUM_OFW = "10000";
+    // 项目号-凡享资产
+    public static String PRO_NUM_EJ = "10001";
     // 初始密码
     public static String INIT_PASSWORD = "111111";
     // web平台

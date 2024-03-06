@@ -23,10 +23,10 @@ public class UserRoleServiceImpl implements UserRoleService {
         return userRoleDaoMapper.getById(id);
     }
 
-    @Override
-    public UserRole getByStaffId(String staffId) {
-        return userRoleDaoMapper.getByStaffId(staffId);
-    }
+//    @Override
+//    public UserRole getByStaffId(String staffId) {
+//        return userRoleDaoMapper.getByStaffId(staffId);
+//    }
 
     public List<UserRole> getList(UserRole userRole){
         return userRoleDaoMapper.getList(userRole);
@@ -41,9 +41,9 @@ public class UserRoleServiceImpl implements UserRoleService {
         userRoleDaoMapper.update(userRole);
     }
 
-    @Override
-    public void delete(String id) {
-        userRoleDaoMapper.delete(id);
-    }
+//    @Override
+//    public void delete(String id) {
+//        userRoleDaoMapper.delete(id);
+//    }
 
 }

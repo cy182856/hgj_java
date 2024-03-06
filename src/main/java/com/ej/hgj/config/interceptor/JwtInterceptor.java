@@ -28,51 +28,6 @@ public class JwtInterceptor implements HandlerInterceptor {
     @Autowired
     private UserDaoMapper userDaoMapper;
 
-    public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response, Object object) {
-        if (!"OPTIONS".equals(request.getMethod())) {
-            //获取token
-            //String token = request.getParameter("X-Token");
-            String token = request.getHeader("X-Token");
-            // 执行认证
-            if (StringUtils.isBlank(token)) {
-                logger.info("token为空");
-                response.setStatus(401);
-                return false;
-            }
-            //获取token的userid
-            String userId = "";
-            try {
-                //解密获取
-                userId = JWT.decode(token).getAudience().get(0); //得到token中的userid载荷
-            } catch (JWTDecodeException j) {
-                logger.info("获取userid异常，token验证失败");
-                response.setStatus(401);
-            }
-            //根据userid查询数据库
-            User user = userService.getById(userId);
-            if (user == null) {
-                logger.info("用户为空，token验证失败");
-                response.setStatus(401);
-                return false;
-            }
-            // 用户密码加签验证 token
-            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(user.getPassword())).build();
-            try {
-                jwtVerifier.verify(token);
-            } catch (JWTVerificationException e) {
-                logger.info("用户密码加签验证token失败");
-                response.setStatus(401);
-            }
-
-        }else {
-            logger.info("放行1次");
-        }
-        return true;
-    }
-
-
-
 //    public boolean preHandle(HttpServletRequest request,
 //                             HttpServletResponse response, Object object) {
 //        if (!"OPTIONS".equals(request.getMethod())) {
@@ -95,14 +50,14 @@ public class JwtInterceptor implements HandlerInterceptor {
 //                response.setStatus(401);
 //            }
 //            //根据userid查询数据库
-//            List<User> userList = userDaoMapper.queryUserByStaffId(userId);
-//            if (userList.isEmpty()) {
+//            User user = userService.getById(userId);
+//            if (user == null) {
 //                logger.info("用户为空，token验证失败");
 //                response.setStatus(401);
 //                return false;
 //            }
 //            // 用户密码加签验证 token
-//            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(userList.get(0).getPassword())).build();
+//            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(user.getPassword())).build();
 //            try {
 //                jwtVerifier.verify(token);
 //            } catch (JWTVerificationException e) {
@@ -115,4 +70,49 @@ public class JwtInterceptor implements HandlerInterceptor {
 //        }
 //        return true;
 //    }
+
+
+
+    public boolean preHandle(HttpServletRequest request,
+                             HttpServletResponse response, Object object) {
+        if (!"OPTIONS".equals(request.getMethod())) {
+            //获取token
+            //String token = request.getParameter("X-Token");
+            String token = request.getHeader("X-Token");
+            // 执行认证
+            if (StringUtils.isBlank(token)) {
+                logger.info("token为空");
+                response.setStatus(401);
+                return false;
+            }
+            //获取token的userid
+            String userId = "";
+            try {
+                //解密获取
+                userId = JWT.decode(token).getAudience().get(0); //得到token中的userid载荷
+            } catch (JWTDecodeException j) {
+                logger.info("获取userid异常，token验证失败");
+                response.setStatus(401);
+            }
+            //根据userid查询数据库
+            List<User> userList = userDaoMapper.queryUserByUserId(userId);
+            if (userList.isEmpty()) {
+                logger.info("用户为空，token验证失败");
+                response.setStatus(401);
+                return false;
+            }
+            // 用户密码加签验证 token
+            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(userList.get(0).getPassword())).build();
+            try {
+                jwtVerifier.verify(token);
+            } catch (JWTVerificationException e) {
+                logger.info("用户密码加签验证token失败");
+                response.setStatus(401);
+            }
+
+        }else {
+            logger.info("放行1次");
+        }
+        return true;
+    }
 }

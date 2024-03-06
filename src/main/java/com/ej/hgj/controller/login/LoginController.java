@@ -30,45 +30,21 @@ public class LoginController {
     @Autowired
     private UserDaoMapper userDaoMapper;
 
-    @RequestMapping(value = "/login",method = RequestMethod.POST)
-    public AjaxResult login(@RequestBody Map<String,String> data, HttpServletRequest request, HttpServletResponse response){
-        AjaxResult ajaxResult = new AjaxResult();
-        String userName = data.get("username");
-        String password = data.get("password");
-        //校验用户名和密码
-        User user = userService.queryUser(userName, password);
-        if (user == null) {
-            ajaxResult.setCode(400);
-            ajaxResult.setMessage("用户名或密码错误");
-        }else {
-            //生成token
-            String token = TokenUtils.getToken(user.getStaffId(), user.getPassword());
-            //将用户存入session,用userid作为键
-            request.getSession().setAttribute(user.getStaffId(),user);
-            HashMap tokenMap = new HashMap();
-            tokenMap.put("token",token);
-            ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
-            ajaxResult.setMessage("登陆成功");
-            ajaxResult.setData(tokenMap);
-        }
-        return ajaxResult;
-    }
-
 //    @RequestMapping(value = "/login",method = RequestMethod.POST)
-//    public AjaxResult serviceLogin(@RequestBody Map<String,String> data, HttpServletRequest request, HttpServletResponse response){
+//    public AjaxResult login(@RequestBody Map<String,String> data, HttpServletRequest request, HttpServletResponse response){
 //        AjaxResult ajaxResult = new AjaxResult();
 //        String userName = data.get("username");
 //        String password = data.get("password");
 //        //校验用户名和密码
-//        List<User> userList = userDaoMapper.queryUserList(userName, password);
-//        if (userList.isEmpty()) {
+//        User user = userService.queryUser(userName, password);
+//        if (user == null) {
 //            ajaxResult.setCode(400);
 //            ajaxResult.setMessage("用户名或密码错误");
 //        }else {
 //            //生成token
-//            String token = TokenUtils.getToken(userList.get(0).getStaffId(), userList.get(0).getPassword());
+//            String token = TokenUtils.getToken(user.getStaffId(), user.getPassword());
 //            //将用户存入session,用userid作为键
-//            request.getSession().setAttribute(userList.get(0).getStaffId(),userList.get(0));
+//            request.getSession().setAttribute(user.getStaffId(),user);
 //            HashMap tokenMap = new HashMap();
 //            tokenMap.put("token",token);
 //            ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
@@ -78,29 +54,29 @@ public class LoginController {
 //        return ajaxResult;
 //    }
 
-    @RequestMapping(value = "/getInfo",method = RequestMethod.GET)
-    public AjaxResult getInfo(@RequestParam("token") String token){
+    @RequestMapping(value = "/login",method = RequestMethod.POST)
+    public AjaxResult serviceLogin(@RequestBody Map<String,String> data, HttpServletRequest request, HttpServletResponse response){
         AjaxResult ajaxResult = new AjaxResult();
-        //解密获取
-        String userId = JWT.decode(token).getAudience().get(0); //得到token中的userid载荷
-        //根据userid查询数据库
-        User user = userService.getById(userId);
-        if(user == null){
+        String userName = data.get("username");
+        String password = data.get("password");
+        //校验用户名和密码
+        List<User> userList = userDaoMapper.queryUserList(userName, password);
+        if (userList.isEmpty()) {
             ajaxResult.setCode(400);
-            ajaxResult.setMessage("未获取到用户信息,请重新登陆");
-        }else{
-            HashMap hashMap = new HashMap();
-            hashMap.put("avatar", "any");
-            hashMap.put("introduction", "介绍");
-            hashMap.put("roles", new String[]{"any"});
-            hashMap.put("name", user.getUserName());
+            ajaxResult.setMessage("用户名或密码错误");
+        }else {
+            //生成token
+            String token = TokenUtils.getToken(userList.get(0).getUserId(), userList.get(0).getPassword());
+            //将用户存入session,用userid作为键
+            request.getSession().setAttribute(userList.get(0).getUserId(),userList.get(0));
+            HashMap tokenMap = new HashMap();
+            tokenMap.put("token",token);
             ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
-            ajaxResult.setMessage("已登录");
-            ajaxResult.setData(hashMap);
+            ajaxResult.setMessage("登陆成功");
+            ajaxResult.setData(tokenMap);
         }
         return ajaxResult;
     }
-
 
 //    @RequestMapping(value = "/getInfo",method = RequestMethod.GET)
 //    public AjaxResult getInfo(@RequestParam("token") String token){
@@ -108,8 +84,8 @@ public class LoginController {
 //        //解密获取
 //        String userId = JWT.decode(token).getAudience().get(0); //得到token中的userid载荷
 //        //根据userid查询数据库
-//        List<User> userList = userDaoMapper.queryUserByStaffId(userId);
-//        if(userList.isEmpty()){
+//        User user = userService.getById(userId);
+//        if(user == null){
 //            ajaxResult.setCode(400);
 //            ajaxResult.setMessage("未获取到用户信息,请重新登陆");
 //        }else{
@@ -117,11 +93,35 @@ public class LoginController {
 //            hashMap.put("avatar", "any");
 //            hashMap.put("introduction", "介绍");
 //            hashMap.put("roles", new String[]{"any"});
-//            hashMap.put("name", userList.get(0).getUserName());
+//            hashMap.put("name", user.getUserName());
 //            ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
 //            ajaxResult.setMessage("已登录");
 //            ajaxResult.setData(hashMap);
 //        }
 //        return ajaxResult;
 //    }
+
+
+    @RequestMapping(value = "/getInfo",method = RequestMethod.GET)
+    public AjaxResult getInfo(@RequestParam("token") String token){
+        AjaxResult ajaxResult = new AjaxResult();
+        //解密获取
+        String userId = JWT.decode(token).getAudience().get(0); //得到token中的userid载荷
+        //根据userid查询数据库
+        List<User> userList = userDaoMapper.queryUserByUserId(userId);
+        if(userList.isEmpty()){
+            ajaxResult.setCode(400);
+            ajaxResult.setMessage("未获取到用户信息,请重新登陆");
+        }else{
+            HashMap hashMap = new HashMap();
+            hashMap.put("avatar", "any");
+            hashMap.put("introduction", "介绍");
+            hashMap.put("roles", new String[]{"any"});
+            hashMap.put("name", userList.get(0).getUserName());
+            ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+            ajaxResult.setMessage("已登录");
+            ajaxResult.setData(hashMap);
+        }
+        return ajaxResult;
+    }
 }

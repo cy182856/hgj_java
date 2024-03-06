@@ -25,6 +25,8 @@ public interface UserBuildDaoMapper {
 
     void delete(String mobile);
 
+    void deleteByUserId(String userId);
+
     void deleteByMobileAndCorpId(String mobile, String corpId);
 
     void insertList(@Param("list") List<UserBuild> userBuildList);

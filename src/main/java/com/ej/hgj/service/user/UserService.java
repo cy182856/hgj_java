@@ -12,7 +12,7 @@ public interface UserService {
 
     User queryUser(String userName, String password);
 
-    User getById(String id);
+    //User getById(String id);
 
     List<User> getList(User user);
 
@@ -22,7 +22,7 @@ public interface UserService {
 
     void save(User user);
 
-    void update(User user);
+   // void update(User user);
 
     void delete(String id);
 

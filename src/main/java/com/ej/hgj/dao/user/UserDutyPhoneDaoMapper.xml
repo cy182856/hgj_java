@@ -25,6 +25,13 @@
         where delete_flag = 0 and mobile = #{mobile}
     </select>
 
+    <select id="getByUserId" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_user_duty_phone
+        where delete_flag = 0 and mobile = #{userId}
+    </select>
+
     <!-- 根据手机号企业号查询-->
     <select id="getByMobileAndCorpId" resultMap="BaseMap" parameterType="java.lang.String" >
         select
@@ -128,6 +135,10 @@
     <!-- 删除-->
     <delete id="delete" parameterType="java.lang.String" >
         delete from t_user_duty_phone where mobile = #{mobile}
+    </delete>
+
+    <delete id="deleteByUserId" parameterType="java.lang.String" >
+        delete from t_user_duty_phone where mobile = #{userId}
     </delete>
 
     <!-- 删除-->

@@ -79,19 +79,20 @@ public class UserController {
         // 查询所有值班电话
         List<UserDutyPhone> userDutyPhoneList = userDutyPhoneDaoMapper.getList(new UserDutyPhone());
         for(User user1 : list){
-            List<Build> buildListFilter = buildList.stream().filter(build1 -> user1.getMobile().equals(build1.getMobile()) && build1.getOrgId().equals(user1.getProjectNum())).collect(Collectors.toList());
+            List<Build> buildListFilter = buildList.stream().filter(build1 -> user1.getUserId().equals(build1.getMobile()) && build1.getOrgId().equals(user1.getProjectNum())).collect(Collectors.toList());
             // 去重复
             buildListFilter = buildListFilter.stream().collect(
-                        Collectors.collectingAndThen(Collectors.toCollection(
-                                () -> new TreeSet<>(Comparator.comparing(Build::getBudId))), ArrayList::new));
+                    Collectors.collectingAndThen(Collectors.toCollection(
+                            () -> new TreeSet<>(Comparator.comparing(Build::getBudId))), ArrayList::new));
             // 排序
-            buildListFilter = buildListFilter.stream().sorted(Comparator.comparing(Build :: getBudNameUnit)).collect(Collectors.toList());
+            buildListFilter = buildListFilter.stream().sorted(Comparator.comparing(Build::getBudNameUnit)).collect(Collectors.toList());
             user1.setBuildList(buildListFilter);
 
-            List<UserDutyPhone> userDutyPhoneListFilter = userDutyPhoneList.stream().filter(dutyPhone -> dutyPhone.getMobile().equals(user1.getMobile())).collect(Collectors.toList());
-            if(!userDutyPhoneListFilter.isEmpty()){
+            List<UserDutyPhone> userDutyPhoneListFilter = userDutyPhoneList.stream().filter(dutyPhone -> dutyPhone.getMobile().equals(user1.getUserId())).collect(Collectors.toList());
+            if (!userDutyPhoneListFilter.isEmpty()) {
                 user1.setPhone(userDutyPhoneListFilter.get(0).getPhone());
             }
+
         }
         //logger.info("list:"+ JSON.toJSONString(list));
         PageInfo<User> pageInfo = new PageInfo<>(list);
@@ -156,9 +157,9 @@ public class UserController {
         return access_token;
     }
 
-    //同步通讯录
-    @RequestMapping(value = "/sync",method = RequestMethod.GET)
-    public AjaxResult sync() {
+    //同步通讯录-东方渔人码头
+    @RequestMapping(value = "/sync/ofw",method = RequestMethod.GET)
+    public AjaxResult syncOfw() {
         logger.info("---------------------------同步通讯录开始--------------------");
         AjaxResult ajaxResult = new AjaxResult();
         //记住，先去企业微信后台管理端开启api同步权限
@@ -179,8 +180,9 @@ public class UserController {
         List<User> userInfoList = getDepartmentUserDetails(departmentList,access_token);
         // 跟据企业通讯录的用户ID查找已有通讯录，不存在就新增
         for(User wxUserInfo : userInfoList){
-            List<User> alreadyUserFilterList = alreadyUserList.stream().filter(alreadyWxUserInfo -> alreadyWxUserInfo.getMobile().equals(wxUserInfo.getMobile())).collect(Collectors.toList());
+            List<User> alreadyUserFilterList = alreadyUserList.stream().filter(alreadyWxUserInfo -> alreadyWxUserInfo.getUserId().equals(wxUserInfo.getUserId())).collect(Collectors.toList());
             if(alreadyUserFilterList.isEmpty()){
+                wxUserInfo.setCorpId("wwaf0bc97996187867");
                 usersAll.add(wxUserInfo);
             }
         }
@@ -197,56 +199,57 @@ public class UserController {
         return ajaxResult;
     }
 
-    //企业微信服务商同步授权企业通讯录
-//    @RequestMapping(value = "/sync",method = RequestMethod.GET)
-//    public AjaxResult sync() {
-//        logger.info("---------------------------同步通讯录开始--------------------");
-//        AjaxResult ajaxResult = new AjaxResult();
-//        ConstantConfig miniProgramAppEj = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP_EJ);
-//        ConstantConfig suiteTicket = constantConfDaoMapper.getByKey(Constant.SUITE_TICKET);
-//        // 通讯录新增
-//        List<User> usersAll = new ArrayList<>();
-//        // 查询授权企业corpId
-//        List<Corp> corpList = corpDaoMapper.getList(new Corp());
-//        // 获取已有通讯录列表
-//        List<User> alreadyUserList = userService.getList(new User());
-//        for(Corp corp : corpList) {
-//            // 获取第三方凭证token
-//            JSONObject jsonObjectSuiteAcToken = getSuiteAccessToken(miniProgramAppEj.getAppId(), miniProgramAppEj.getAppSecret(), suiteTicket.getConfigValue());
-//            String suiteAccessToken = jsonObjectSuiteAcToken.get("suite_access_token").toString();
-//            // 获取企业凭证
-//            JSONObject jsonObjectAccToken = getCorpToken(corp.getCorpId(), corp.getPermanentCode(), suiteAccessToken);
-//            String access_token = jsonObjectAccToken.getString("access_token").toString();
-//            // 获取部门列表信息(不填则是查询出所有的部门列表)
-//            List<Department> departmentList = getDepartmentList(access_token, "");
-//            logger.info("---------------------------获取部门列表--------------------" + JSON.toJSONString(departmentList));
-//            // 根据部门列表获取部门成员详情
-//            List<User> userInfoList = getDepartmentUserDetails(departmentList, access_token);
-//            // 跟据企业通讯录的用户ID查找已有通讯录，不存在就新增
-//            for (User wxUserInfo : userInfoList) {
-//                List<User> alreadyUserFilterList = alreadyUserList.stream().filter(alreadyWxUserInfo -> alreadyWxUserInfo.getMobile().equals(wxUserInfo.getMobile())).collect(Collectors.toList());
-//                if (alreadyUserFilterList.isEmpty()) {
-//                    wxUserInfo.setCorpId(corp.getCorpId());
-//                    usersAll.add(wxUserInfo);
-//                }
-//            }
-//        }
-//        // 将其保存到数据库中
-//        if (!usersAll.isEmpty()) {
-//            // 根据手机号去重复
-//            usersAll = usersAll.stream().collect(
-//                    Collectors.collectingAndThen(Collectors.toCollection(
-//                            () -> new TreeSet<>(Comparator.comparing(User::getMobile))), ArrayList::new));
-//            userService.insertList(usersAll);
-//        }
-//        logger.info("---------------------------同步通讯录结束--------------------" + JSON.toJSONString(usersAll));
-//        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
-//        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
-//        HashMap map = new HashMap();
-//        map.put("user", usersAll);
-//        ajaxResult.setData(map);
-//        return ajaxResult;
-//    }
+    //企业微信服务商同步授权企业通讯录-凡享
+    @RequestMapping(value = "/sync/fx",method = RequestMethod.GET)
+    public AjaxResult syncFx() {
+        logger.info("---------------------------同步通讯录开始--------------------");
+        AjaxResult ajaxResult = new AjaxResult();
+        // ConstantConfig miniProgramAppEj = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP_EJ);
+        // ConstantConfig suiteTicket = constantConfDaoMapper.getByKey(Constant.SUITE_TICKET);
+        // 通讯录新增
+        List<User> usersAll = new ArrayList<>();
+        // 查询授权企业corpId
+        List<Corp> corpList = corpDaoMapper.getList(new Corp());
+        // 获取已有通讯录列表
+        List<User> alreadyUserList = userService.getList(new User());
+        for(Corp corp : corpList) {
+            // 获取第三方凭证token
+            //JSONObject jsonObjectSuiteAcToken = getSuiteAccessToken(miniProgramAppEj.getAppId(), miniProgramAppEj.getAppSecret(), suiteTicket.getConfigValue());
+            //String suiteAccessToken = jsonObjectSuiteAcToken.get("suite_access_token").toString();
+            // 获取企业凭证
+            //JSONObject jsonObjectAccToken = getCorpToken(corp.getCorpId(), corp.getPermanentCode(), suiteAccessToken);
+            //String access_token = jsonObjectAccToken.getString("access_token").toString();
+            String access_token = QyApiUtils.getToken(corp.getCorpId(),corp.getPermanentCode());
+            // 获取部门列表信息(不填则是查询出所有的部门列表)
+            List<Department> departmentList = getDepartmentList(access_token, "");
+            logger.info("---------------------------获取部门列表--------------------" + JSON.toJSONString(departmentList));
+            // 根据部门列表获取部门成员详情
+            List<User> userInfoList = getDepartmentUserDetailsFx(departmentList, access_token);
+            // 跟据企业通讯录的用户ID查找已有通讯录，不存在就新增
+            for (User wxUserInfo : userInfoList) {
+                List<User> alreadyUserFilterList = alreadyUserList.stream().filter(alreadyWxUserInfo -> alreadyWxUserInfo.getUserId().equals(wxUserInfo.getUserId())).collect(Collectors.toList());
+                if (alreadyUserFilterList.isEmpty()) {
+                    wxUserInfo.setCorpId("wp2U43agAA5zYxOldvud9BfjBng3oPeQ");
+                    usersAll.add(wxUserInfo);
+                }
+            }
+        }
+        // 将其保存到数据库中
+        if (!usersAll.isEmpty()) {
+            // 根据userid去重复
+            usersAll = usersAll.stream().collect(
+                    Collectors.collectingAndThen(Collectors.toCollection(
+                            () -> new TreeSet<>(Comparator.comparing(User::getUserId))), ArrayList::new));
+            userService.insertList(usersAll);
+        }
+        logger.info("---------------------------同步通讯录结束--------------------" + JSON.toJSONString(usersAll));
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        HashMap map = new HashMap();
+        map.put("user", usersAll);
+        ajaxResult.setData(map);
+        return ajaxResult;
+    }
 
     /**
      * 获取部门列表
@@ -261,6 +264,42 @@ public class UserController {
         JSONObject jsonObject = JSONObject.parseObject(HttpClientUtil.doGet(getDepartmentList_url));
         List<Department> departmentList = JSONObject.parseArray(jsonObject.getString("department"),Department.class);
         return  departmentList;
+    }
+
+    /**
+     * 获取部门成员详情-凡享
+     * @param depts
+     * @param accessToken
+     * @param//是否遍历子部门的成员，一般不要遍历，除非你就只获取父级部门或者子部门为空，不然会导致数据重复
+     * @return
+     */
+    public List<User> getDepartmentUserDetailsFx(List<Department> depts, String accessToken) {
+        List<User> users = new ArrayList<>();
+        for (Department department : depts) {
+            // 1.获取请求的url
+            String getDepartmentUserDetails_url = "https://qyapi.weixin.qq.com/cgi-bin/user/list?access_token="+accessToken+"&department_id="+department.getId();
+            // 2.调用接口，发送请求，获取部门成员
+            JSONObject jsonObject =JSONObject.parseObject(HttpClientUtil.doGet(getDepartmentUserDetails_url));
+            List<Map<String, Object>> mapListJson = (List)jsonObject.getJSONArray("userlist");
+            for (Map<String, Object> map : mapListJson){
+                User user = new User();
+                String userid = map.get("userid") + "";
+                if(StringUtils.isNotBlank(userid)) {
+                    user.setId(TimestampGenerator.generateSerialNumber());
+                    user.setUserId(userid);
+                    user.setUserName(map.get("name") + "");
+                    user.setPassword(Constant.INIT_PASSWORD);
+                    user.setDeptName(department.getName());
+                    user.setCreateTime(new Date());
+                    user.setUpdateTime(new Date());
+                    user.setCreateBy("");
+                    user.setUpdateBy("");
+                    user.setDeleteFlag(0);
+                    users.add(user);
+                }
+            }
+        }
+        return users;
     }
 
     /**
@@ -280,18 +319,17 @@ public class UserController {
             List<Map<String, Object>> mapListJson = (List)jsonObject.getJSONArray("userlist");
             for (Map<String, Object> map : mapListJson){
                 User user = new User();
-                String mobile = map.get("mobile") + "";
-                if(StringUtils.isNotBlank(mobile)) {
+                String userId = map.get("userid") + "";
+                if(StringUtils.isNotBlank(userId)) {
                     user.setId(TimestampGenerator.generateSerialNumber());
-                    user.setStaffId(mobile);
-                    user.setUserId(map.get("userid") + "");
+                    user.setUserId(userId);
                     user.setUserName(map.get("name") + "");
                     user.setQrCode(map.get("qr_code") + "");
                     user.setPassword(Constant.INIT_PASSWORD);
                     user.setAlias(map.get("alias") + "");
                     user.setDeptName(department.getName());
                     user.setPosition(map.get("position") + "");
-                    user.setMobile(mobile);
+                    user.setMobile(map.get("mobile") + "");
                     user.setBizMail(map.get("biz_mail") + "");
                     user.setAvatar(map.get("avatar") + "");
                     user.setThumbAvatar(map.get("thumb_avatar") + "");

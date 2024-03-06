@@ -10,7 +10,7 @@ public interface UserRoleService {
 
     UserRole getById(String id);
 
-    UserRole getByStaffId(String staffId);
+    //UserRole getByStaffId(String staffId);
 
     List<UserRole> getList(UserRole userRole);
 
@@ -18,7 +18,7 @@ public interface UserRoleService {
 
     void update(UserRole userRole);
 
-    void delete(String id);
+    //void delete(String id);
 
 
 }
