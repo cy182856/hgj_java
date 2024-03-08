@@ -19,7 +19,7 @@ public interface HgjHouseDaoMapper {
 
     void delete();
 
-    List<HgjHouse> getList(HgjHouse hgjHouse);
+    // List<HgjHouse> getList(HgjHouse hgjHouse);
 
 
 }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.sy.dao.cst.HgjSyCstDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.cst.HgjCst">
+        <result column="org_id" jdbcType="VARCHAR" property="orgId"/>
+        <result column="code" jdbcType="VARCHAR" property="code"/>
+        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
+    </resultMap>
+
+    <!-- 根据资源ID查询客户名称-->
+    <select id="getCstNameByResId" resultMap="BaseMap" parameterType="java.lang.String" >
+        SELECT
+            DISTINCT(c.code) as code,hu.orgid as org_id,c.cstname as cst_name
+        FROM
+            rcr rcr
+                INNER  JOIN house hu ON hu.id = rcr.resid
+                INNER JOIN cst c on c.id=rcr.cstid
+        where rcr.resid = #{resId} and rcr.isaffect =1
+    </select>
+</mapper>

@@ -19,6 +19,7 @@ import com.ej.hgj.enums.TempMonsterBasicRespCode;
 import com.ej.hgj.enums.wechat.EventTypeEnum;
 import com.ej.hgj.enums.wechat.PubMsgTypeEnum;
 import com.ej.hgj.request.RespTextMessage;
+import com.ej.hgj.sy.dao.cst.HgjSyCstDaoMapper;
 import com.ej.hgj.utils.DateUtils;
 import com.ej.hgj.utils.HttpClientUtil;
 import com.ej.hgj.utils.wechat.PubCommonUtil;
@@ -62,6 +63,9 @@ public class WechatServiceImpl implements WechatService{
 
     @Autowired
     private HgjHouseDaoMapper hgjHouseDaoMapper;
+
+    @Autowired
+    private HgjSyCstDaoMapper hgjSyCstDaoMapper;
 
     @Override
     public String handleMessage(HttpServletRequest request) throws IOException, DocumentException, JAXBException {
@@ -346,7 +350,8 @@ public class WechatServiceImpl implements WechatService{
         HgjHouse hh = hgjHouseDaoMapper.findById(objectId);
         if(hh != null){
             houseId = objectId;
-            HgjCst hgjCst = hgjCstDaoMapper.getCstNameByResId(houseId);
+            //HgjCst hgjCst = hgjCstDaoMapper.getCstNameByResId(houseId);
+            HgjCst hgjCst = hgjSyCstDaoMapper.getCstNameByResId(houseId);
             houseName = hh.getResName();
             cstCode = hgjCst.getCode();
             cstName = hgjCst.getCstName();

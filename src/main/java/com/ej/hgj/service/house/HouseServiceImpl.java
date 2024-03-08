@@ -56,9 +56,9 @@ public class HouseServiceImpl implements HouseService {
     private CstPayPerDaoMapper cstPayPerDaoMapper;
 
 
-    public List<HgjHouse> getList(HgjHouse hgjHouse){
-        return hgjHouseDaoMapper.getList(hgjHouse);
-    }
+//    public List<HgjHouse> getList(HgjHouse hgjHouse){
+//        return hgjHouseDaoMapper.getList(hgjHouse);
+//    }
 
     @Override
     public GetTempQrcodeResult qrcode(GetTempQrcodeRequest getTempQrcodeRequest) {

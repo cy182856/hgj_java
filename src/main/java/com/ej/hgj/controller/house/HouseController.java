@@ -9,6 +9,7 @@ import com.ej.hgj.entity.house.HgjHouse;
 import com.ej.hgj.request.GetTempQrcodeRequest;
 import com.ej.hgj.request.GetTempQrcodeResult;
 import com.ej.hgj.service.house.HouseService;
+import com.ej.hgj.sy.dao.house.HgjSyHouseDaoMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -27,6 +28,9 @@ public class HouseController {
     @Autowired
     private HouseService houseService;
 
+    @Autowired
+    private HgjSyHouseDaoMapper hgjSyHouseDaoMapper;
+
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(@RequestParam(value = "page",defaultValue = "1") int page,
                            @RequestParam(value = "limit",defaultValue = "10") int limit,
@@ -34,7 +38,8 @@ public class HouseController {
         AjaxResult ajaxResult = new AjaxResult();
         HashMap map = new HashMap();
         PageHelper.offsetPage((page-1) * limit,limit);
-        List<HgjHouse> list = houseService.getList(house);
+        //List<HgjHouse> list = houseService.getList(house);
+        List<HgjHouse> list = hgjSyHouseDaoMapper.getList(house);
         //logger.info("list:"+ JSON.toJSONString(list));
         PageInfo<HgjHouse> pageInfo = new PageInfo<>(list);
         //计算总页数

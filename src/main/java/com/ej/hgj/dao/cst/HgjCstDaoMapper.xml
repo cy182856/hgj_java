@@ -5,7 +5,7 @@
     <resultMap id="BaseMap" type="com.ej.hgj.entity.cst.HgjCst">
         <result column="id" jdbcType="VARCHAR" property="id"/>
         <result column="org_id" jdbcType="VARCHAR" property="orgId"/>
-        <result column="Code" jdbcType="VARCHAR" property="code"/>
+        <result column="code" jdbcType="VARCHAR" property="code"/>
         <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
         <result column="cst_type" jdbcType="VARCHAR" property="cstType"/>
         <result column="cst_level" jdbcType="VARCHAR" property="cstLevel"/>
@@ -80,13 +80,13 @@
     </select>
 
     <!-- 根据资源ID查询客户名称-->
-    <select id="getCstNameByResId" resultMap="BaseMap" parameterType="java.lang.String" >
-        SELECT
-            DISTINCT(c.`code`) as code,hu.org_id,c.cst_name
-        FROM
-            s_rcr rcr
-                INNER  JOIN s_house hu ON hu.id = rcr.res_id
-                INNER JOIN s_cst c on c.id=rcr.cst_id
-        where rcr.res_id=#{resId} and rcr.is_affect =1
-    </select>
+<!--    <select id="getCstNameByResId" resultMap="BaseMap" parameterType="java.lang.String" >-->
+<!--        SELECT-->
+<!--            DISTINCT(c.`code`) as code,hu.org_id,c.cst_name-->
+<!--        FROM-->
+<!--            s_rcr rcr-->
+<!--                INNER  JOIN s_house hu ON hu.id = rcr.res_id-->
+<!--                INNER JOIN s_cst c on c.id=rcr.cst_id-->
+<!--        where rcr.res_id=#{resId} and rcr.is_affect =1-->
+<!--    </select>-->
 </mapper>

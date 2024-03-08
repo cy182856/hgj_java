@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface HouseService {
 
-    List<HgjHouse> getList(HgjHouse hgjHouse);
+   // List<HgjHouse> getList(HgjHouse hgjHouse);
 
     GetTempQrcodeResult qrcode(GetTempQrcodeRequest getTempQrcodeRequest);
 
