@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.gonggao.GonggaoDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.gonggao.Gonggao">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
+        <result column="article_id" jdbcType="VARCHAR" property="articleId"/>
+        <result column="media_id" jdbcType="VARCHAR" property="mediaId"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="type_name" jdbcType="VARCHAR" property="typeName"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="author" jdbcType="VARCHAR" property="author"/>
+        <result column="is_deleted" jdbcType="VARCHAR" property="isDeleted"/>
+        <result column="url" jdbcType="VARCHAR" property="url"/>
+        <result column="thumb_url" jdbcType="VARCHAR" property="thumbUrl"/>
+        <result column="is_show" jdbcType="INTEGER" property="isShow"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, pro_num, article_id, media_id, `type`, title, author, is_deleted, url, thumb_url, is_show, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 根据主键查询-->
+    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            <include refid="Base_Column_List" />
+        from t_gonggao
+        where id = #{id}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.gonggao.Gonggao">
+        select
+        g.*,t.name as type_name
+        from t_gonggao g left join t_gonggao_type t on g.type = t.id
+        where g.delete_flag = 0
+        <if test="title != null">
+            and g.title like CONCAT('%', #{title,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="proNum != null">
+            and g.pro_num = #{proNum,jdbcType=VARCHAR}
+        </if>
+        order by g.update_time desc
+    </select>
+
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.gonggao.Gonggao" >
+        insert into  t_gonggao(
+        <if test="id != null">
+            id,
+        </if>
+        <if test="proNum != null">
+            pro_num,
+        </if>
+        <if test="articleId != null">
+            article_id,
+        </if>
+        <if test="mediaId != null">
+            media_id,
+        </if>
+        <if test="type != null">
+            `type`,
+        </if>
+        <if test="title != null">
+            title,
+        </if>
+        <if test="author != null">
+            author,
+        </if>
+        <if test="isDeleted != null">
+            is_deleted,
+        </if>
+        <if test="url != null">
+            url,
+        </if>
+        <if test="thumbUrl != null">
+            thumb_url,
+        </if>
+        <if test="isShow != null">
+            is_show,
+        </if>
+        <if test="createTime != null">
+            create_time,
+        </if>
+        <if test="createBy != null">
+            create_by,
+        </if>
+        <if test="updateTime != null">
+            update_time,
+        </if>
+        <if test="updateBy != null">
+            update_by,
+        </if>
+        <if test="deleteFlag != null">
+            delete_flag
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="proNum != null" >
+                #{proNum,jdbcType=VARCHAR},
+            </if>
+            <if test="articleId != null" >
+                #{articleId,jdbcType=VARCHAR},
+            </if>
+            <if test="mediaId != null" >
+                #{mediaId,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null" >
+                #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="title != null" >
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="author != null" >
+                #{author,jdbcType=VARCHAR},
+            </if>
+            <if test="isDeleted != null" >
+                #{isDeleted,jdbcType=VARCHAR},
+            </if>
+            <if test="url != null" >
+                #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="thumbUrl != null" >
+                #{thumbUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="isShow != null" >
+                #{isShow,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 批量插入-->
+    <insert id="insertList" parameterType="java.util.List">
+        insert into t_gonggao (
+        id, pro_num, article_id, media_id, `type`, title, author, is_deleted, url, thumb_url, is_show, create_time, update_time, create_by,
+        update_by, delete_flag
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.proNum,jdbcType=VARCHAR},
+            #{item.articleId,jdbcType=VARCHAR},
+            #{item.mediaId,jdbcType=VARCHAR},
+            #{item.type,jdbcType=VARCHAR},
+            #{item.title,jdbcType=VARCHAR},
+            #{item.author,jdbcType=VARCHAR},
+            #{item.isDeleted,jdbcType=VARCHAR},
+            #{item.url,jdbcType=VARCHAR},
+            #{item.thumbUrl,jdbcType=VARCHAR},
+            #{item.isShow,jdbcType=INTEGER},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.deleteFlag,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.gonggao.Gonggao" >
+        update
+        t_gonggao
+        <set>
+            <if test="isShow != null">
+                is_show = #{isShow,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                `type` = #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id=#{id,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 删除-->
+    <update id="delete" parameterType="java.lang.String" >
+        update t_gonggao set delete_flag = 1 where id=#{id}
+    </update>
+
+    <update id="isShow" parameterType="java.lang.String" >
+        update t_gonggao set is_show = 0 where id=#{id}
+    </update>
+
+    <update id="notIsShow" parameterType="java.lang.String" >
+        update t_gonggao set is_show = 1 where id=#{id}
+    </update>
+
+</mapper>
