@@ -92,6 +92,40 @@ public class CstServiceImpl implements CstService {
         return getTempQrcodeResult;
     }
 
+    @Override
+    public GetTempQrcodeResult cstIntoQrcode(GetTempQrcodeRequest getTempQrcodeRequest) {
+        logger.info("------------生成入住二维码实现----------");
+        GetTempQrcodeResult getTempQrcodeResult = null;
+        String param = null;
+        try {
+            param = getCstIntoQrcodeParam(getTempQrcodeRequest);
+            ConstantConfig constantConfig = constantConfDaoMapper.getByProNumAndKey(getTempQrcodeRequest.getProNum(),Constant.WE_CHAT_PUB_APP);
+            // 获取token
+            String token = getToken(constantConfig.getAppId(), constantConfig.getAppSecret());
+            // 获取二维码失效时间
+            ConstantConfig configQrDefaultSecond = constantConfDaoMapper.getByKey(Constant.QR_DEFAULT_SECOND);
+            logger.info("客户入住二维码失效时间:" + configQrDefaultSecond.getConfigValue()+"秒");
+            logger.info("生成入住二维码 AppId:"+constantConfig.getAppId()+"----AppSecret:" + constantConfig.getAppSecret());
+            logger.info("---------token:----------"+token);
+            String qrcode = WechatPubNumUtils.qrcode(QrSceneEnum.QR_STR_SCENE.getCode(),
+                    configQrDefaultSecond.getConfigValue() , param,
+                    StringUtils.isBlank(getTempQrcodeRequest.getQrRespType()) ? QrRespEnum.QR_IMG.getCode() : getTempQrcodeRequest.getQrRespType(),
+                    token);
+            logger.info("---------qrcode:----------"+qrcode);
+            getTempQrcodeResult = new GetTempQrcodeResult();
+            if (StringUtils.isBlank(getTempQrcodeRequest.getQrRespType()) || StringUtils.equals(QrRespEnum.QR_IMG.getCode(), getTempQrcodeRequest.getQrRespType())) {
+                getTempQrcodeResult.setImgUrl(qrcode);
+            } else {
+                getTempQrcodeResult.setCodeUrl(qrcode);
+            }
+        } catch (ParseException e) {
+            e.getMessage();
+        } catch (Exception e) {
+            e.getMessage();
+        }
+        return getTempQrcodeResult;
+    }
+
     private String getQrcodeParam(GetTempQrcodeRequest getTempQrcodeRequest)  throws ParseException {
         //生成二维码时，如果验证码超过了有效期，重新生成房屋信息验证码，之前生成的二维码将失效，
         //如果没有超过有效期，则验证码保持原样，有效期重新设置为10分钟
@@ -99,6 +133,17 @@ public class CstServiceImpl implements CstService {
         StringBuffer sb = new StringBuffer();
         sb.append(ScanQrEnum.S01.getCode());
         sb.append(getTempQrcodeRequest.getCstCode());
+        String param = sb.toString();
+        return param;
+    }
+
+    private String getCstIntoQrcodeParam(GetTempQrcodeRequest getTempQrcodeRequest)  throws ParseException {
+        //生成二维码时，如果验证码超过了有效期，重新生成房屋信息验证码，之前生成的二维码将失效，
+        //如果没有超过有效期，则验证码保持原样，有效期重新设置为10分钟
+        // areaId|buildingId|houseNo|huRole|huOpenMode|checkCode|usrSeqId|usrType|custId
+        StringBuffer sb = new StringBuffer();
+        sb.append(ScanQrEnum.S01.getCode());
+        sb.append(getTempQrcodeRequest.getCstIntoId());
         String param = sb.toString();
         return param;
     }

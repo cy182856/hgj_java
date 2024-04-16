@@ -3,7 +3,9 @@ package com.ej.hgj.controller.cstInto;
 import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.cstInto.CstIntoDaoMapper;
+import com.ej.hgj.dao.cstInto.CstIntoHouseDaoMapper;
 import com.ej.hgj.entity.cstInto.CstInto;
+import com.ej.hgj.entity.cstInto.CstIntoHouse;
 import com.ej.hgj.entity.role.Role;
 import com.ej.hgj.entity.user.User;
 import com.ej.hgj.entity.user.UserRole;
@@ -41,6 +43,9 @@ public class CstIntoController {
     @Autowired
     private CstIntoDaoMapper cstIntoDaoMapper;
 
+    @Autowired
+    private CstIntoHouseDaoMapper cstIntoHouseDaoMapper;
+
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(@RequestParam(value = "page",defaultValue = "1") int page,
                            @RequestParam(value = "limit",defaultValue = "10") int limit,
@@ -75,32 +80,41 @@ public class CstIntoController {
      * @param id
      * @return
      */
+//    @RequestMapping(value = "/delete",method = RequestMethod.GET)
+//    public AjaxResult delete(@RequestParam(required=false, value = "id") String id,
+//                             @RequestParam(required=false, value = "cstIntoHouseId") String cstIntoHouseId){
+//        AjaxResult ajaxResult = new AjaxResult();
+//        // 判断是否是客户、业主
+//        CstInto cstInto = cstIntoDaoMapper.getById(id);
+//        if(cstInto.getIntoRole() == Constant.INTO_ROLE_CST || cstInto.getIntoRole() == Constant.INTO_ROLE_PROPERTY_OWNER){
+//
+//            CstInto cst = new CstInto();
+//            cst.setIntoRole(Constant.INTO_ROLE_CST);
+//            cst.setCstCode(cstInto.getCstCode());
+//            // 查询业主
+//            List<CstInto> cstIntoList = cstIntoDaoMapper.getList(cst);
+//            // 查询租户
+//            cst.setIntoRole(Constant.INTO_ROLE_ENTRUST);
+//            cst.setIntoStatus(Constant.INTO_STATUS_Y);
+//            List<CstInto> cstIntoTenantList = cstIntoDaoMapper.getList(cst);
+//            // 如果只剩一个业主，需要先解除租户才能解除业主
+//            if(!cstIntoList.isEmpty() && cstIntoList.size() == 1 && !cstIntoTenantList.isEmpty()){
+//                ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+//                ajaxResult.setMessage("请先解除租户在解除业主");
+//                return ajaxResult;
+//            }
+//        }
+//        cstIntoDaoMapper.delete(id);
+//        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+//        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+//        return ajaxResult;
+//    }
+
     @RequestMapping(value = "/delete",method = RequestMethod.GET)
-    public AjaxResult delete(@RequestParam(required=false, value = "id") String id){
+    public AjaxResult delete(@RequestParam(required=false, value = "id") String id,
+                             @RequestParam(required=false, value = "cstIntoHouseId") String cstIntoHouseId){
         AjaxResult ajaxResult = new AjaxResult();
-        // 判断是否是业主
-        CstInto cstInto = cstIntoDaoMapper.getById(id);
-        if(cstInto.getIntoRole() == Constant.INTO_ROLE_OWNER){
-            CstInto cst = new CstInto();
-            cst.setIntoRole(Constant.INTO_ROLE_OWNER);
-            cst.setCstCode(cstInto.getCstCode());
-            // 查询业主
-            List<CstInto> cstIntoList = cstIntoDaoMapper.getList(cst);
-            // 查询租户
-            cst.setIntoRole(Constant.INTO_ROLE_TENANT);
-            cst.setIntoStatus(Constant.INTO_STATUS_Y);
-            List<CstInto> cstIntoTenantList = cstIntoDaoMapper.getList(cst);
-            // 如果只剩一个业主，需要先解除租户才能解除业主
-            if(!cstIntoList.isEmpty() && cstIntoList.size() == 1 && !cstIntoTenantList.isEmpty()){
-                ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
-                ajaxResult.setMessage("请先解除租户在解除业主");
-                return ajaxResult;
-            }
-        }
-        cstIntoDaoMapper.delete(id);
-        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
-        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
-        return ajaxResult;
+        return cstIntoService.unbind(ajaxResult,id,cstIntoHouseId);
     }
 
     /**

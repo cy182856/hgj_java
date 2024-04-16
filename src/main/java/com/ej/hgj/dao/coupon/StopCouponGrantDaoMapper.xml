@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.coupon.StopCouponGrantDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.coupon.StopCouponGrant">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="stop_coupon_id" jdbcType="VARCHAR" property="stopCouponId"/>
+        <result column="tag_id" jdbcType="VARCHAR" property="tagId"/>
+        <result column="start_time" jdbcType="VARCHAR" property="startTime"/>
+        <result column="end_time" jdbcType="VARCHAR" property="endTime"/>
+        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, stop_coupon_id, tag_id, start_time, end_time, cst_code, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 根据主键查询-->
+    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            <include refid="Base_Column_List" />
+        from t_stop_coupon_grant
+        where id = #{id}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.coupon.StopCouponGrant">
+        select
+        g.*,t.name,c.cst_name,s.title
+        from t_stop_coupon_grant g
+        left join t_stop_coupon s on s.id = g.stop_coupon_id
+        left join t_tag t on t.id = g.tag_id
+        left join s_cst c on c.code = g.cst_code
+        where g.delete_flag = 0 and t.delete_flag = 0
+        <if test="cstName != null">
+            and c.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="title != null">
+            and s.title like CONCAT('%', #{title,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="tagId != null and tagId != ''">
+            and g.tag_id = #{tagId,jdbcType=VARCHAR}
+        </if>
+        order by g.update_time desc
+    </select>
+
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.coupon.StopCouponGrant" >
+        insert into  t_stop_coupon_grant(
+        <if test="id != null">
+            id,
+        </if>
+        <if test="stopCouponId != null">
+            stop_coupon_id,
+        </if>
+        <if test="tagId != null">
+            tag_id,
+        </if>
+        <if test="startTime != null">
+            start_time,
+        </if>
+        <if test="endTime != null">
+            end_time,
+        </if>
+        <if test="cstCode != null">
+            cst_code,
+        </if>
+        <if test="createTime != null">
+            create_time,
+        </if>
+        <if test="createBy != null">
+            create_by,
+        </if>
+        <if test="updateTime != null">
+            update_time,
+        </if>
+        <if test="updateBy != null">
+            update_by,
+        </if>
+        <if test="deleteFlag != null">
+            delete_flag
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="stopCouponId != null" >
+                #{stopCouponId,jdbcType=VARCHAR},
+            </if>
+            <if test="tagId != null" >
+                #{tagId,jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null" >
+                #{startTime,jdbcType=VARCHAR},
+            </if>
+            <if test="endTime != null" >
+                #{endTime,jdbcType=VARCHAR},
+            </if>
+            <if test="cstCode != null" >
+                #{cstCode,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 批量插入-->
+    <insert id="insertList" parameterType="java.util.List">
+        insert into t_stop_coupon_grant (
+        id, stop_coupon_id, tag_id, start_time, end_time, cst_code, create_time, update_time, create_by,
+        update_by, delete_flag
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.stopCouponId,jdbcType=VARCHAR},
+            #{item.tagId,jdbcType=VARCHAR},
+            #{item.startTime,jdbcType=VARCHAR},
+            #{item.endTime,jdbcType=VARCHAR},
+            #{item.cstCode,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.deleteFlag,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.coupon.StopCouponGrant" >
+        update
+        t_stop_coupon_grant
+        <set>
+            <if test="stopCouponId != null">
+                stop_coupon_id = #{stopCouponId,jdbcType=VARCHAR},
+            </if>
+            <if test="tagId != null">
+                title = #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null">
+                start_time = #{startTime,jdbcType=VARCHAR},
+            </if>
+            <if test="endTime != null">
+                is_exp = #{isExp,jdbcType=VARCHAR},
+            </if>
+            <if test="cstCode != null">
+                cst_code = #{cstCode,jdbcType=VARCHAR},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id=#{id,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 删除-->
+    <update id="delete" parameterType="java.lang.String" >
+        delete from t_stop_coupon_grant where id=#{id}
+    </update>
+
+</mapper>

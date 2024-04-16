@@ -20,7 +20,7 @@ public interface HgjCstDaoMapper {
 
     void insertList(@Param("list") List<SyCst> syCstList);
 
-    void delete();
+    void delete(String orgId);
 
     List<HgjCst> getList(HgjCst hgjCst);
 

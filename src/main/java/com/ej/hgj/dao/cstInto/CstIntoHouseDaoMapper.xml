@@ -1,32 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ej.hgj.dao.cstInto.CstIntoDaoMapper">
+<mapper namespace="com.ej.hgj.dao.cstInto.CstIntoHouseDaoMapper">
 
-    <resultMap id="BaseMap" type="com.ej.hgj.entity.cstInto.CstInto">
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.cstInto.CstIntoHouse">
         <result column="id" jdbcType="VARCHAR" property="id"/>
-        <result column="project_num" jdbcType="VARCHAR" property="projectNum"/>
-        <result column="project_name" jdbcType="VARCHAR" property="projectName"/>
-        <result column="wx_open_id" jdbcType="VARCHAR" property="wxOpenId"/>
-        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
-        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
+        <result column="cst_into_id" jdbcType="VARCHAR" property="cstIntoId"/>
         <result column="house_id" jdbcType="VARCHAR" property="houseId"/>
-        <result column="res_name" jdbcType="VARCHAR" property="resName"/>
-        <result column="into_role" jdbcType="INTEGER" property="intoRole"/>
         <result column="into_status" jdbcType="INTEGER" property="intoStatus"/>
-        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
-
-        <result column="cst_into_house_id" jdbcType="VARCHAR" property="cstIntoHouseId"/>
-
-        <result column="house_into_status" jdbcType="INTEGER" property="houseIntoStatus"/>
-
     </resultMap>
     <sql id="Base_Column_List" >
-        id, project_num, wx_open_id, user_name, cst_code, house_id, into_role, into_status, create_time, update_time, create_by,
+        id, cst_into_id, house_id, into_status, create_time, update_time, create_by,
         update_by, delete_flag
     </sql>
 
@@ -34,8 +22,16 @@
     <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
         select
         <include refid="Base_Column_List" />
-        from t_cst_into
+        from t_cst_into_house
         where id = #{id}
+    </select>
+
+    <!-- 根据入住ID和转态查询-->
+    <select id="getByCstIntoIdAndIntoStatus" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_cst_into_house
+        where cst_into_id = #{cstIntoId} and into_status in(1)
     </select>
 
     <!-- 查询列表-->
@@ -43,15 +39,12 @@
         SELECT
             c.*, s.cst_name,
             pc.project_name,
-            h.res_name,
-            ch.id as cst_into_house_id,
-            ch.into_status as house_into_status
+            h.res_name
         FROM
             t_cst_into c
         LEFT JOIN s_cst s ON s.`code` = c.cst_code
         LEFT JOIN t_pro_config pc ON pc.project_num = s.org_id
-        LEFT JOIN t_cst_into_house ch on c.id = ch.cst_into_id and ch.delete_flag = 0
-        LEFT JOIN s_house h on h.id = ch.house_id
+        LEFT JOIN s_house h on h.id = c.house_id
         WHERE c.delete_flag = 0
         <if test="projectNum != null and projectNum != ''">
             and pc.project_num = #{projectNum}
@@ -65,27 +58,36 @@
         <if test="intoRole != null">
             and c.into_role = #{intoRole}
         </if>
-        <if test="intoStatus != null and intoStatus == 0">
-            and c.into_status = 0
-        </if>
-        <if test="intoStatus != null and intoStatus == 1">
-            and c.into_status = 1 and (ch.into_status is null or ch.into_status = 1)
-        </if>
-        <if test="intoStatus != null and intoStatus == 2">
-            and ch.into_status = 2
-        </if>
-        <if test="intoStatus != null and intoStatus == 3">
-            and ch.into_status = 3
+        <if test="intoStatus != null">
+            and c.into_status = #{intoStatus}
         </if>
         <if test="cstCode != null">
             and c.cst_code = #{cstCode}
         </if>
-        order by c.update_time desc, c.into_role
+        order by c.update_time desc
     </select>
 
+    <insert id="insertList" parameterType="java.util.List">
+        insert into t_cst_into_house (
+        id, cst_into_id, house_id, into_status, create_time, update_time, delete_flag
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.cstIntoId,jdbcType=VARCHAR},
+            #{item.houseId,jdbcType=VARCHAR},
+            #{item.intoStatus,jdbcType=INTEGER},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.deleteFlag,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+
     <!-- 保存-->
-    <insert id="save" parameterType="com.ej.hgj.entity.cstInto.CstInto" >
-        insert into  t_cst_into(
+    <insert id="save" parameterType="com.ej.hgj.entity.cstInto.CstIntoHouse" >
+        insert into  t_cst_into_house(
         <if test="id != null">
             id,
         </if>
@@ -171,46 +173,25 @@
 
     <!-- 逻辑删除-->
     <update id="delete" parameterType="java.lang.String" >
-        update t_cst_into set delete_flag = 1 ,update_time = NOW() where id=#{id,jdbcType=VARCHAR}
+        update t_cst_into_house set delete_flag = 1 ,update_time = NOW() where id=#{id,jdbcType=VARCHAR}
     </update>
 
     <!-- 根据微信号客户号删除-->
     <update id="deleteByCstCodeAndWxOpenId" parameterType="java.lang.String" >
         update
-            t_cst_into
+            t_cst_into_house
         set delete_flag = 1 , update_time = NOW()
         where cst_code=#{cstCode,jdbcType=VARCHAR}
           and wx_open_id=#{wxOpenId,jdbcType=VARCHAR}
     </update>
 
     <!-- 更新-->
-    <update id="update" parameterType="com.ej.hgj.entity.house.CstInto" >
+    <update id="updateById" parameterType="com.ej.hgj.entity.cstInto.CstIntoHouse" >
         update
-        t_cst_into
+        t_cst_into_house
         <set>
-            <if test="projectNum != null" >
-                project_num = #{projectNum,jdbcType=VARCHAR},
-            </if>
-            <if test="wxOpenId != null">
-                wx_open_id = #{wxOpenId,jdbcType=VARCHAR},
-            </if>
-            <if test="userName != null">
-                user_name = #{userName,jdbcType=VARCHAR},
-            </if>
-            <if test="cstCode != null">
-                cst_code = #{cstCode,jdbcType=VARCHAR},
-            </if>
-            <if test="houseId != null">
-                house_id = #{houseId,jdbcType=VARCHAR},
-            </if>
-            <if test="intoRole != null">
-                into_role = #{intoRole,jdbcType=INTEGER},
-            </if>
             <if test="intoStatus != null">
                 into_status = #{intoStatus,jdbcType=INTEGER},
-            </if>
-            <if test="updateBy != null">
-                update_by = #{updateBy,jdbcType=VARCHAR},
             </if>
             <if test="updateTime != null">
                 update_time = #{updateTime,jdbcType=TIMESTAMP},
@@ -221,4 +202,5 @@
         </set>
         where id = #{id,jdbcType=VARCHAR}
     </update>
+
 </mapper>

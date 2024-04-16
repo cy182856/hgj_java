@@ -22,4 +22,12 @@ public interface HgjHouseDaoMapper {
     // List<HgjHouse> getList(HgjHouse hgjHouse);
 
 
+    List<HgjHouse> queryBuilding (String orgId);
+
+
+
+
+
+
+
 }

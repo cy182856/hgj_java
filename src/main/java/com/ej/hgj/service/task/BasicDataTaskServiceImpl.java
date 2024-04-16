@@ -88,19 +88,35 @@ public class BasicDataTaskServiceImpl implements BasicDataTaskService {
         }
 
         /**客户档案*/
-        List<SyCst> syCstList = syCstDaoMapper.getList();
-        if(!syCstList.isEmpty()){
-            for (SyCst syCst : syCstList){
+        // 10000 - 东方渔人码头
+        List<SyCst> syCstListOfw = syCstDaoMapper.getListByProNumOfw();
+        if(!syCstListOfw.isEmpty()){
+            for (SyCst syCst : syCstListOfw){
                 syCst.setCreateTime(new Date());
                 syCst.setUpdateTime(new Date());
             }
-            logger.info("查询思源客户档案数量:" + syCstList.size());
+            logger.info("查询思源东方渔人码头客户档案数量:" + syCstListOfw.size());
             // 删除惠管家所有客户档案
-            hgjCstDaoMapper.delete();
-            logger.info("删除惠管家客户档案成功!");
+            hgjCstDaoMapper.delete("10000");
+            logger.info("删除惠管家东方渔人码头客户档案成功!");
             // 插入思源系统的客户档案到惠管家
-            hgjCstDaoMapper.insertList(syCstList);
-            logger.info("客户档案插入成功,插入数量:" + syCstList.size());
+            hgjCstDaoMapper.insertList(syCstListOfw);
+            logger.info("东方渔人码头客户档案插入成功,插入数量:" + syCstListOfw.size());
+        }
+        // 10001 - 新弘北外滩
+        List<SyCst> syCstListXh = syCstDaoMapper.getListByProNumXh();
+        if(!syCstListXh.isEmpty()){
+            for (SyCst syCst : syCstListXh){
+                syCst.setCreateTime(new Date());
+                syCst.setUpdateTime(new Date());
+            }
+            logger.info("查询思源新弘北外滩客户档案数量:" + syCstListXh.size());
+            // 删除惠管家所有客户档案
+            hgjCstDaoMapper.delete("10001");
+            logger.info("删除惠管家新弘北外滩客户档案成功!");
+            // 插入思源系统的客户档案到惠管家
+            hgjCstDaoMapper.insertList(syCstListXh);
+            logger.info("新弘北外滩客户档案插入成功,插入数量:" + syCstListXh.size());
         }
 
         /**客户合同资源关联信息*/

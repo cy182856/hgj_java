@@ -14,5 +14,6 @@ public interface HgjSyHouseDaoMapper {
 
     List<HgjHouse> getList(HgjHouse hgjHouse);
 
+    List<HgjHouse> queryRoomNum (String budId);
 
 }

@@ -45,4 +45,27 @@
         from House
     </select>
 
+    <!-- 根据客户编号查询思源房屋列表-->
+    <select id="getListByCstCode" resultMap="BaseMap" parameterType="com.ej.hgj.entity.house.HgjHouse" >
+        select
+        *
+        from(
+            select
+            hu.*
+            from
+            rcr rcr
+            left join contract con on con.id = rcr.cttid
+            left join house hu on hu.id = rcr.resid
+            where
+            rcr.cstid in (
+                select
+                id
+                from
+                cst
+                where
+                code = #{cstCode,jdbcType=VARCHAR}
+            )
+        ) t
+    </select>
+
 </mapper>

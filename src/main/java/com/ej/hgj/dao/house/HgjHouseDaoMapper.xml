@@ -148,6 +148,15 @@
         delete from s_house
     </delete>
 
+    <!-- 查询楼栋-->
+    <select id="queryBuilding" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            bud_id,bud_name
+        from s_house
+        where org_id=#{orgId}
+        group by bud_id,bud_name
+    </select>
+
     <!-- 查询列表-->
 <!--    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.house.HgjHouse">-->
 <!--        select-->

@@ -63,4 +63,15 @@
         </if>
     </select>
 
+    <!-- 查询列表-->
+    <select id="queryRoomNum" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.house.HgjHouse">
+        select
+            cst.code as cst_code, cst.cstname as cst_name
+        from house h
+                 inner JOIN rcr r on r.resid = h.id
+                 inner JOIN cst cst on r.cstid = cst.id
+        where h.isaffect = 1 and r.isaffect = 1 and h.BudID = #{budId}
+        group by cst.code,cst.cstname
+    </select>
+
 </mapper>

@@ -1,5 +1,7 @@
 package com.ej.hgj.entity.cst;
 
+import com.ej.hgj.entity.tag.Tag;
+import com.ej.hgj.entity.tag.TagCst;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -36,6 +38,8 @@ public class HgjCst {
     private List<Integer> webMenuIds;
 
     private List<Integer> weComMenuIds;
+
+    private List<Tag> tagList;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")

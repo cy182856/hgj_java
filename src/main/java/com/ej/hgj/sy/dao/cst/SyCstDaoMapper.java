@@ -10,6 +10,11 @@ import java.util.List;
 @Component
 public interface SyCstDaoMapper {
 
-    List<SyCst> getList();
+    // List<SyCst> getList();
+
+    List<SyCst> getListByProNumOfw();
+
+    List<SyCst> getListByProNumXh();
+
 
 }

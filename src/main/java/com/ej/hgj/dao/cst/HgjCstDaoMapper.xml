@@ -28,7 +28,7 @@
     </select>
     <insert id="insertList" parameterType="java.util.List">
         insert into s_cst (
-        id, org_id, code, cst_name, cst_type, cst_level, is_affect, contract_character, cer_type, cer_no, lic_no, mobile, create_time, update_time
+        id, org_id, code, cst_name, cst_type, cst_level, is_affect, create_time, update_time
         )
         VALUES
         <foreach collection="list" item="item" separator=",">
@@ -40,11 +40,6 @@
             #{item.cstType,jdbcType=VARCHAR},
             #{item.cstLevel,jdbcType=VARCHAR},
             #{item.isAffect,jdbcType=INTEGER},
-            #{item.contractCharacter,jdbcType=VARCHAR},
-            #{item.cerType,jdbcType=VARCHAR},
-            #{item.cerNo,jdbcType=VARCHAR},
-            #{item.licNo,jdbcType=VARCHAR},
-            #{item.mobile,jdbcType=VARCHAR},
             #{item.createTime,jdbcType=TIMESTAMP},
             #{item.updateTime,jdbcType=TIMESTAMP}
             )
@@ -53,7 +48,7 @@
 
     <!-- 删除-->
     <delete id="delete" parameterType="java.lang.String" >
-        delete from s_cst
+        delete from s_cst where org_id = #{orgId,jdbcType=VARCHAR}
     </delete>
 
     <!-- 查询列表-->

@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-    @Transactional
+@Transactional
 public class RoleMenuServiceImpl implements RoleMenuService {
 
     Logger logger = LoggerFactory.getLogger(getClass());

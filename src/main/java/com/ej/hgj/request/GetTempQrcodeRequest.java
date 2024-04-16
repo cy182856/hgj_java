@@ -15,11 +15,17 @@ public class GetTempQrcodeRequest implements Serializable {
 
     // 房屋ID
     private String houseId;
-    
-    // 返回二维码类型  默认值 IMG 
+
+    // 返回二维码类型  默认值 IMG
     private String qrRespType;
-    
+
     // 二维码时效 单位 s 默认值 600
     private String second;
+
+    // 入住类型
+    private String intoType;
+
+    // 入住id
+    private String cstIntoId;
 
 }

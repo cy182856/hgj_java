@@ -22,4 +22,6 @@ public interface CstIntoDaoMapper {
 
     CstInto getById(String id);
 
+    void update(CstInto cstInto);
+
 }

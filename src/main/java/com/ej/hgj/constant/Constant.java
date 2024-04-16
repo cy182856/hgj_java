@@ -75,13 +75,38 @@ public class Constant {
     public static final String MD5SALT = "pzucp57mn7j9183ppww4bm7omje47449";
 
     // 入住角色 0-房主
-    public static Integer INTO_ROLE_OWNER = 0;
+    //public static Integer INTO_ROLE_OWNER = 0;
     // 入住角色 1-租户
-    public static Integer INTO_ROLE_TENANT = 1;
+    //public static Integer INTO_ROLE_TENANT = 1;
+    // 入住角色 1-客户
+    public static Integer INTO_ROLE_CST = 0;
+    // 入住角色 2-委托人
+    public static Integer INTO_ROLE_ENTRUST = 1;
+    // 入住角色 3-产权人
+    public static Integer INTO_ROLE_PROPERTY_OWNER = 2;
+    // 入住角色 4-住户
+    public static Integer INTO_ROLE_HOUSEHOLD = 3;
     // 入住状态 0-未入住
     public static Integer INTO_STATUS_N = 0;
-    // 入住角色 1-已入住
+    // 入住状态 1-已入住
     public static Integer INTO_STATUS_Y = 1;
+    // 入住状态 2-已解绑
+    public static Integer INTO_STATUS_U = 2;
+
+
+    /**
+     * 入住角色
+     */
+
+
+    /**
+     * 入住状态
+     */
+    // 入住状态 0-待入住
+    public static Integer INTO_STATUS_WAIT = 0;
+    // 入住状态 1-已入住
+    public static Integer INTO_STATUS_ALREADY = 1;
+
 
     /**
      * 应用的调用身份密钥 凡享物管小程序
