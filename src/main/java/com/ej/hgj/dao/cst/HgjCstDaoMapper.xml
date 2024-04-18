@@ -17,6 +17,7 @@
         <result column="mobile" jdbcType="VARCHAR" property="mobile"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="project_name" jdbcType="VARCHAR" property="projectName"/>
     </resultMap>
     <sql id="Base_Column_List" >
         id, org_id, code, cst_name, cst_type, cst_level, is_affect, contract_character, cer_type, cer_no, lic_no, mobile, create_time, update_time
@@ -54,23 +55,23 @@
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.cst.HgjCst">
         select
-        <include refid="Base_Column_List" />
-        from s_cst
+        c.*,p.project_name
+        from s_cst c left join t_pro_config p on c.org_id = p.project_num
         where 1 = 1
         <if test="code != null">
-            and code like CONCAT('%', #{code,jdbcType=VARCHAR},'%') ESCAPE '/'
+            and c.code like CONCAT('%', #{code,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
         <if test="cstName != null">
-            and cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+            and c.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
         <if test="cerNo != null">
-            and cer_no = #{cerNo,jdbcType=VARCHAR}
+            and c.cer_no = #{cerNo,jdbcType=VARCHAR}
         </if>
         <if test="licNo != null">
-            and lic_no = #{licNo,jdbcType=VARCHAR}
+            and c.lic_no = #{licNo,jdbcType=VARCHAR}
         </if>
         <if test="orgId != null and orgId != '' ">
-            and org_id = #{orgId,jdbcType=VARCHAR}
+            and c.org_id = #{orgId,jdbcType=VARCHAR}
         </if>
     </select>
 

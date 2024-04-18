@@ -7,6 +7,7 @@ import com.ej.hgj.constant.Constant;
 import com.ej.hgj.entity.build.Build;
 import com.ej.hgj.entity.cst.HgjCst;
 import com.ej.hgj.entity.house.HgjHouse;
+import com.ej.hgj.entity.house.SyHouse;
 import com.ej.hgj.request.GetTempQrcodeRequest;
 import com.ej.hgj.request.GetTempQrcodeResult;
 import com.ej.hgj.service.house.HouseService;

@@ -11,6 +11,9 @@ import java.util.List;
 @Component
 public interface CstIntoDaoMapper {
 
+    List<CstInto> getByCstCode(String cstCode);
+
+    List<CstInto> getByCstCodeAndTime(String cstCode);
 
     List<CstInto> getList(CstInto cstInto);
 

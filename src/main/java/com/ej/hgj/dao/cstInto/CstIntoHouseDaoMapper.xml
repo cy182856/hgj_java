@@ -31,7 +31,7 @@
         select
         <include refid="Base_Column_List" />
         from t_cst_into_house
-        where cst_into_id = #{cstIntoId} and into_status in(1)
+        where cst_into_id = #{cstIntoId} and into_status in(1,3)
     </select>
 
     <!-- 查询列表-->
@@ -203,4 +203,21 @@
         where id = #{id,jdbcType=VARCHAR}
     </update>
 
+    <!-- 更新-->
+    <update id="updateByCstIntoId" parameterType="com.ej.hgj.entity.cstInto.CstIntoHouse" >
+        update
+        t_cst_into_house
+        <set>
+            <if test="intoStatus != null">
+                into_status = #{intoStatus,jdbcType=INTEGER},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="deleteFlag != null">
+                delete_flag = #{deleteFlag,jdbcType=INTEGER},
+            </if>
+        </set>
+        where cst_into_id = #{cstIntoId,jdbcType=VARCHAR}
+    </update>
 </mapper>

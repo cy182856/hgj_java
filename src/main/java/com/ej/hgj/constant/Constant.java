@@ -34,6 +34,8 @@ public class Constant {
     // 临时二维码时效 单位 s
     // public static final String DEFAULT_SECOND = "600";
     public static final String QR_DEFAULT_SECOND = "qr_default_second";
+    // 入住二维码生成次数限制
+    public static final String QR_CREATE_NUM = "qr_create_num";
     // token
     public static final String TOKEN = "hgj20230719";
 

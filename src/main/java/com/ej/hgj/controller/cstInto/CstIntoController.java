@@ -118,7 +118,7 @@ public class CstIntoController {
     }
 
     /**
-     * 设为业主
+     * 设为客户或业主
      * @param id
      * @return
      */

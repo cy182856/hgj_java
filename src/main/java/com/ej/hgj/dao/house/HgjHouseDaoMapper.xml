@@ -157,6 +157,14 @@
         group by bud_id,bud_name
     </select>
 
+    <!-- 根据入住ID查询列表-->
+    <select id="getByCstIntoId" resultMap="BaseMap"  parameterType="java.lang.String">
+        select
+            h.*
+        from s_house h inner join t_cst_into_house i on i.house_id = h.id
+        where i.delete_flag = 0 and i.into_status = 0 and i.cst_into_id = #{cstIntoId}
+    </select>
+
     <!-- 查询列表-->
 <!--    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.house.HgjHouse">-->
 <!--        select-->

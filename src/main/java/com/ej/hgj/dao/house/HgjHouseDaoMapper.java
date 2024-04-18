@@ -24,6 +24,9 @@ public interface HgjHouseDaoMapper {
 
     List<HgjHouse> queryBuilding (String orgId);
 
+    List<HgjHouse> getByCstIntoId(String cstIntoId);
+
+
 
 
 

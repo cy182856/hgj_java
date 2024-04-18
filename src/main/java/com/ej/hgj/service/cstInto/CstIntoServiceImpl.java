@@ -53,23 +53,51 @@ public class CstIntoServiceImpl implements CstIntoService {
 
     @Override
     public void owner(String id) {
-        // 查询该租户已绑定的房屋列表
+        // 查询入住信息
         CstInto cstInto = cstIntoDaoMapper.getById(id);
-        // 删除该租户已绑定的房屋
-        cstIntoDaoMapper.deleteByCstCodeAndWxOpenId(cstInto.getCstCode(),cstInto.getWxOpenId());
-        // 设为业主
-        CstInto cInto = new CstInto();
-        cInto.setId(TimestampGenerator.generateSerialNumber());
-        cInto.setWxOpenId(cstInto.getWxOpenId());
-        cInto.setUserName(cstInto.getUserName());
-        cInto.setCstCode(cstInto.getCstCode());
-        cInto.setIntoRole(Constant.INTO_ROLE_CST);
-        cInto.setIntoStatus(Constant.INTO_STATUS_Y);
-        cInto.setCreateTime(new Date());
-        cInto.setUpdateTime(new Date());
-        cInto.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-        cstIntoDaoMapper.save(cInto);
+        Integer intoRole = cstInto.getIntoRole();
+        // 角色是委托人处理
+        if(intoRole == Constant.INTO_ROLE_ENTRUST){
+            updateIntoRole(id,Constant.INTO_ROLE_CST);
+        }else {
+            updateIntoRole(id,Constant.INTO_ROLE_PROPERTY_OWNER);
+        }
     }
+
+    public void updateIntoRole(String id,Integer intoRole){
+        // 更新入住角色为
+        CstInto cst = new CstInto();
+        cst.setId(id);
+        cst.setIntoRole(intoRole);
+        cst.setUpdateTime(new Date());
+        cstIntoDaoMapper.update(cst);
+        // 删除已入住房间
+        CstIntoHouse cstIntoHouse = new CstIntoHouse();
+        cstIntoHouse.setCstIntoId(id);
+        cstIntoHouse.setDeleteFlag(Constant.DELETE_FLAG_YES);
+        cstIntoHouse.setUpdateTime(new Date());
+        cstIntoHouseDaoMapper.updateByCstIntoId(cstIntoHouse);
+    }
+
+//    @Override
+//    public void owner(String id) {
+//        // 查询该租户已绑定的房屋列表
+//        CstInto cstInto = cstIntoDaoMapper.getById(id);
+//        // 删除该租户已绑定的房屋
+//        cstIntoDaoMapper.deleteByCstCodeAndWxOpenId(cstInto.getCstCode(),cstInto.getWxOpenId());
+//        // 设为业主
+//        CstInto cInto = new CstInto();
+//        cInto.setId(TimestampGenerator.generateSerialNumber());
+//        cInto.setWxOpenId(cstInto.getWxOpenId());
+//        cInto.setUserName(cstInto.getUserName());
+//        cInto.setCstCode(cstInto.getCstCode());
+//        cInto.setIntoRole(Constant.INTO_ROLE_CST);
+//        cInto.setIntoStatus(Constant.INTO_STATUS_Y);
+//        cInto.setCreateTime(new Date());
+//        cInto.setUpdateTime(new Date());
+//        cInto.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+//        cstIntoDaoMapper.save(cInto);
+//    }
 
     @Override
     public String saveCstIntoInfo(IntoVo intoVo) {
@@ -112,9 +140,10 @@ public class CstIntoServiceImpl implements CstIntoService {
         // 判断是否是客户、业主
         CstInto cstInto = cstIntoDaoMapper.getById(id);
         if(cstInto.getIntoRole() == Constant.INTO_ROLE_CST || cstInto.getIntoRole() == Constant.INTO_ROLE_PROPERTY_OWNER){
-            List<CstIntoHouse> cstIntoHouseList = cstIntoHouseDaoMapper.getByCstIntoIdAndIntoStatus(id);
+            // 查询已入住该客户的委托人或者住户
+            List<CstInto> cstIntoList = cstIntoDaoMapper.getByCstCode(cstInto.getCstCode());
             // 客户、业主解绑需要先解除委托人、住户
-            if(!cstIntoHouseList.isEmpty()){
+            if(!cstIntoList.isEmpty()){
                 ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
                 ajaxResult.setMessage("请先解除委托人或者住户");
                 return ajaxResult;

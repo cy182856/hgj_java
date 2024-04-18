@@ -30,6 +30,8 @@ public interface CstIntoHouseDaoMapper {
 
     void updateById(CstIntoHouse cstIntoHouse);
 
+    void updateByCstIntoId(CstIntoHouse cstIntoHouse);
+
 
 
 

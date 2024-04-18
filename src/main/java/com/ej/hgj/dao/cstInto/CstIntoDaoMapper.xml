@@ -38,6 +38,22 @@
         where id = #{id}
     </select>
 
+    <!-- 根据主键查询-->
+    <select id="getByCstCode" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_cst_into
+        where delete_flag = 0 and cst_code = #{cstCode} and into_role in(1,3) and into_status = 1
+    </select>
+
+    <!-- 根据主键查询-->
+    <select id="getByCstCodeAndTime" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_cst_into
+        where DATE(create_time) = CURDATE()
+    </select>
+
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.cstInto.CstInto">
         SELECT

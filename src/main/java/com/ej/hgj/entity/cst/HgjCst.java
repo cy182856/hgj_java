@@ -49,4 +49,6 @@ public class HgjCst {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
+    private String projectName;
+
 }
