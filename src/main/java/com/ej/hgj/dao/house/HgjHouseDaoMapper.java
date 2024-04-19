@@ -15,7 +15,7 @@ public interface HgjHouseDaoMapper {
 
     HgjHouse findById(String id);
 
-    void insertList(@Param("list") List<SyHouse> syHouseList);
+    void insertList(@Param("list") List<HgjHouse> syHouseList);
 
     void delete();
 

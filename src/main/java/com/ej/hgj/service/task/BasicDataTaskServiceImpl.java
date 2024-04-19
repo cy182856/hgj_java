@@ -6,6 +6,7 @@ import com.ej.hgj.dao.house.HgjHouseDaoMapper;
 import com.ej.hgj.dao.rcr.HgjRcrDaoMapper;
 import com.ej.hgj.entity.contract.SyContract;
 import com.ej.hgj.entity.cst.SyCst;
+import com.ej.hgj.entity.house.HgjHouse;
 import com.ej.hgj.entity.house.SyHouse;
 import com.ej.hgj.entity.rcr.SyRcr;
 import com.ej.hgj.sy.dao.contract.SyContractDaoMapper;
@@ -72,9 +73,9 @@ public class BasicDataTaskServiceImpl implements BasicDataTaskService {
         }
 
         /**房屋同步*/
-        List<SyHouse> syHouseList = syHouseDaoMapper.getList();
+        List<HgjHouse> syHouseList = syHouseDaoMapper.getList();
         if(!syHouseList.isEmpty()){
-            for (SyHouse syHouse : syHouseList){
+            for (HgjHouse syHouse : syHouseList){
                 syHouse.setCreateTime(new Date());
                 syHouse.setUpdateTime(new Date());
             }

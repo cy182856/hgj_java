@@ -105,21 +105,21 @@ public class CstController {
         return ajaxResult;
     }
 
-//    @RequestMapping(value = "/createQrCode",method = RequestMethod.GET)
-//    public AjaxResult creatCode(HgjCst hgjCst){
-//        logger.info("生成入住二维码参数:"+JSONObject.toJSONString(hgjCst));
-//        AjaxResult ajaxResult = new AjaxResult();
-//        GetTempQrcodeRequest getTempQrcodeRequest = new GetTempQrcodeRequest();
-//        getTempQrcodeRequest.setCstCode(hgjCst.getCode());
-//        getTempQrcodeRequest.setProNum(hgjCst.getOrgId());
-//        GetTempQrcodeResult getTempQrcodeResult = cstService.qrcode(getTempQrcodeRequest);
-//        HashMap map = new HashMap();
-//        map.put("imgUrl", getTempQrcodeResult.getImgUrl());
-//        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
-//        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
-//        ajaxResult.setData(map);
-//        return ajaxResult;
-//    }
+    @RequestMapping(value = "/createQrCode",method = RequestMethod.GET)
+    public AjaxResult creatCode(HgjCst hgjCst){
+        logger.info("生成入住二维码参数:"+JSONObject.toJSONString(hgjCst));
+        AjaxResult ajaxResult = new AjaxResult();
+        GetTempQrcodeRequest getTempQrcodeRequest = new GetTempQrcodeRequest();
+        getTempQrcodeRequest.setCstCode(hgjCst.getCode());
+        getTempQrcodeRequest.setProNum(hgjCst.getOrgId());
+        GetTempQrcodeResult getTempQrcodeResult = cstService.qrcode(getTempQrcodeRequest);
+        HashMap map = new HashMap();
+        map.put("imgUrl", getTempQrcodeResult.getImgUrl());
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        ajaxResult.setData(map);
+        return ajaxResult;
+    }
 
     @RequestMapping(value = "/createIntoCstQrCode",method = RequestMethod.POST)
     public AjaxResult createIntoCstQrCode(@RequestBody IntoVo intoVo){

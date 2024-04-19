@@ -115,6 +115,9 @@
                 <if test='repairStatus == "10"'>
                     and repair_status = 'WOSta_Finish'
                 </if>
+                <if test='repairStatus == "11"'>
+                    and repair_status = 'WOSta_Close'
+                </if>
                 <if test="projectName != null">
                     and project_name like CONCAT('%', #{projectName,jdbcType=VARCHAR},'%') ESCAPE '/'
                 </if>

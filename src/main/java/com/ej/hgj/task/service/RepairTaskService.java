@@ -166,6 +166,14 @@ public class RepairTaskService {
                             rep.setUpdateTime(new Date());
                             repairLogDaoMapper.update(rep);
                         }
+                    }else if("WOSta_Close".equals(workOrd.getWorkOrdState())){
+                        RepairLog repairLog1 = new RepairLog();
+                        repairLog1.setRepairNum(workOrd.getWoNo());
+                        repairLog1.setOrders(workOrd.getOrders());
+                        repairLog1.setOrdersTime(workOrd.getOrdersTime());
+                        repairLog1.setRepairStatus("WOSta_Close");
+                        repairLog1.setUpdateTime(new Date());
+                        repairLogDaoMapper.update(repairLog1);
                     }
                 }
             }

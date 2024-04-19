@@ -12,7 +12,7 @@ import java.util.List;
 @Component
 public interface SyHouseDaoMapper {
 
-    List<SyHouse> getList();
+    List<HgjHouse> getList();
 
     List<HgjHouse> getListByCstCode(HgjHouse hgjHouse);
 
