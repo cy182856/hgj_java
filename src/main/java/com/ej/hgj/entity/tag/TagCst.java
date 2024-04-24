@@ -14,6 +14,8 @@ public class TagCst {
 
     private String cstCode;
 
+    private String cstName;
+
     private String createBy;
 
     private String updateBy;

@@ -82,7 +82,7 @@ public class Constant {
     //public static Integer INTO_ROLE_TENANT = 1;
     // 入住角色 1-客户
     public static Integer INTO_ROLE_CST = 0;
-    // 入住角色 2-委托人
+    // 入住角色 2-子客户
     public static Integer INTO_ROLE_ENTRUST = 1;
     // 入住角色 3-产权人
     public static Integer INTO_ROLE_PROPERTY_OWNER = 2;

@@ -1,5 +1,6 @@
 package com.ej.hgj.dao.tag;
 
+import com.ej.hgj.entity.cst.HgjCst;
 import com.ej.hgj.entity.gonggao.GonggaoType;
 import com.ej.hgj.entity.role.RoleMenu;
 import com.ej.hgj.entity.tag.TagCst;
@@ -18,5 +19,8 @@ public interface TagCstDaoMapper {
     void insertList(@Param("list") List<TagCst> tagCstList);
 
     List<TagCst> getList(TagCst tagCst);
+
+    List<HgjCst> getCstByTagId(String tagId);
+
 
 }

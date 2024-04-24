@@ -26,15 +26,17 @@
     <!--查询东方渔人码头客户列表-->
     <select id="getListByProNumOfw" resultMap="BaseMap" parameterType="java.lang.String" >
         select
-            c.ID,
-            c.OrgID,
+            max(c.ID) as ID,
+            max( c.OrgID) as OrgID,
             c.Code,
-            c.CstName,
-            c.CstType,
-            c.CstLevel
+            max(c.CstName) as CstName,
+            max(c.CstType) as CstType,
+            max(c.CstLevel) as CstLevel
         from Cst c
                  left join CstCom m on m.CstID = c.ID
-        where c.OrgID = '10000' and c.IsAffect = 1
+                 left JOIN RCR r on r.CstID = c.ID
+        where c.OrgID = '10000' and c.IsAffect = 1 and r.CurStatus = 'NorC'
+        group by  c.Code
     </select>
 
     <!--查询新弘北外滩客户列表-->

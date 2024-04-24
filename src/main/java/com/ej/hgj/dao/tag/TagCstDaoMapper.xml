@@ -6,6 +6,7 @@
         <result column="id" jdbcType="VARCHAR" property="id"/>
         <result column="tag_id" jdbcType="VARCHAR" property="tagId"/>
         <result column="cst_code" jdbcType="INTEGER" property="cstCode"/>
+        <result column="cst_name" jdbcType="INTEGER" property="cstName"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -26,6 +27,14 @@
         <if test="tagId != null">
             and tag_id = #{tagId,jdbcType=VARCHAR}
         </if>
+    </select>
+
+    <!-- 根据标签查询客户列表-->
+    <select id="getCstByTagId" resultMap="BaseMap"  parameterType="java.lang.String">
+        select
+            c.code as cst_code,c.cst_name
+        from t_tag_cst t inner join s_cst c on t.cst_code = c.code
+        where t.delete_flag = 0 and t.tag_id = #{tagId}
     </select>
 
     <!-- 删除-->

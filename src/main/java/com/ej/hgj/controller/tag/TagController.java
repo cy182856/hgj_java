@@ -7,6 +7,8 @@ import com.ej.hgj.dao.house.HgjHouseDaoMapper;
 import com.ej.hgj.dao.tag.TagCstDaoMapper;
 import com.ej.hgj.dao.tag.TagDaoMapper;
 import com.ej.hgj.entity.config.ProConfig;
+import com.ej.hgj.entity.coupon.StopCouponGrantBatch;
+import com.ej.hgj.entity.cst.HgjCst;
 import com.ej.hgj.entity.gonggao.GonggaoType;
 import com.ej.hgj.entity.house.HgjHouse;
 import com.ej.hgj.entity.menu.Menu;
@@ -196,6 +198,20 @@ public class TagController {
         tagCstService.saveTagCst(tag);
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        return ajaxResult;
+    }
+
+    @RequestMapping(value = "/selectCstList",method = RequestMethod.GET)
+    public AjaxResult selectCstList(@RequestParam(required=false, value = "id") String id){
+        AjaxResult ajaxResult = new AjaxResult();
+        HashMap map = new HashMap();
+        List<HgjCst> list = tagCstDaoMapper.getCstByTagId(id);
+        //logger.info("list:"+ JSON.toJSONString(list));
+        map.put("list",list);
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        ajaxResult.setData(map);
+        //logger.info("responseMsg:"+ JSON.toJSONString(ajaxResult));
         return ajaxResult;
     }
 }

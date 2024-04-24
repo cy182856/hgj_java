@@ -51,7 +51,7 @@
         select
         <include refid="Base_Column_List" />
         from t_cst_into
-        where DATE(create_time) = CURDATE()
+        where DATE(create_time) = CURDATE() and cst_code = #{cstCode}
     </select>
 
     <!-- 查询列表-->
@@ -88,7 +88,7 @@
             and c.into_status = 1 and (ch.into_status is null or ch.into_status = 1)
         </if>
         <if test="intoStatus != null and intoStatus == 2">
-            and ch.into_status = 2
+            and (c.into_status = 2 or ch.into_status = 2)
         </if>
         <if test="intoStatus != null and intoStatus == 3">
             and ch.into_status = 3

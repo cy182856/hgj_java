@@ -144,6 +144,7 @@ public class CstController {
             GetTempQrcodeResult getTempQrcodeResult = cstService.cstIntoQrcode(getTempQrcodeRequest);
             map.put("imgUrl", getTempQrcodeResult.getImgUrl());
             Date date = new Date();
+            // 二维码创建时间
             map.put("qrCreateTime", DateUtils.wechatPubFormat(date));
             // 委托人、住户查询所要入住的房间
             List<String> houseList = new ArrayList<>();
@@ -163,6 +164,10 @@ public class CstController {
                     for(HgjHouse house : list){
                         houseList.add(house.getResName());
                     }
+                }else{
+                    ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+                    ajaxResult.setMessage("该客户没有房间无法生成入住二维码");
+                    return ajaxResult;
                 }
             }
             if(!houseList.isEmpty()){
@@ -175,6 +180,19 @@ public class CstController {
             Long longQrCreateTime = date.getTime();
             Date cutOffDate = new Date(longQrCreateTime + qrDefaultSecond * 1000);
             map.put("qrCutOffTime", DateUtils.wechatPubFormat(cutOffDate));
+            // 入住二维码角色
+            String intoRole = "";
+            Integer intoType = Integer.valueOf(intoVo.getIntoType());
+            if(Constant.INTO_ROLE_CST == intoType){
+                intoRole = "客户";
+            }else if(Constant.INTO_ROLE_ENTRUST == intoType){
+                intoRole = "子客户";
+            }else if(Constant.INTO_ROLE_PROPERTY_OWNER == intoType){
+                intoRole = "产权人";
+            } else if(Constant.INTO_ROLE_HOUSEHOLD == intoType){
+                intoRole = "住户";
+            }
+            map.put("intoRole",intoRole);
         }
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
