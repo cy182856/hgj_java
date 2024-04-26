@@ -23,6 +23,8 @@ public interface StopCouponGrantDaoMapper {
 
     void delete(String id);
 
+    void deleteByBatchId(String batchId);
+
     void insertList(@Param("list") List<StopCouponGrant> stopCouponGrantList);
 
 

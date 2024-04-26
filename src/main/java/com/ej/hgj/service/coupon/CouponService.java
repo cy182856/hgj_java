@@ -11,4 +11,6 @@ public interface CouponService {
 
     void couponGrant(StopCoupon stopCoupon);
 
+    void deleteBatch(String id);
+
 }

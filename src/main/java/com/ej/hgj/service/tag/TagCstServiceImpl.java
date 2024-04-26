@@ -2,7 +2,9 @@ package com.ej.hgj.service.tag;
 
 import com.alibaba.fastjson.JSONObject;
 import com.ej.hgj.constant.Constant;
+import com.ej.hgj.dao.cst.HgjCstDaoMapper;
 import com.ej.hgj.dao.tag.TagCstDaoMapper;
+import com.ej.hgj.entity.cst.HgjCst;
 import com.ej.hgj.entity.tag.Tag;
 import com.ej.hgj.entity.tag.TagCst;
 import com.ej.hgj.utils.TimestampGenerator;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -25,6 +28,9 @@ public class TagCstServiceImpl implements TagCstService {
     @Autowired
     private TagCstDaoMapper tagCstDaoMapper;
 
+    @Autowired
+    private HgjCstDaoMapper hgjCstDaoMapper;
+
     @Override
     public void saveTagCst(Tag tag) {
         String tagId = tag.getId();
@@ -33,6 +39,7 @@ public class TagCstServiceImpl implements TagCstService {
         logger.info("删除客户标签成功tagId:" + tagId);
         List<TagCst> tagCstList = new ArrayList<>();
         if(cstCodes != null){
+            List<HgjCst> cstList = hgjCstDaoMapper.getList(new HgjCst());
             for(int i = 0; i<cstCodes.size(); i++){
                 TagCst tagCst = new TagCst();
                 String cstCode = cstCodes.get(i);
@@ -44,7 +51,11 @@ public class TagCstServiceImpl implements TagCstService {
                 tagCst.setUpdateBy("");
                 tagCst.setUpdateTime(new Date());
                 tagCst.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-                tagCstList.add(tagCst);
+                // 根据客户编号查询客户表，如果查不到就不保存
+                List<HgjCst> cstListFilter = cstList.stream().filter(hgjCst -> hgjCst.getCode().equals(cstCode)).collect(Collectors.toList());
+                if(!cstListFilter.isEmpty()){
+                    tagCstList.add(tagCst);
+                }
             }
         }
         // 新增客户标签

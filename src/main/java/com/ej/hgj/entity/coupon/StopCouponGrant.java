@@ -11,6 +11,8 @@ public class StopCouponGrant {
 
     private String id;
 
+    private String batchId;
+
     private String stopCouponId;
 
     private String tagId;

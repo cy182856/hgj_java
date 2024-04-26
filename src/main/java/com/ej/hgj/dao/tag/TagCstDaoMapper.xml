@@ -21,11 +21,11 @@
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.tag.TagCst">
         select
-        <include refid="Base_Column_List" />
-        from t_tag_cst
-        where delete_flag = 0
+        a.*
+        from t_tag_cst a inner join s_cst b on a.cst_code = b.code
+        where a.delete_flag = 0
         <if test="tagId != null">
-            and tag_id = #{tagId,jdbcType=VARCHAR}
+            and a.tag_id = #{tagId,jdbcType=VARCHAR}
         </if>
     </select>
 

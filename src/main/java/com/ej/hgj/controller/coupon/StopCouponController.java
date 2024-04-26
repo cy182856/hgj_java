@@ -42,6 +42,9 @@ public class StopCouponController {
     private CouponService couponService;
 
     @Autowired
+    private StopCouponGrantDaoMapper stopCouponGrantDaoMapper;
+
+    @Autowired
     private StopCouponGrantBatchDaoMapper stopCouponGrantBatchDaoMapper;
 
     @RequestMapping(value = "/list",method = RequestMethod.GET)
@@ -142,7 +145,25 @@ public class StopCouponController {
     @RequestMapping(value = "/delete",method = RequestMethod.GET)
     public AjaxResult delete(@RequestParam(required=false, value = "id") String id){
         AjaxResult ajaxResult = new AjaxResult();
-        stopCouponDaoMapper.delete(id);
+        // 查询该停车卷发放记录
+        StopCouponGrantBatch stopCouponGrantBatch = new StopCouponGrantBatch();
+        stopCouponGrantBatch.setStopCouponId(id);
+        List<StopCouponGrantBatch> list = stopCouponGrantBatchDaoMapper.getList(stopCouponGrantBatch);
+        if(!list.isEmpty()){
+            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+            ajaxResult.setMessage("该停车券有发放记录，不能删除！");
+        }else {
+            stopCouponDaoMapper.delete(id);
+            ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+            ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        }
+        return ajaxResult;
+    }
+
+    @RequestMapping(value = "/batchDelete",method = RequestMethod.GET)
+    public AjaxResult batchDelete(@RequestParam(required=false, value = "id") String id){
+        AjaxResult ajaxResult = new AjaxResult();
+        couponService.deleteBatch(id);
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;

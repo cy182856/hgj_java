@@ -45,7 +45,8 @@ public class CouponServiceImpl implements CouponService {
         String endTime = stopCoupon.getEndTime();
         // 保存批次表
         StopCouponGrantBatch stopCouponGrantBatch = new StopCouponGrantBatch();
-        stopCouponGrantBatch.setId(TimestampGenerator.generateSerialNumber());
+        String batchId = TimestampGenerator.generateSerialNumber();
+        stopCouponGrantBatch.setId(batchId);
         stopCouponGrantBatch.setStopCouponId(id);
         stopCouponGrantBatch.setTagId(tagId);
         stopCouponGrantBatch.setStartTime(startTIme);
@@ -57,7 +58,7 @@ public class CouponServiceImpl implements CouponService {
         stopCouponGrantBatch.setDeleteFlag(Constant.DELETE_FLAG_NOT);
         stopCouponGrantBatchDaoMapper.save(stopCouponGrantBatch);
 
-        // 保存分发表
+        // 保存分发表-批次详情
         TagCst tagCst = new TagCst();
         tagCst.setTagId(tagId);
         List<TagCst> tagCstList = tagCstDaoMapper.getList(tagCst);
@@ -66,6 +67,7 @@ public class CouponServiceImpl implements CouponService {
             for (TagCst cst : tagCstList) {
                 StopCouponGrant sg = new StopCouponGrant();
                 sg.setId(TimestampGenerator.generateSerialNumber());
+                sg.setBatchId(batchId);
                 sg.setStopCouponId(id);
                 sg.setTagId(tagId);
                 sg.setStartTime(startTIme);
@@ -80,5 +82,13 @@ public class CouponServiceImpl implements CouponService {
             }
             stopCouponGrantDaoMapper.insertList(stopCouponGrantList);
         }
+    }
+
+    @Override
+    public void deleteBatch(String id) {
+        // 删除批次
+        stopCouponGrantBatchDaoMapper.delete(id);
+        // 删除发放详细
+        stopCouponGrantDaoMapper.deleteByBatchId(id);
     }
 }
