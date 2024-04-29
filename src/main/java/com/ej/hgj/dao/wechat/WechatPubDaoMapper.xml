@@ -28,6 +28,13 @@
         where id = #{id}
     </select>
 
+    <!-- 查询最大ID-->
+    <select id="getMaxId" resultMap="BaseMap" >
+        select
+            max(id) as id
+        from t_wechat_pub
+    </select>
+
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.wechat.WechatPub">
         select
@@ -37,9 +44,116 @@
         <if test="name != null">
             and `name` like CONCAT('%', #{name,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
+        <if test="proNum != null and proNum != ''">
+            and pro_num = #{proNum,jdbcType=VARCHAR}
+        </if>
         <if test="id != null">
             and id = #{id}
         </if>
     </select>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.wechat.WechatPub" >
+        update
+        t_wechat_pub
+        <set>
+            <if test="proNum != null">
+                pro_num = #{proNum,jdbcType=VARCHAR},
+            </if>
+            <if test="proName != null">
+                pro_name = #{proName,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                `name` = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="appId != null">
+                app_id = #{appId,jdbcType=VARCHAR},
+            </if>
+            <if test="appSecret != null">
+                app_secret = #{appSecret,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="deleteFlag != null">
+                delete_flag = #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </set>
+        where id=#{id,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.wechat.WechatPub" >
+        insert into  t_wechat_pub(
+        <if test="id != null">
+            id,
+        </if>
+        <if test="proNum != null">
+            pro_num,
+        </if>
+        <if test="proName != null">
+            pro_name,
+        </if>
+        <if test="name != null">
+            `name`,
+        </if>
+        <if test="appId != null">
+            app_id,
+        </if>
+        <if test="appSecret != null">
+            app_secret,
+        </if>
+        <if test="createTime != null">
+            create_time,
+        </if>
+        <if test="createBy != null">
+            create_by,
+        </if>
+        <if test="updateTime != null">
+            update_time,
+        </if>
+        <if test="updateBy != null">
+            update_by,
+        </if>
+        <if test="deleteFlag != null">
+            delete_flag
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="proNum != null" >
+                #{proNum,jdbcType=VARCHAR},
+            </if>
+            <if test="proName != null" >
+                #{proName,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null" >
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="appId != null" >
+                #{appId,jdbcType=VARCHAR},
+            </if>
+            <if test="appSecret != null" >
+                #{appSecret,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
 
 </mapper>

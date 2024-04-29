@@ -7,11 +7,15 @@ import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.wechat.WechatPubDaoMapper;
 import com.ej.hgj.dao.wechat.WechatPubMenuDaoMapper;
 import com.ej.hgj.entity.build.Build;
+import com.ej.hgj.entity.gonggao.Gonggao;
 import com.ej.hgj.entity.user.User;
 import com.ej.hgj.entity.wechat.WechatPub;
 import com.ej.hgj.entity.wechat.WechatPubMenu;
 import com.ej.hgj.service.house.HouseService;
+import com.ej.hgj.utils.TimestampGenerator;
 import com.ej.hgj.vo.WechatPubVo;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +27,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -258,4 +263,121 @@ public class WechatServiceController {
         return ajaxResult;
     }
 
+    @RequestMapping(value = "/menuSelect",method = RequestMethod.GET)
+    public AjaxResult menuSelect(){
+        AjaxResult ajaxResult = new AjaxResult();
+        HashMap map = new HashMap();
+        // 查询所有公众号菜单
+        WechatPubMenu wechatPubMenu = new WechatPubMenu();
+        List<WechatPubMenu> list = wechatPubMenuDaoMapper.getList(wechatPubMenu);
+        map.put("list",list);
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        ajaxResult.setData(map);
+        return ajaxResult;
     }
+
+    @RequestMapping(value = "/list",method = RequestMethod.GET)
+    public AjaxResult list(@RequestParam(value = "page",defaultValue = "1") int page,
+                           @RequestParam(value = "limit",defaultValue = "10") int limit,
+                           WechatPub wechatPub){
+        AjaxResult ajaxResult = new AjaxResult();
+        HashMap map = new HashMap();
+        PageHelper.offsetPage((page-1) * limit,limit);
+        List<WechatPub> list = wechatPubDaoMapper.getList(wechatPub);
+        //logger.info("list:"+ JSON.toJSONString(list));
+        PageInfo<WechatPub> pageInfo = new PageInfo<>(list);
+        //计算总页数
+        int pageNumTotal = (int) Math.ceil((double)pageInfo.getTotal()/(double)limit);
+        if(page > pageNumTotal){
+            PageInfo<Gonggao> entityPageInfo = new PageInfo<>();
+            entityPageInfo.setList(new ArrayList<>());
+            entityPageInfo.setTotal(pageInfo.getTotal());
+            entityPageInfo.setPageNum(page);
+            entityPageInfo.setPageSize(limit);
+            map.put("pageInfo",entityPageInfo);
+        }else {
+            map.put("pageInfo",pageInfo);
+        }
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        ajaxResult.setData(map);
+        //logger.info("responseMsg:"+ JSON.toJSONString(ajaxResult));
+        return ajaxResult;
+    }
+
+    @RequestMapping(value = "/save",method = RequestMethod.POST)
+    public AjaxResult save(@RequestBody WechatPub wechatPub){
+        AjaxResult ajaxResult = new AjaxResult();
+        Integer id = wechatPub.getId();
+        if(id != null){
+            wechatPub.setUpdateTime(new Date());
+            wechatPubDaoMapper.update(wechatPub);
+        }else {
+            WechatPub wp = wechatPubDaoMapper.getMaxId();
+            Integer maxId = wp.getId();
+            wechatPub.setId(maxId + 1);
+            wechatPub.setCreateTime(new Date());
+            wechatPub.setUpdateTime(new Date());
+            wechatPub.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+            wechatPubDaoMapper.save(wechatPub);
+        }
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        return ajaxResult;
+    }
+
+    @RequestMapping(value = "/menuSave",method = RequestMethod.POST)
+    public AjaxResult menuSave(@RequestBody WechatPubMenu wechatPubMenu){
+        AjaxResult ajaxResult = new AjaxResult();
+        Integer id = wechatPubMenu.getId();
+        if(wechatPubMenu.getParentId() == null){
+            wechatPubMenu.setParentId(0);
+        }
+        if(id != null){
+            wechatPubMenu.setUpdateTime(new Date());
+            wechatPubMenuDaoMapper.update(wechatPubMenu);
+        }else {
+            WechatPubMenu wp = wechatPubMenuDaoMapper.getMaxId();
+            Integer maxId = wp.getId();
+            wechatPubMenu.setId(maxId + 1);
+            wechatPubMenu.setCreateTime(new Date());
+            wechatPubMenu.setUpdateTime(new Date());
+            wechatPubMenu.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+            wechatPubMenuDaoMapper.save(wechatPubMenu);
+        }
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        return ajaxResult;
+    }
+
+    @RequestMapping(value = "/menuList",method = RequestMethod.GET)
+    public AjaxResult menuList(@RequestParam(value = "page",defaultValue = "1") int page,
+                           @RequestParam(value = "limit",defaultValue = "10") int limit,
+                           WechatPubMenu wechatPubMenu){
+        AjaxResult ajaxResult = new AjaxResult();
+        HashMap map = new HashMap();
+        PageHelper.offsetPage((page-1) * limit,limit);
+        List<WechatPubMenu> list = wechatPubMenuDaoMapper.getList(wechatPubMenu);
+        //logger.info("list:"+ JSON.toJSONString(list));
+        PageInfo<WechatPubMenu> pageInfo = new PageInfo<>(list);
+        //计算总页数
+        int pageNumTotal = (int) Math.ceil((double)pageInfo.getTotal()/(double)limit);
+        if(page > pageNumTotal){
+            PageInfo<Gonggao> entityPageInfo = new PageInfo<>();
+            entityPageInfo.setList(new ArrayList<>());
+            entityPageInfo.setTotal(pageInfo.getTotal());
+            entityPageInfo.setPageNum(page);
+            entityPageInfo.setPageSize(limit);
+            map.put("pageInfo",entityPageInfo);
+        }else {
+            map.put("pageInfo",pageInfo);
+        }
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        ajaxResult.setData(map);
+        //logger.info("responseMsg:"+ JSON.toJSONString(ajaxResult));
+        return ajaxResult;
+    }
+
+}

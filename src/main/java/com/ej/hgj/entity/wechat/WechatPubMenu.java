@@ -86,4 +86,11 @@ public class WechatPubMenu {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
+
+    /**
+     * 前端显示字段
+     */
+    // 公众号名称
+    private String wechatPubName;
+
 }
