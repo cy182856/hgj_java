@@ -7,12 +7,9 @@ import com.ej.hgj.dao.house.HgjHouseDaoMapper;
 import com.ej.hgj.dao.tag.TagCstDaoMapper;
 import com.ej.hgj.dao.tag.TagDaoMapper;
 import com.ej.hgj.entity.config.ProConfig;
-import com.ej.hgj.entity.coupon.StopCouponGrantBatch;
 import com.ej.hgj.entity.cst.HgjCst;
 import com.ej.hgj.entity.gonggao.GonggaoType;
 import com.ej.hgj.entity.house.HgjHouse;
-import com.ej.hgj.entity.menu.Menu;
-import com.ej.hgj.entity.role.Role;
 import com.ej.hgj.entity.tag.*;
 import com.ej.hgj.service.tag.TagCstService;
 import com.ej.hgj.sy.dao.house.HgjSyHouseDaoMapper;
@@ -24,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -88,6 +88,7 @@ public class TagController {
     public AjaxResult select(Tag tag){
         AjaxResult ajaxResult = new AjaxResult();
         HashMap map = new HashMap();
+        tag.setType(1);
         List<Tag> list = tagDaoMapper.getList(tag);
         //logger.info("list:"+ JSON.toJSONString(list));
         map.put("list",list);
@@ -101,10 +102,18 @@ public class TagController {
     @RequestMapping(value = "/save",method = RequestMethod.POST)
     public AjaxResult save(@RequestBody Tag tag){
         AjaxResult ajaxResult = new AjaxResult();
+        // 检查标签名是否重复
+        List<Tag> tagList = tagDaoMapper.getByName(tag.getName());
+        if(!tagList.isEmpty()){
+            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+            ajaxResult.setMessage("标签名称重复!");
+            return ajaxResult;
+        }
         if(tag.getId() != null){
             tagDaoMapper.update(tag);
         }else{
             tag.setId(TimestampGenerator.generateSerialNumber());
+            tag.setType(1);
             tag.setUpdateTime(new Date());
             tag.setCreateTime(new Date());
             tag.setDeleteFlag(0);
@@ -214,4 +223,5 @@ public class TagController {
         //logger.info("responseMsg:"+ JSON.toJSONString(ajaxResult));
         return ajaxResult;
     }
+
 }

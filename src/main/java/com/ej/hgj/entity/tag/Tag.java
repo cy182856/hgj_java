@@ -11,6 +11,8 @@ import java.util.List;
 public class Tag {
     private String id;
 
+    private Integer type;
+
     private String name;
 
     private String createBy;

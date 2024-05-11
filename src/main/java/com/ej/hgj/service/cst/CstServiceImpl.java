@@ -193,31 +193,31 @@ public class CstServiceImpl implements CstService {
         }
         //--------------------------------------------------------------------------------------------------------------
         // 删除账单权限
-        cstPayPerDaoMapper.delete(hgjCst.getCode());
-        logger.info("删除账单权限成功cstCode:" + hgjCst.getCode());
-        List<Integer> weComMenuIds = hgjCst.getWeComMenuIds();
-        List<CstPayPer> cstPayPerList = new ArrayList<>();
-        if(weComMenuIds != null){
-            for(int i = 0; i<weComMenuIds.size(); i++){
-                CstPayPer webRoleMenu = new CstPayPer();
-                Integer webMenuId = weComMenuIds.get(i);
-                webRoleMenu.setId(GenerateUniqueIdUtil.getGuid());
-                //webRoleMenu.setProjectNum(Constant.PROJECT_NUM);
-                webRoleMenu.setCstCode(hgjCst.getCode());
-                webRoleMenu.setFunctionId(webMenuId);
-                webRoleMenu.setCreateBy("");
-                webRoleMenu.setCreateTime(new Date());
-                webRoleMenu.setUpdateBy("");
-                webRoleMenu.setUpdateTime(new Date());
-                webRoleMenu.setDeleteFlag(0);
-                cstPayPerList.add(webRoleMenu);
-
-            }
-        }
-        // 新增账单权限
-        if(!cstPayPerList.isEmpty()){
-            cstPayPerDaoMapper.insertList(cstPayPerList);
-            logger.info("新增账单权限成功:"+ JSONObject.toJSONString(cstPayPerList));
-        }
+//        cstPayPerDaoMapper.delete(hgjCst.getCode());
+//        logger.info("删除账单权限成功cstCode:" + hgjCst.getCode());
+//        List<Integer> weComMenuIds = hgjCst.getWeComMenuIds();
+//        List<CstPayPer> cstPayPerList = new ArrayList<>();
+//        if(weComMenuIds != null){
+//            for(int i = 0; i<weComMenuIds.size(); i++){
+//                CstPayPer webRoleMenu = new CstPayPer();
+//                Integer webMenuId = weComMenuIds.get(i);
+//                webRoleMenu.setId(GenerateUniqueIdUtil.getGuid());
+//                //webRoleMenu.setProjectNum(Constant.PROJECT_NUM);
+//                webRoleMenu.setCstCode(hgjCst.getCode());
+//                webRoleMenu.setFunctionId(webMenuId);
+//                webRoleMenu.setCreateBy("");
+//                webRoleMenu.setCreateTime(new Date());
+//                webRoleMenu.setUpdateBy("");
+//                webRoleMenu.setUpdateTime(new Date());
+//                webRoleMenu.setDeleteFlag(0);
+//                cstPayPerList.add(webRoleMenu);
+//
+//            }
+//        }
+//        // 新增账单权限
+//        if(!cstPayPerList.isEmpty()){
+//            cstPayPerDaoMapper.insertList(cstPayPerList);
+//            logger.info("新增账单权限成功:"+ JSONObject.toJSONString(cstPayPerList));
+//        }
     }
 }
