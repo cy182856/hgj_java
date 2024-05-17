@@ -1,23 +1,38 @@
-package com.ej.hgj.entity.menu.mini;
+package com.ej.hgj.entity.feedback;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
-public class MenuMini {
-    private Integer id;
-    private Integer parentId;
-    private String funName;
-    private String bindEvent;
-    private String logoPath;
-    private String pagePath;
-    private Integer index;
-    private Integer sort;
+public class FeedBack {
+
+    private String id;
+
+    private String proNum;
+
+    private String proName;
+
+    private String wxOpenId;
+
+    private String cstCode;
+
+    private String cstName;
+
+    private String cstPhone;
+
+    private String image;
+
+    private String feedbackDesc;
+
+    private String createBy;
+
+    private String updateBy;
+
     private Integer deleteFlag;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
@@ -25,8 +40,5 @@ public class MenuMini {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-
-    private List<String> cstCodes;
-
 
 }

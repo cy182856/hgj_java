@@ -16,6 +16,8 @@ public interface MenuMiniDaoMapper {
 
     List<MenuMini> getList(MenuMini menuMini);
 
+    List<MenuMini> getByParentId(MenuMini menuMini);
+
     void delete(String cstCode);
 
     void insertList(@Param("list") List<CstMenu> cstMenuList);

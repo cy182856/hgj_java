@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.menu.cstmenumini.CstMenuMiniDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.cst.CstMenu">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="project_num" jdbcType="VARCHAR" property="projectNum"/>
+        <result column="cst_code" jdbcType="INTEGER" property="cstCode"/>
+        <result column="menu_id" jdbcType="INTEGER" property="menuId"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, project_num, cst_code, menu_id, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.cst.CstMenu">
+        select
+        a.*
+        from t_cst_menu_mini a inner join s_cst b on a.cst_code = b.code
+        where a.delete_flag = 0
+        <if test="menuId != null">
+            and a.menu_id = #{menuId,jdbcType=INTEGER}
+        </if>
+    </select>
+
+    <!-- 删除-->
+    <update id="delete" parameterType="java.lang.Integer" >
+        delete from t_cst_menu_mini where menu_id = #{menuId,jdbcType=INTEGER}
+    </update>
+
+    <!-- 批量插入-->
+    <insert id="insertList" parameterType="java.util.List">
+        insert into t_cst_menu_mini (
+        id, project_num, cst_code, menu_id, create_time, update_time, create_by,
+        update_by, delete_flag
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.projectNum,jdbcType=VARCHAR},
+            #{item.cstCode,jdbcType=VARCHAR},
+            #{item.menuId,jdbcType=INTEGER},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.deleteFlag,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+
+</mapper>
