@@ -20,4 +20,6 @@ public interface RepairLogDaoMapper {
 
     void delete(String id);
 
+    List<RepairLog> getListByStatusAndTime(RepairLog repairLog);
+
 }

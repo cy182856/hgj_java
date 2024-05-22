@@ -33,6 +33,14 @@ public abstract class DateUtils {
     public static long NANO_ONE_MINUTE;
     public static long NANO_ONE_HOUR;
     public static long NANO_ONE_DAY;
+    public static SimpleDateFormat sdfYmdHms = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    // 获取系统时间 年月日时分秒
+    public static String strYmdHms(){
+        Date date = new Date();
+        String ymdHms = DateUtils.sdfYmdHms.format(date);
+        return ymdHms;
+    }
 
     public static Date getNow() {
         return new Date();

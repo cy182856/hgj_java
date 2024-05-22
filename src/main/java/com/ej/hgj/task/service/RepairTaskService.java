@@ -1,7 +1,10 @@
 package com.ej.hgj.task.service;
 
+import com.alibaba.fastjson.JSONObject;
+import com.ej.hgj.dao.config.ConstantConfDaoMapper;
 import com.ej.hgj.dao.material.MaterialApplyDaoMapper;
 import com.ej.hgj.dao.repair.RepairLogDaoMapper;
+import com.ej.hgj.entity.config.ConstantConfig;
 import com.ej.hgj.entity.repair.RepairLog;
 import com.ej.hgj.entity.workord.Material;
 import com.ej.hgj.entity.workord.MaterialApply;
@@ -10,7 +13,10 @@ import com.ej.hgj.entity.workord.WorkOrd;
 import com.ej.hgj.sy.dao.workord.MaterialDaoMapper;
 import com.ej.hgj.sy.dao.workord.ReturnVisitDaoMapper;
 import com.ej.hgj.sy.dao.workord.WorkOrdDaoMapper;
+import com.ej.hgj.utils.DateUtils;
 import com.ej.hgj.utils.GenerateUniqueIdUtil;
+import com.ej.hgj.utils.SyPostClient;
+import com.github.pagehelper.Constant;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +47,9 @@ public class RepairTaskService {
 
     @Autowired
     private ReturnVisitDaoMapper returnVisitDaoMapper;
+
+    @Autowired
+    private ConstantConfDaoMapper constantConfDaoMapper;
 
     @Transactional
     public void repairWoStaSubUpdate() {
@@ -217,4 +226,57 @@ public class RepairTaskService {
         }
     }
 
+    @Transactional
+    public void repairWoStaFinishMsgUpdate() {
+        logger.info("----------------------已完工工单自动评论定时任务处理开始--------------------------- ");
+        // 查询惠管家前7天已完工工单
+        List<RepairLog> repairLogList = repairLogDaoMapper.getListByStatusAndTime(new RepairLog());
+        for(RepairLog repair : repairLogList){
+            // 根据单号查询报修单ID
+            WorkOrd workOrd = workOrdDaoMapper.getCsWorkOrd(repair.getRepairNum(),"WOSta_Finish");
+            if(workOrd != null){
+                // 根据报修单id查询思源已回访记录
+                List<ReturnVisit> list = returnVisitDaoMapper.getList(workOrd.getId());
+                // 未回访,调用思源回访接口，更新报修单状态
+                if(list.isEmpty()){
+                    // 获取思源接口地址
+                    ConstantConfig constantConfig = constantConfDaoMapper.getByKey("sy_url");
+                    // 获取token
+                    String token = SyPostClient.getToken(constantConfig.getConfigValue());
+                    String p7 = initReturnVisit(workOrd.getId(), "100", "100", "默认好评");
+                    // 获取请求结果, 调用思源接口 94-客服回访接口，修改工单状态为已回访
+                    JSONObject jsonObject = SyPostClient.userRev2ServiceCustomerServiceReturn("UserRev2_Service_CustomerServiceReturn", p7, token, constantConfig.getConfigValue());
+                    String status = jsonObject.getString("Status");
+                    if ("1".equals(status)) {
+                        RepairLog repairLog = new RepairLog();
+                        repairLog.setRepairNum(repair.getRepairNum());
+                        repairLog.setRepairScore("5");
+                        repairLog.setRepairMsg("默认好评");
+                        repairLog.setSatisFaction("0");
+                        repairLog.setRepairStatus("WOSta_Visit");
+                        repairLogDaoMapper.update(repairLog);
+                    }
+                }
+            }
+
+        }
+        logger.info("----------------------已完工工单自动评论定时任务处理结束--------------------------- ");
+    }
+
+    // 组装参数-客服回访
+    public String initReturnVisit(String repairId, String satisFaction, String totalScore, String desc){
+        String WOID = "{ \"WOID\":\"" + repairId + "\",";
+        String ReturnVisitWay = "\"ReturnVisitWay\":\"Tel\",";
+        String ReturnVisitDate = "\"ReturnVisitDate\":\"" + DateUtils.strYmdHms() + "\",";
+        String Object = "\"Object\":\"17082215304300020066\",";
+        String ObjectName = "\"ObjectName\":\"KF01\",";
+        String SatisfiedVisit = "\"SatisfiedVisit\":\"" + satisFaction + "\",";
+        //String FailureCause = "\"FailureCause\":\"很满意\",";
+        String Remark = "\"Remark\":\"" + desc + "\",";
+        String TotalScore = "\"TotalScore\":\"" + totalScore + "\",";
+        String VisitState = "\"VisitState\":\"1\",";
+        String UserId = "\"UserId\":\"Sam\",";
+        UserId += "}";
+        return WOID + ReturnVisitWay + ReturnVisitDate + Object + ObjectName + SatisfiedVisit + Remark + TotalScore + VisitState + UserId;
+    }
 }

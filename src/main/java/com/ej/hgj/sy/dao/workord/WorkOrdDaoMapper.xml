@@ -21,7 +21,7 @@
         select
             ID as id, WONo as woNo, workordstate workOrdState
         from cs_workord
-        where WONo = #{woNo}
+        where WONo = #{woNo} and workordstate = #{ordState}
     </select>
 
     <!-- 根据报修单ID查询-->

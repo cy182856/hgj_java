@@ -14,7 +14,7 @@ public interface WorkOrdDaoMapper {
 
     WorkOrd getKhBxWoNo(String proNum);
 
-    WorkOrd getCsWorkOrd(String woNo);
+    WorkOrd getCsWorkOrd(String woNo, String ordState);
 
     List<WorkOrd> getList(List<String> woNoList);
 
