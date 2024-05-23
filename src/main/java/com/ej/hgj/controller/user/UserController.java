@@ -157,50 +157,51 @@ public class UserController {
         return access_token;
     }
 
-    //同步通讯录-东方渔人码头
-    @RequestMapping(value = "/sync/ofw",method = RequestMethod.GET)
-    public AjaxResult syncOfw() {
-        logger.info("---------------------------同步通讯录开始--------------------");
-        AjaxResult ajaxResult = new AjaxResult();
-        //记住，先去企业微信后台管理端开启api同步权限
-        //corpid---企业微信corpid
-        ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.WE_COM_APP);
-        //corpsecret  ---企业微信通讯录secret
-        ConstantConfig secret = constantConfDaoMapper.getByKey(Constant.WE_COM_ADDRESS_BOOK_SECRET);
-        // 1查询出access_Token的值
-        String access_token = getAccessToken(constantConfig.getAppId(),secret.getConfigValue());
-        // 获取部门列表信息(不填则是查询出所有的部门列表)
-        List<Department> departmentList = getDepartmentList(access_token, "");
-        logger.info("---------------------------获取部门列表--------------------" + JSON.toJSONString(departmentList));
-        // 通讯录新增
-        List<User> usersAll = new ArrayList<>();
-        // 获取已有通讯录列表
-        List<User> alreadyUserList = userService.getList(new User());
-        // 根据部门列表获取部门成员详情
-        List<User> userInfoList = getDepartmentUserDetails(departmentList,access_token);
-        // 跟据企业通讯录的用户ID查找已有通讯录，不存在就新增
-        for(User wxUserInfo : userInfoList){
-            List<User> alreadyUserFilterList = alreadyUserList.stream().filter(alreadyWxUserInfo -> alreadyWxUserInfo.getUserId().equals(wxUserInfo.getUserId())).collect(Collectors.toList());
-            if(alreadyUserFilterList.isEmpty()){
-                wxUserInfo.setCorpId("wwaf0bc97996187867");
-                usersAll.add(wxUserInfo);
-            }
-        }
-        // 将其保存到数据库中
-        if (!usersAll.isEmpty()) {
-            userService.insertList(usersAll);
-        }
-        logger.info("---------------------------同步通讯录结束--------------------" + JSON.toJSONString(usersAll));
-        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
-        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
-        HashMap map = new HashMap();
-        map.put("user",usersAll);
-        ajaxResult.setData(map);
-        return ajaxResult;
-    }
+//    //同步通讯录-东方渔人码头
+//    @RequestMapping(value = "/sync/ofw",method = RequestMethod.GET)
+//    public AjaxResult syncOfw() {
+//        logger.info("---------------------------同步通讯录开始--------------------");
+//        AjaxResult ajaxResult = new AjaxResult();
+//        //记住，先去企业微信后台管理端开启api同步权限
+//        //corpid---企业微信corpid
+//        ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.WE_COM_APP);
+//        //corpsecret  ---企业微信通讯录secret
+//        ConstantConfig secret = constantConfDaoMapper.getByKey(Constant.WE_COM_ADDRESS_BOOK_SECRET);
+//        // 1查询出access_Token的值
+//        String access_token = getAccessToken(constantConfig.getAppId(),secret.getConfigValue());
+//        // 获取部门列表信息(不填则是查询出所有的部门列表)
+//        List<Department> departmentList = getDepartmentList(access_token, "");
+//        logger.info("---------------------------获取部门列表--------------------" + JSON.toJSONString(departmentList));
+//        // 通讯录新增
+//        List<User> usersAll = new ArrayList<>();
+//        // 获取已有通讯录列表
+//        List<User> alreadyUserList = userService.getList(new User());
+//        // 根据部门列表获取部门成员详情
+//        List<User> userInfoList = getDepartmentUserDetails(departmentList,access_token);
+//        // 跟据企业通讯录的用户ID查找已有通讯录，不存在就新增
+//        for(User wxUserInfo : userInfoList){
+//            List<User> alreadyUserFilterList = alreadyUserList.stream().filter(alreadyWxUserInfo -> alreadyWxUserInfo.getUserId().equals(wxUserInfo.getUserId())).collect(Collectors.toList());
+//            if(alreadyUserFilterList.isEmpty()){
+//                wxUserInfo.setCorpId("wwaf0bc97996187867");
+//                usersAll.add(wxUserInfo);
+//            }
+//        }
+//        // 将其保存到数据库中
+//        if (!usersAll.isEmpty()) {
+//            userService.insertList(usersAll);
+//        }
+//        logger.info("---------------------------同步通讯录结束--------------------" + JSON.toJSONString(usersAll));
+//        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+//        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+//        HashMap map = new HashMap();
+//        map.put("user",usersAll);
+//        ajaxResult.setData(map);
+//        return ajaxResult;
+//    }
 
-    //企业微信服务商同步授权企业通讯录-凡享
-    @RequestMapping(value = "/sync/fx",method = RequestMethod.GET)
+
+    //企业微信服务商同步授权企业通讯录
+    @RequestMapping(value = "/sync",method = RequestMethod.GET)
     public AjaxResult syncFx() {
         logger.info("---------------------------同步通讯录开始--------------------");
         AjaxResult ajaxResult = new AjaxResult();
@@ -224,12 +225,12 @@ public class UserController {
             List<Department> departmentList = getDepartmentList(access_token, "");
             logger.info("---------------------------获取部门列表--------------------" + JSON.toJSONString(departmentList));
             // 根据部门列表获取部门成员详情
-            List<User> userInfoList = getDepartmentUserDetailsFx(departmentList, access_token);
+            List<User> userInfoList = getDepartmentUserDetailsAll(departmentList, access_token);
             // 跟据企业通讯录的用户ID查找已有通讯录，不存在就新增
             for (User wxUserInfo : userInfoList) {
                 List<User> alreadyUserFilterList = alreadyUserList.stream().filter(alreadyWxUserInfo -> alreadyWxUserInfo.getUserId().equals(wxUserInfo.getUserId())).collect(Collectors.toList());
                 if (alreadyUserFilterList.isEmpty()) {
-                    wxUserInfo.setCorpId("wp2U43agAA5zYxOldvud9BfjBng3oPeQ");
+                    wxUserInfo.setCorpId(corp.getCorpId());
                     usersAll.add(wxUserInfo);
                 }
             }
@@ -273,7 +274,7 @@ public class UserController {
      * @param//是否遍历子部门的成员，一般不要遍历，除非你就只获取父级部门或者子部门为空，不然会导致数据重复
      * @return
      */
-    public List<User> getDepartmentUserDetailsFx(List<Department> depts, String accessToken) {
+    public List<User> getDepartmentUserDetailsAll(List<Department> depts, String accessToken) {
         List<User> users = new ArrayList<>();
         for (Department department : depts) {
             // 1.获取请求的url

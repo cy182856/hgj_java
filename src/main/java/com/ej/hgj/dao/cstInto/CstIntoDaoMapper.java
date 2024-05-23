@@ -27,4 +27,6 @@ public interface CstIntoDaoMapper {
 
     void update(CstInto cstInto);
 
+    void deleteByStatusAndTime(CstInto cstInto);
+
 }
