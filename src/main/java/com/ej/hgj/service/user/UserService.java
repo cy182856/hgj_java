@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface UserService {
 
-    User queryUser(String userName, String password);
+    List<User> queryUser(String userName, String password);
 
     //User getById(String id);
 
@@ -22,7 +22,7 @@ public interface UserService {
 
     void save(User user);
 
-   // void update(User user);
+    void updateByMobile(User user);
 
     void delete(String id);
 

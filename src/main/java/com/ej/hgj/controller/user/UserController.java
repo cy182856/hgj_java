@@ -8,14 +8,13 @@ import com.ej.hgj.dao.build.BuildDaoMapper;
 import com.ej.hgj.dao.config.ConstantConfDaoMapper;
 import com.ej.hgj.dao.config.ProConfDaoMapper;
 import com.ej.hgj.dao.corp.CorpDaoMapper;
+import com.ej.hgj.dao.user.UserDaoMapper;
 import com.ej.hgj.dao.user.UserDutyPhoneDaoMapper;
 import com.ej.hgj.entity.build.Build;
 import com.ej.hgj.entity.config.ConstantConfig;
 import com.ej.hgj.entity.config.ProConfig;
 import com.ej.hgj.entity.corp.Corp;
-import com.ej.hgj.entity.user.Department;
-import com.ej.hgj.entity.user.User;
-import com.ej.hgj.entity.user.UserDutyPhone;
+import com.ej.hgj.entity.user.*;
 import com.ej.hgj.service.user.UserService;
 import com.ej.hgj.utils.*;
 import com.ej.hgj.utils.wechat.MyX509TrustManager;
@@ -64,7 +63,7 @@ public class UserController {
     private CorpDaoMapper corpDaoMapper;
 
     @Autowired
-    private ProConfDaoMapper proConfDaoMapper;
+    private UserDaoMapper userDaoMapper;
 
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(@RequestParam(value = "page",defaultValue = "1") int page,
@@ -133,6 +132,32 @@ public class UserController {
     @RequestMapping(value = "/update",method = RequestMethod.POST)
     public AjaxResult save(HttpServletRequest request, @RequestBody User user){
         return userService.updateRolePro(new AjaxResult(),user,TokenUtils.getUserId(request));
+    }
+
+    @RequestMapping(value = "/updatePassword",method = RequestMethod.POST)
+    public AjaxResult updatePassword(HttpServletRequest request, @RequestBody User user){
+        AjaxResult ajaxResult = new AjaxResult();
+        String userId = TokenUtils.getUserId(request);
+        String oldPassword = user.getOldPassword();
+        String newPassword = user.getNewPassword();
+        User us = userDaoMapper.getByUserId(userId);
+        String mobile = us.getMobile();
+        // 校验旧密码的正确性
+        List<User> userList = userService.queryUser(mobile, oldPassword);
+        if(userList.isEmpty()){
+            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+            ajaxResult.setMessage("旧密码错误!");
+        }else {
+            // 根据手机号修改密码
+            User userPram = new User();
+            userPram.setMobile(mobile);
+            userPram.setPassword(newPassword);
+            userPram.setUpdateTime(new Date());
+            userService.updateByMobile(userPram);
+            ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+            ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        }
+        return ajaxResult;
     }
 
 //    @RequestMapping(value = "/update",method = RequestMethod.POST)

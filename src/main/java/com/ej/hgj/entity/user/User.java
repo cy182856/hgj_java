@@ -14,6 +14,8 @@ public class User {
 
     private String corpId;
 
+    private String corpName;
+
     private String projectNum;
 
     private String projectName;
@@ -72,5 +74,11 @@ public class User {
 
     // 楼栋绑定列表
     private List<Build> buildList;
+
+    // 旧密码
+    private String oldPassword;
+
+    // 新密码
+    private String newPassword;
 
 }

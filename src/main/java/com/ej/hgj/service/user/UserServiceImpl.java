@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
     private UserRoleDaoMapper userRoleDaoMapper;
 
     @Override
-    public User queryUser(String userName, String password) {
+    public List<User> queryUser(String userName, String password) {
         return userDaoMapper.queryUser(userName, password);
     }
 
@@ -76,10 +76,10 @@ public class UserServiceImpl implements UserService {
         userDaoMapper.save(user);
     }
 
-//    @Override
-//    public void update(User user) {
-//        userDaoMapper.update(user);
-//    }
+    @Override
+    public void updateByMobile(User user) {
+        userDaoMapper.updateByMobile(user);
+    }
 
     @Override
     public void delete(String id) {

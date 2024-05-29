@@ -17,7 +17,7 @@ public interface UserDaoMapper {
 
     //User getByStaffIdAndCorpId(String staffId, String corpId);
 
-    User queryUser(@Param("userName") String userName, @Param("password") String password);
+    List<User> queryUser(@Param("userName") String userName, @Param("password") String password);
 
     List<User> queryUserList(@Param("userName") String userName, @Param("password") String password);
 
@@ -31,7 +31,7 @@ public interface UserDaoMapper {
 
     void save(User user);
 
-    //void update(User user);
+    void updateByMobile(User user);
 
     void updateById(User user);
 
