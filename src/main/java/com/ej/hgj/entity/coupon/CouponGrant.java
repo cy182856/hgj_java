@@ -7,14 +7,21 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Data
-public class StopCoupon {
+public class CouponGrant {
+
     private String id;
 
-    private String title;
+    private String batchId;
 
-    private Integer hour;
+    private String couponId;
 
-    private Integer isExp;
+    private String tagId;
+
+    private String startTime;
+
+    private String endTime;
+
+    private String cstCode;
 
     private String createBy;
 
@@ -30,9 +37,10 @@ public class StopCoupon {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
-    private String tagId;
+    private String name;
 
-    private String startTime;
+    private String cstName;
 
-    private String endTime;
+    private String title;
+
 }

@@ -99,6 +99,17 @@
         order by c.update_time desc, c.into_role
     </select>
 
+    <!-- 查询已入住列表-->
+    <select id="getListByProNum" resultMap="BaseMap"  parameterType="java.lang.String">
+        SELECT
+        i.*,s.cst_name
+        FROM
+        t_cst_into i left join s_cst s ON s.`code` = i.cst_code
+        WHERE i.delete_flag = 0
+        and i.project_num = #{proNum}
+        and i.into_status = 1
+    </select>
+
     <!-- 保存-->
     <insert id="save" parameterType="com.ej.hgj.entity.cstInto.CstInto" >
         insert into  t_cst_into(

@@ -2,14 +2,11 @@ package com.ej.hgj.service.coupon;
 
 
 
-import com.ej.hgj.entity.coupon.StopCoupon;
-import com.ej.hgj.entity.role.Role;
-
-import java.util.List;
+import com.ej.hgj.entity.coupon.Coupon;
 
 public interface CouponService {
 
-    void couponGrant(StopCoupon stopCoupon);
+    void couponGrant(Coupon coupon);
 
     void deleteBatch(String id);
 

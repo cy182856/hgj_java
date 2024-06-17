@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ej.hgj.dao.coupon.StopCouponDaoMapper">
+<mapper namespace="com.ej.hgj.dao.coupon.CouponDaoMapper">
 
-    <resultMap id="BaseMap" type="com.ej.hgj.entity.coupon.StopCoupon">
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.coupon.Coupon">
         <result column="id" jdbcType="VARCHAR" property="id"/>
         <result column="title" jdbcType="VARCHAR" property="title"/>
         <result column="hour" jdbcType="INTEGER" property="hour"/>
@@ -27,10 +27,10 @@
     </select>
 
     <!-- 查询列表-->
-    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.coupon.StopCoupon">
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.coupon.Coupon">
         select
         <include refid="Base_Column_List" />
-        from t_stop_coupon
+        from t_coupon
         where delete_flag = 0
         <if test="title != null">
             and `title` like CONCAT('%', #{title,jdbcType=VARCHAR},'%') ESCAPE '/'
@@ -39,8 +39,8 @@
     </select>
 
     <!-- 保存-->
-    <insert id="save" parameterType="com.ej.hgj.entity.coupon.StopCoupon" >
-        insert into  t_stop_coupon(
+    <insert id="save" parameterType="com.ej.hgj.entity.coupon.Coupon" >
+        insert into  t_coupon(
         <if test="id != null">
             id,
         </if>
@@ -101,7 +101,7 @@
     </insert>
 
     <!-- 更新-->
-    <update id="update" parameterType="com.ej.hgj.entity.coupon.StopCoupon" >
+    <update id="update" parameterType="com.ej.hgj.entity.coupon.Coupon" >
         update
         t_stop_coupon
         <set>

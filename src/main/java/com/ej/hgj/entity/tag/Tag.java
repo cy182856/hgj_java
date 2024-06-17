@@ -11,9 +11,15 @@ import java.util.List;
 public class Tag {
     private String id;
 
+    private String proNum;
+
+    private String proName;
+
     private Integer type;
 
     private String name;
+
+    private Integer range;
 
     private String createBy;
 
@@ -30,6 +36,8 @@ public class Tag {
     private Date createTime;
 
     private List<String> cstCodes;
+
+    private List<String> wxOpenIds;
 
     private String cstCode;
 

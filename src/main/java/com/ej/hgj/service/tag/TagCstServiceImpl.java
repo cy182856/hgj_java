@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.cst.HgjCstDaoMapper;
 import com.ej.hgj.dao.tag.TagCstDaoMapper;
+import com.ej.hgj.dao.tag.TagDaoMapper;
 import com.ej.hgj.entity.cst.HgjCst;
 import com.ej.hgj.entity.tag.Tag;
 import com.ej.hgj.entity.tag.TagCst;
@@ -31,13 +32,19 @@ public class TagCstServiceImpl implements TagCstService {
     @Autowired
     private HgjCstDaoMapper hgjCstDaoMapper;
 
+    @Autowired
+    private TagDaoMapper tagDaoMapper;
+
     @Override
     public void saveTagCst(Tag tag) {
         String tagId = tag.getId();
+        Tag t = tagDaoMapper.getById(tagId);
         List<String> cstCodes = tag.getCstCodes();
+        List<String> wxOpenIds = tag.getWxOpenIds();
         tagCstDaoMapper.delete(tagId);
         logger.info("删除客户标签成功tagId:" + tagId);
         List<TagCst> tagCstList = new ArrayList<>();
+        // 选择客户
         if(cstCodes != null){
             List<HgjCst> cstList = hgjCstDaoMapper.getList(new HgjCst());
             for(int i = 0; i<cstCodes.size(); i++){
@@ -46,6 +53,7 @@ public class TagCstServiceImpl implements TagCstService {
                 tagCst.setId(TimestampGenerator.generateSerialNumber());
                 tagCst.setTagId(tagId);
                 tagCst.setCstCode(cstCode);
+                tagCst.setRange(t.getRange());
                 tagCst.setCreateBy("");
                 tagCst.setCreateTime(new Date());
                 tagCst.setUpdateBy("");
@@ -58,6 +66,25 @@ public class TagCstServiceImpl implements TagCstService {
                 }
             }
         }
+
+        // 选择个人
+        if(wxOpenIds != null){
+            for(int i = 0; i<wxOpenIds.size(); i++){
+                TagCst tagCst = new TagCst();
+                String wxOpenId = wxOpenIds.get(i);
+                tagCst.setId(TimestampGenerator.generateSerialNumber());
+                tagCst.setTagId(tagId);
+                tagCst.setWxOpenId(wxOpenId);
+                tagCst.setRange(t.getRange());
+                tagCst.setCreateBy("");
+                tagCst.setCreateTime(new Date());
+                tagCst.setUpdateBy("");
+                tagCst.setUpdateTime(new Date());
+                tagCst.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+                tagCstList.add(tagCst);
+            }
+        }
+
         // 新增客户标签
         if(!tagCstList.isEmpty()){
             tagCstDaoMapper.insertList(tagCstList);

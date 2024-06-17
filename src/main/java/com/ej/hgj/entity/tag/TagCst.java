@@ -14,7 +14,11 @@ public class TagCst {
 
     private String cstCode;
 
+    private String wxOpenId;
+
     private String cstName;
+
+    private Integer range;
 
     private String createBy;
 

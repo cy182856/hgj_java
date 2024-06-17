@@ -75,6 +75,7 @@ public class LoginController {
             ajaxResult.setMessage("登陆成功");
             ajaxResult.setData(tokenMap);
         }
+        logger.info("---------" + userName + "--------登录系统------");
         return ajaxResult;
     }
 

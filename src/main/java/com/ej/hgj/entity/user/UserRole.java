@@ -18,6 +18,8 @@ public class UserRole {
 
     private String roleId;
 
+    private String roleName;
+
     private String createBy;
 
     private String updateBy;

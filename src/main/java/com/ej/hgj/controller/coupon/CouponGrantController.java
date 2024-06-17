@@ -2,12 +2,9 @@ package com.ej.hgj.controller.coupon;
 
 import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
-import com.ej.hgj.dao.coupon.StopCouponDaoMapper;
-import com.ej.hgj.dao.coupon.StopCouponGrantDaoMapper;
+import com.ej.hgj.dao.coupon.CouponGrantDaoMapper;
 import com.ej.hgj.dao.tag.TagCstDaoMapper;
-import com.ej.hgj.entity.coupon.StopCouponGrant;
-import com.ej.hgj.entity.coupon.StopCouponGrant;
-import com.ej.hgj.entity.tag.TagCst;
+import com.ej.hgj.entity.coupon.CouponGrant;
 import com.ej.hgj.utils.TimestampGenerator;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -23,13 +20,13 @@ import java.util.List;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/stopCouponGrant")
-public class StopCouponGrantController {
+@RequestMapping("/couponGrant")
+public class CouponGrantController {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private StopCouponGrantDaoMapper stopCouponGrantDaoMapper;
+    private CouponGrantDaoMapper couponGrantDaoMapper;
 
     @Autowired
     private TagCstDaoMapper tagCstDaoMapper;
@@ -37,16 +34,16 @@ public class StopCouponGrantController {
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(@RequestParam(value = "page",defaultValue = "1") int page,
                            @RequestParam(value = "limit",defaultValue = "10") int limit,
-                           StopCouponGrant stopCouponGrant){
+                           CouponGrant couponGrant){
         AjaxResult ajaxResult = new AjaxResult();
         HashMap map = new HashMap();
         PageHelper.offsetPage((page-1) * limit,limit);
-        List<StopCouponGrant> list = stopCouponGrantDaoMapper.getList(stopCouponGrant);
-        PageInfo<StopCouponGrant> pageInfo = new PageInfo<>(list);
+        List<CouponGrant> list = couponGrantDaoMapper.getList(couponGrant);
+        PageInfo<CouponGrant> pageInfo = new PageInfo<>(list);
         //计算总页数
         int pageNumTotal = (int) Math.ceil((double)pageInfo.getTotal()/(double)limit);
         if(page > pageNumTotal){
-            PageInfo<StopCouponGrant> entityPageInfo = new PageInfo<>();
+            PageInfo<CouponGrant> entityPageInfo = new PageInfo<>();
             entityPageInfo.setList(new ArrayList<>());
             entityPageInfo.setTotal(pageInfo.getTotal());
             entityPageInfo.setPageNum(page);
@@ -63,10 +60,10 @@ public class StopCouponGrantController {
     }
 
     @RequestMapping(value = "/select",method = RequestMethod.GET)
-    public AjaxResult select(StopCouponGrant stopCouponGrant){
+    public AjaxResult select(CouponGrant couponGrant){
         AjaxResult ajaxResult = new AjaxResult();
         HashMap map = new HashMap();
-        List<StopCouponGrant> list = stopCouponGrantDaoMapper.getList(stopCouponGrant);
+        List<CouponGrant> list = couponGrantDaoMapper.getList(couponGrant);
         //logger.info("list:"+ JSON.toJSONString(list));
         map.put("list",list);
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
@@ -77,20 +74,20 @@ public class StopCouponGrantController {
     }
 
     @RequestMapping(value = "/save",method = RequestMethod.POST)
-    public AjaxResult save(@RequestBody StopCouponGrant stopCouponGrant){
+    public AjaxResult save(@RequestBody CouponGrant couponGrant){
         AjaxResult ajaxResult = new AjaxResult();
 //        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-//        ZonedDateTime zonedDateTime = ZonedDateTime.parse(stopCouponGrant.getStartDate(), formatter);
+//        ZonedDateTime zonedDateTime = ZonedDateTime.parse(couponGrant.getStartDate(), formatter);
 //        Date date = Date.from(zonedDateTime.toInstant());
-//        stopCouponGrant.setStartTime(date);
-        if(stopCouponGrant.getId() != null){
-            stopCouponGrantDaoMapper.update(stopCouponGrant);
+//        couponGrant.setStartTime(date);
+        if(couponGrant.getId() != null){
+            couponGrantDaoMapper.update(couponGrant);
         }else{
-            stopCouponGrant.setId(TimestampGenerator.generateSerialNumber());
-            stopCouponGrant.setUpdateTime(new Date());
-            stopCouponGrant.setCreateTime(new Date());
-            stopCouponGrant.setDeleteFlag(0);
-            stopCouponGrantDaoMapper.save(stopCouponGrant);
+            couponGrant.setId(TimestampGenerator.generateSerialNumber());
+            couponGrant.setUpdateTime(new Date());
+            couponGrant.setCreateTime(new Date());
+            couponGrant.setDeleteFlag(0);
+            couponGrantDaoMapper.save(couponGrant);
         }
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
@@ -100,7 +97,7 @@ public class StopCouponGrantController {
     @RequestMapping(value = "/delete",method = RequestMethod.GET)
     public AjaxResult delete(@RequestParam(required=false, value = "id") String id){
         AjaxResult ajaxResult = new AjaxResult();
-        stopCouponGrantDaoMapper.delete(id);
+        couponGrantDaoMapper.delete(id);
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;

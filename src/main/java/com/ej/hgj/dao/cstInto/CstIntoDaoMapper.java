@@ -17,6 +17,8 @@ public interface CstIntoDaoMapper {
 
     List<CstInto> getList(CstInto cstInto);
 
+    List<CstInto> getListByProNum(String proNum);
+
     void delete(String id);
 
     void save(CstInto cstInto);

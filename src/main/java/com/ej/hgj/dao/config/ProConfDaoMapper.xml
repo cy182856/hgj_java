@@ -47,6 +47,9 @@
         <include refid="Base_Column_List" />
         from t_pro_config
         where delete_flag = 0
+        <if test="projectNum != null">
+            and project_num = #{projectNum,jdbcType=VARCHAR}
+        </if>
         <if test="projectName != null">
             and project_name like CONCAT('%', #{projectName,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>

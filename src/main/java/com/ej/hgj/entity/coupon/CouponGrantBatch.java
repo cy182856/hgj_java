@@ -7,11 +7,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Data
-public class StopCouponGrantBatch {
+public class CouponGrantBatch {
 
     private String id;
 
-    private String stopCouponId;
+    private String couponId;
 
     private String tagId;
 

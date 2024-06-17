@@ -65,6 +65,16 @@
         order by update_time desc
     </select>
 
+    <!-- 查询列表-->
+    <select id="getByUserAndRole" resultMap="BaseMap"  parameterType="java.lang.String">
+        select
+        ur.*
+        from t_user_role ur inner join t_role r on r.id = ur.role_id
+        where ur.delete_flag = 0
+        and ur.staff_id = #{userId,jdbcType=VARCHAR}
+        and r.role_name in('管理员','开发者')
+    </select>
+
     <!-- 保存-->
     <insert id="save" parameterType="com.ej.hgj.entity.user.UserRole" >
         insert into  t_user_role(

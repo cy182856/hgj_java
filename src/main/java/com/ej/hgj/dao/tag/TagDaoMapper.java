@@ -15,7 +15,7 @@ public interface TagDaoMapper {
 
     List<Tag> getList(Tag tag);
 
-    List<Tag> getByName(String name);
+    List<Tag> getByProNumAndName(String proNum, String name);
 
     List<Tag> getCstTag(Tag tag);
 

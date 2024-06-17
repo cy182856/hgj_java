@@ -77,4 +77,5 @@ public class HgjHouse {
     private String cstCode;
 
     private String cstName;
+
 }

@@ -20,6 +20,8 @@ public interface UserRoleDaoMapper {
 
     List<UserRole> getList(UserRole userRole);
 
+    List<UserRole> getByUserAndRole(String userId);
+
     void save(UserRole userRole);
 
     void update(UserRole userRole);

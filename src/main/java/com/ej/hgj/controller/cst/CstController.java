@@ -83,7 +83,7 @@ public class CstController {
         List<HgjCst> list = cstService.getList(cst);
         //logger.info("list:"+ JSON.toJSONString(list));
         for(HgjCst hgjCst : list){
-            List<Tag> tagListFilter = tagList.stream().filter(tag -> tag.getCstCode().equals(hgjCst.getCode())).collect(Collectors.toList());
+            List<Tag> tagListFilter = tagList.stream().filter(tag -> tag.getCstCode() != null && tag.getCstCode().equals(hgjCst.getCode())).collect(Collectors.toList());
             hgjCst.setTagList(tagListFilter);
         }
         PageInfo<HgjCst> pageInfo = new PageInfo<>(list);
@@ -186,7 +186,7 @@ public class CstController {
             if(Constant.INTO_ROLE_CST == intoType){
                 intoRole = "客户";
             }else if(Constant.INTO_ROLE_ENTRUST == intoType){
-                intoRole = "子客户";
+                intoRole = "员工";
             }else if(Constant.INTO_ROLE_PROPERTY_OWNER == intoType){
                 intoRole = "产权人";
             } else if(Constant.INTO_ROLE_HOUSEHOLD == intoType){

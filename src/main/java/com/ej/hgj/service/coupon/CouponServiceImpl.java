@@ -1,16 +1,13 @@
 package com.ej.hgj.service.coupon;
 
 import com.ej.hgj.constant.Constant;
-import com.ej.hgj.dao.coupon.StopCouponGrantBatchDaoMapper;
-import com.ej.hgj.dao.coupon.StopCouponGrantDaoMapper;
-import com.ej.hgj.dao.role.RoleDaoMapper;
+import com.ej.hgj.dao.coupon.CouponGrantBatchDaoMapper;
+import com.ej.hgj.dao.coupon.CouponGrantDaoMapper;
 import com.ej.hgj.dao.tag.TagCstDaoMapper;
-import com.ej.hgj.entity.coupon.StopCoupon;
-import com.ej.hgj.entity.coupon.StopCouponGrant;
-import com.ej.hgj.entity.coupon.StopCouponGrantBatch;
-import com.ej.hgj.entity.role.Role;
+import com.ej.hgj.entity.coupon.Coupon;
+import com.ej.hgj.entity.coupon.CouponGrant;
+import com.ej.hgj.entity.coupon.CouponGrantBatch;
 import com.ej.hgj.entity.tag.TagCst;
-import com.ej.hgj.service.role.RoleService;
 import com.ej.hgj.utils.TimestampGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,25 +26,25 @@ public class CouponServiceImpl implements CouponService {
     Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private StopCouponGrantDaoMapper stopCouponGrantDaoMapper;
+    private CouponGrantDaoMapper couponGrantDaoMapper;
 
     @Autowired
     private TagCstDaoMapper tagCstDaoMapper;
 
     @Autowired
-    private StopCouponGrantBatchDaoMapper stopCouponGrantBatchDaoMapper;
+    private CouponGrantBatchDaoMapper couponGrantBatchDaoMapper;
 
     @Override
-    public void couponGrant(StopCoupon stopCoupon) {
-        String id = stopCoupon.getId();
-        String tagId = stopCoupon.getTagId();
-        String startTIme = stopCoupon.getStartTime();
-        String endTime = stopCoupon.getEndTime();
+    public void couponGrant(Coupon coupon) {
+        String id = coupon.getId();
+        String tagId = coupon.getTagId();
+        String startTIme = coupon.getStartTime();
+        String endTime = coupon.getEndTime();
         // 保存批次表
-        StopCouponGrantBatch stopCouponGrantBatch = new StopCouponGrantBatch();
+        CouponGrantBatch stopCouponGrantBatch = new CouponGrantBatch();
         String batchId = TimestampGenerator.generateSerialNumber();
         stopCouponGrantBatch.setId(batchId);
-        stopCouponGrantBatch.setStopCouponId(id);
+        stopCouponGrantBatch.setCouponId(id);
         stopCouponGrantBatch.setTagId(tagId);
         stopCouponGrantBatch.setStartTime(startTIme);
         stopCouponGrantBatch.setEndTime(endTime);
@@ -56,19 +53,19 @@ public class CouponServiceImpl implements CouponService {
         stopCouponGrantBatch.setUpdateTime(new Date());
         stopCouponGrantBatch.setUpdateBy("");
         stopCouponGrantBatch.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-        stopCouponGrantBatchDaoMapper.save(stopCouponGrantBatch);
+        couponGrantBatchDaoMapper.save(stopCouponGrantBatch);
 
         // 保存分发表-批次详情
         TagCst tagCst = new TagCst();
         tagCst.setTagId(tagId);
         List<TagCst> tagCstList = tagCstDaoMapper.getList(tagCst);
         if(!tagCstList.isEmpty()) {
-            List<StopCouponGrant> stopCouponGrantList = new ArrayList<>();
+            List<CouponGrant> couponGrantList = new ArrayList<>();
             for (TagCst cst : tagCstList) {
-                StopCouponGrant sg = new StopCouponGrant();
+                CouponGrant sg = new CouponGrant();
                 sg.setId(TimestampGenerator.generateSerialNumber());
                 sg.setBatchId(batchId);
-                sg.setStopCouponId(id);
+                sg.setCouponId(id);
                 sg.setTagId(tagId);
                 sg.setStartTime(startTIme);
                 sg.setEndTime(endTime);
@@ -78,17 +75,17 @@ public class CouponServiceImpl implements CouponService {
                 sg.setUpdateTime(new Date());
                 sg.setUpdateBy("");
                 sg.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-                stopCouponGrantList.add(sg);
+                couponGrantList.add(sg);
             }
-            stopCouponGrantDaoMapper.insertList(stopCouponGrantList);
+            couponGrantDaoMapper.insertList(couponGrantList);
         }
     }
 
     @Override
     public void deleteBatch(String id) {
         // 删除批次
-        stopCouponGrantBatchDaoMapper.delete(id);
+        couponGrantBatchDaoMapper.delete(id);
         // 删除发放详细
-        stopCouponGrantDaoMapper.deleteByBatchId(id);
+        couponGrantDaoMapper.deleteByBatchId(id);
     }
 }
