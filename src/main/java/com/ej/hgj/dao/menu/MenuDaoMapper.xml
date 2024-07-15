@@ -19,6 +19,15 @@
     <select id="menuList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.menu.Menu">
         select  * from t_menu
         where delete_flag = 0
+        <if test="name != null">
+            and `name` like CONCAT('%', #{name,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="metaStr != null">
+            and meta like CONCAT('%', #{metaStr,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="path != null">
+            and `path` like CONCAT('%', #{path,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
         order by update_time desc
     </select>
 

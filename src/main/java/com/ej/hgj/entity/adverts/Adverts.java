@@ -1,35 +1,25 @@
-package com.ej.hgj.entity.cstInto;
+package com.ej.hgj.entity.adverts;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
-public class CstInto {
+public class Adverts {
+
     private String id;
 
-    private String projectNum;
+    private String proNum;
 
-    private String projectName;
+    private String title;
 
-    private String wxOpenId;
+    private String imgPath;
 
-    private String cstCode;
+    private String url;
 
-    private String houseId;
-
-    private String resName;
-
-    private Integer intoRole;
-
-    private Integer intoStatus;
-
-    private String userName;
-
-    private String cstName;
+    private Integer isShow;
 
     private String createBy;
 
@@ -45,16 +35,10 @@ public class CstInto {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
-    private String cstIntoHouseId;
-
-    private Integer houseIntoStatus;
-
     private String startTime;
 
     private String endTime;
 
-    private String intoStatusName;
-
-    private String intoRoleName;
+    private String proName;
 
 }

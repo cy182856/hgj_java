@@ -14,6 +14,8 @@ public interface RepairLogDaoMapper {
 
     List<RepairLog> getList(RepairLog repairLog);
 
+    List<RepairLog> getListAll(RepairLog repairLog);
+
     void save(RepairLog repairLog);
 
     void update(RepairLog repairLog);

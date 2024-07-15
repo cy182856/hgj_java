@@ -96,6 +96,12 @@
         <if test="cstCode != null">
             and c.cst_code = #{cstCode}
         </if>
+        <if test="startTime != null and startTime != ''">
+            and c.create_time >= #{startTime,jdbcType=VARCHAR}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and c.create_time &lt;= #{endTime,jdbcType=VARCHAR}
+        </if>
         order by c.update_time desc, c.into_role
     </select>
 

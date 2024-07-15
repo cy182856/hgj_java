@@ -20,6 +20,8 @@ public class ConstantConfig {
 
     private String appSecret;
 
+    private String description;
+
     private String createBy;
 
     private String updateBy;

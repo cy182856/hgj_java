@@ -173,6 +173,37 @@
 
     </select>
 
+    <!-- 查询列表-->
+    <select id="getListAll" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.repair.RepairLog">
+        select
+        <include refid="Base_Column_List" />
+        from t_repair_log
+        where delete_flag = 0
+        <if test="projectNum != null">
+            and project_num = #{projectNum,jdbcType=VARCHAR}
+        </if>
+        <if test="cstCode != null and cstCode != ''">
+            and cst_code = #{cstCode,jdbcType=VARCHAR}
+        </if>
+        <if test="cstName != null and cstName != ''">
+            and cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="repairNum != null and repairNum != ''">
+            and repair_num like CONCAT('%', #{repairNum,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="repairStatus != null and repairStatus != ''">
+            and repair_status = #{repairStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            and create_time >= #{startTime,jdbcType=VARCHAR}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and create_time &lt;= #{endTime,jdbcType=VARCHAR}
+        </if>
+        order by update_time desc
+    </select>
+
+
     <!-- 保存-->
     <insert id="save" parameterType="com.ej.hgj.entity.repair.RepairLog" >
         insert into  t_repair_log(

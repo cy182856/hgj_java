@@ -32,6 +32,8 @@ public interface CstIntoHouseDaoMapper {
 
     void updateByCstIntoId(CstIntoHouse cstIntoHouse);
 
+    void deleteByStatusAndTime(CstIntoHouse cstIntoHouse);
+
 
 
 

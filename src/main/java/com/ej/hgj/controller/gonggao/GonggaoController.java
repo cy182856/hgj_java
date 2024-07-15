@@ -13,27 +13,32 @@ import com.ej.hgj.entity.config.ConstantConfig;
 import com.ej.hgj.entity.config.ProConfig;
 import com.ej.hgj.entity.gonggao.Gonggao;
 import com.ej.hgj.entity.gonggao.GonggaoType;
+import com.ej.hgj.entity.role.Role;
 import com.ej.hgj.utils.DateUtils;
 import com.ej.hgj.utils.HttpClientUtil;
 import com.ej.hgj.utils.MyX509TrustManager;
 import com.ej.hgj.utils.TimestampGenerator;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,6 +49,9 @@ import java.util.stream.Stream;
 public class GonggaoController {
 
     Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Value("${upload.path}")
+    private String uploadPath;
 
     @Autowired
     private GonggaoTypeDaoMapper gonggaoTypeDaoMapper;
@@ -121,6 +129,8 @@ public class GonggaoController {
                             gonggao.setThumbUrl(jsonObjectNews.getString("thumb_url"));
                             // 默认1,不显示  0-显示
                             gonggao.setIsShow(1);
+                            // 来源：1-公众号 2-编辑器
+                            gonggao.setSource(1);
                             gonggao.setCreateTime(new Date());
                             gonggao.setUpdateTime(new Date(Long.valueOf(updateTime) * 1000));
                             gonggao.setCreateBy("");
@@ -185,6 +195,8 @@ public class GonggaoController {
                             gonggao.setThumbUrl(jsonObjectNews.getString("thumb_url"));
                             // 默认1,不显示  0-显示
                             gonggao.setIsShow(1);
+                            // 来源：1-公众号 2-编辑器
+                            gonggao.setSource(1);
                             gonggao.setCreateTime(new Date());
                             gonggao.setUpdateTime(new Date(Long.valueOf(updateTime) * 1000));
                             gonggao.setCreateBy("");
@@ -353,5 +365,120 @@ public class GonggaoController {
         } catch (Exception e) {
         }
         return jsonObject;
+    }
+
+    /**
+     * 编辑器保存
+     * @param gonggao
+     * @return
+     */
+    @RequestMapping(value = "/saveContent",method = RequestMethod.POST)
+    public AjaxResult saveContent(@RequestBody Gonggao gonggao){
+        AjaxResult ajaxResult = new AjaxResult();
+        String id = TimestampGenerator.generateSerialNumber();
+        gonggao.setId(id);
+        String url = saveGongGaoContent(id, gonggao.getContent());
+        gonggao.setUrl(url);
+        // 来源：1-公众号 2-编辑器
+        gonggao.setSource(2);
+        // 默认1,不显示  0-显示
+        gonggao.setIsShow(1);
+        gonggao.setUpdateTime(new Date());
+        gonggao.setCreateTime(new Date());
+        gonggao.setDeleteFlag(0);
+        gonggaoDaoMapper.save(gonggao);
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        return ajaxResult;
+    }
+
+    public String saveGongGaoContent(String no, String content) {
+        String path = "";
+        // 将图片数组转换为逗号分割的字符串
+
+            //目录不存在则直接创建
+            File filePath = new File(uploadPath+"/gonggao");
+            if (!filePath.exists()) {
+                filePath.mkdirs();
+            }
+            //创建年月日文件夹
+            File ymdFile = new File(uploadPath + "/gonggao" + File.separator + new SimpleDateFormat("yyyyMMdd").format(new Date()));
+            //目录不存在则直接创建
+            if (!ymdFile.exists()) {
+                ymdFile.mkdirs();
+            }
+            //在年月日文件夹下面创建txt文本存储图片base64码
+            File txtFile = new File(ymdFile.getPath() + "/" + no + ".html");
+            if (!txtFile.exists()) {
+                try {
+                    txtFile.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            path = txtFile.getPath();
+            FileWriter writer = null;
+            try {
+                writer = new FileWriter(txtFile);
+                writer.write(content);
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        return path;
+    }
+
+    @PostMapping(value = "/view")
+    public void view(HttpServletResponse response, String fileId) throws ServletException, IOException {
+        Gonggao gonggao = gonggaoDaoMapper.getById(fileId);
+//        try {
+//            response.setContentType("application/vnd.ms-excel");
+//            //1.输入流，通过输入流读取上传的文件
+//            FileInputStream fileInputStream = new FileInputStream(new File(sumFile.getFileUrl()));
+//            //2.输出流，通过输出流将文件写回了浏览器，在浏览器展示
+//            ServletOutputStream outputStream = response.getOutputStream();
+//            //4.将文件读取进bytes数组，通过输出流写回浏览器
+////            int len = 0;
+////            byte[] bytes = new byte[1024];
+////            while ((len = fileInputStream.read(bytes)) != -1) {
+////                outputStream.write(bytes, 0, len);
+////            }
+//            IOUtils.copy(fileInputStream,outputStream);
+//            outputStream.flush();
+//            //5.关闭资源
+//            outputStream.close();
+//            fileInputStream.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+        OutputStream os = null;
+        InputStream is = null;
+        try {
+            InputStream in = new FileInputStream(new File(gonggao.getUrl()));
+            // 取得输出流
+            os = response.getOutputStream();
+            response.setContentType("application/vnd.ms-excel");
+            response.setHeader("Content-Disposition", "attachment");
+            //复制
+            IOUtils.copy(in, response.getOutputStream());
+            response.getOutputStream().flush();
+        } catch (IOException e) {
+            System.out.println("下载文件失败，" + e.getMessage());
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } catch (IOException e) {
+            }
+            try {
+                if (os != null) {
+                    os.close();
+                }
+            } catch (IOException e) {
+            }
+        }
     }
 }

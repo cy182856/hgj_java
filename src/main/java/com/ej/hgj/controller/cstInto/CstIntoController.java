@@ -17,6 +17,7 @@ import com.ej.hgj.utils.GenerateUniqueIdUtil;
 import com.ej.hgj.utils.TimestampGenerator;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +52,46 @@ public class CstIntoController {
                            @RequestParam(value = "limit",defaultValue = "10") int limit,
                            CstInto cstInto){
         AjaxResult ajaxResult = new AjaxResult();
+        if(StringUtils.isNotBlank(cstInto.getEndTime())){
+            cstInto.setEndTime(cstInto.getEndTime() + " 23:59:59");
+        }
         HashMap map = new HashMap();
         PageHelper.offsetPage((page-1) * limit,limit);
         List<CstInto> list = cstIntoDaoMapper.getList(cstInto);
+        for(CstInto cst : list){
+            // 入住状态
+            if(cst.getIntoRole() == 0 || cst.getIntoRole() == 2){
+                if(cst.getIntoStatus() == Constant.INTO_STATUS_N){
+                    cst.setIntoStatusName("未入住");
+                }else if(cst.getIntoStatus() == Constant.INTO_STATUS_Y){
+                    cst.setIntoStatusName("已入住");
+                } else if(cst.getIntoStatus() == Constant.INTO_STATUS_U){
+                    cst.setIntoStatusName("已解绑");
+                }
+            }else if(cst.getIntoRole() == 1 || cst.getIntoRole() == 3){
+                if(cst.getHouseIntoStatus() == Constant.INTO_STATUS_N){
+                    cst.setIntoStatusName("未入住");
+                }else if(cst.getHouseIntoStatus() == Constant.INTO_STATUS_Y){
+                    cst.setIntoStatusName("已入住");
+                } else if(cst.getHouseIntoStatus() == Constant.INTO_STATUS_U){
+                    cst.setIntoStatusName("已解绑");
+                }else if(cst.getHouseIntoStatus() == Constant.INTO_STATUS_A){
+                    cst.setIntoStatusName("待审核");
+                }
+            }
+
+            // 入住身份
+            if(cst.getIntoRole() == Constant.INTO_ROLE_CST){
+                cst.setIntoRoleName("客户");
+            } else if(cst.getIntoRole() == Constant.INTO_ROLE_ENTRUST){
+                cst.setIntoRoleName("员工");
+            } else if(cst.getIntoRole() == Constant.INTO_ROLE_PROPERTY_OWNER){
+                cst.setIntoRoleName("产权人");
+            } else if(cst.getIntoRole() == Constant.INTO_ROLE_HOUSEHOLD){
+                cst.setIntoRoleName("住户");
+            }
+
+        }
         //logger.info("list:"+ JSON.toJSONString(list));
         PageInfo<CstInto> pageInfo = new PageInfo<>(list);
         //计算总页数

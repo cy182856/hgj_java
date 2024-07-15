@@ -1,35 +1,41 @@
-package com.ej.hgj.entity.cstInto;
+package com.ej.hgj.entity.visit;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
-public class CstInto {
+public class VisitLog {
+
     private String id;
 
-    private String projectNum;
+    private String passId;
 
-    private String projectName;
+    private String proNum;
+
+    private String proName;
+
+    private String passUrl;
+
+    private String randNum;
 
     private String wxOpenId;
 
     private String cstCode;
 
+    private String cstName;
+
+    private String cstMobile;
+
     private String houseId;
 
-    private String resName;
+    // 访客姓名
+    private String visitName;
 
-    private Integer intoRole;
-
-    private Integer intoStatus;
-
-    private String userName;
-
-    private String cstName;
+    // 车牌号
+    private String carNum;
 
     private String createBy;
 
@@ -45,16 +51,14 @@ public class CstInto {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
-    private String cstIntoHouseId;
+    private String houseName;
 
-    private Integer houseIntoStatus;
+    // 生效日期
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date effectuateDate;
 
     private String startTime;
 
     private String endTime;
-
-    private String intoStatusName;
-
-    private String intoRoleName;
-
 }
