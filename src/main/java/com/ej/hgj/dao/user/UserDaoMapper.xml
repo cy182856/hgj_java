@@ -59,12 +59,12 @@
     </select>
 
     <!-- 根据主键查询-->
-<!--    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >-->
-<!--        select-->
-<!--            <include refid="Base_Column_List" />-->
-<!--        from t_user-->
-<!--        where staff_id = #{id}-->
-<!--    </select>-->
+    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            <include refid="Base_Column_List" />
+        from t_user
+        where id = #{id}
+    </select>
 
     <!-- 根据userId查询-->
     <select id="getByUserId" resultMap="BaseMap" parameterType="java.lang.String" >
@@ -142,7 +142,13 @@
                 and r.role_name is null
             </if>
             <if test="mobile != null and mobile != ''">
-                and u.mobile like CONCAT('%', #{mobile,jdbcType=VARCHAR},'%') ESCAPE '/'
+                and u.mobile = #{mobile,jdbcType=VARCHAR}
+            </if>
+            <if test="projectNum != null and projectNum != ''">
+                and u.project_num = #{projectNum,jdbcType=VARCHAR}
+            </if>
+            <if test="corpId != null and corpId != ''">
+                and u.corp_id = #{corpId,jdbcType=VARCHAR}
             </if>
             order by r.role_name desc, id
 
@@ -259,6 +265,9 @@
             </if>
             <if test="mobile != null">
                 mobile = #{mobile,jdbcType=VARCHAR},
+            </if>
+            <if test="qrCode != null">
+                qr_code = #{qrCode,jdbcType=VARCHAR},
             </if>
             <if test="updateTime != null">
                 update_time = #{updateTime,jdbcType=TIMESTAMP},

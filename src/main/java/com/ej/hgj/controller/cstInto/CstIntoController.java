@@ -6,6 +6,7 @@ import com.ej.hgj.dao.cstInto.CstIntoDaoMapper;
 import com.ej.hgj.dao.cstInto.CstIntoHouseDaoMapper;
 import com.ej.hgj.entity.cstInto.CstInto;
 import com.ej.hgj.entity.cstInto.CstIntoHouse;
+import com.ej.hgj.entity.house.HgjHouse;
 import com.ej.hgj.entity.role.Role;
 import com.ej.hgj.entity.user.User;
 import com.ej.hgj.entity.user.UserRole;
@@ -13,6 +14,7 @@ import com.ej.hgj.service.cstInto.CstIntoService;
 import com.ej.hgj.service.role.RoleMenuService;
 import com.ej.hgj.service.role.RoleService;
 import com.ej.hgj.service.user.UserRoleService;
+import com.ej.hgj.sy.dao.house.SyHouseDaoMapper;
 import com.ej.hgj.utils.GenerateUniqueIdUtil;
 import com.ej.hgj.utils.TimestampGenerator;
 import com.github.pagehelper.PageHelper;
@@ -46,6 +48,9 @@ public class CstIntoController {
 
     @Autowired
     private CstIntoHouseDaoMapper cstIntoHouseDaoMapper;
+
+    @Autowired
+    private SyHouseDaoMapper syHouseDaoMapper;
 
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(@RequestParam(value = "page",defaultValue = "1") int page,
@@ -91,6 +96,18 @@ public class CstIntoController {
                 cst.setIntoRoleName("住户");
             }
 
+            // 客户、产权人查询所有房间号
+            List<String> houseList = new ArrayList<>();
+            HgjHouse hgjHouse = new HgjHouse();
+            hgjHouse.setCstCode(cst.getCstCode());
+            List<HgjHouse> hgjHouseList = syHouseDaoMapper.getListByCstCode(hgjHouse);
+            if(!hgjHouseList.isEmpty()){
+                for(HgjHouse house : hgjHouseList){
+                    houseList.add(house.getResName());
+                }
+            }
+
+            cst.setHouseList(houseList);
         }
         //logger.info("list:"+ JSON.toJSONString(list));
         PageInfo<CstInto> pageInfo = new PageInfo<>(list);

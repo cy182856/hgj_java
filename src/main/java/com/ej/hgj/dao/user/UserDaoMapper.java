@@ -11,7 +11,7 @@ import java.util.List;
 @Component
 public interface UserDaoMapper {
 
-    //User getById(String id);
+    User getById(String id);
 
     User getByUserId(String userId);
 

@@ -43,6 +43,9 @@ public class AdvertsController {
                            @RequestParam(value = "limit",defaultValue = "10") int limit,
                            Adverts adverts){
         AjaxResult ajaxResult = new AjaxResult();
+        if(StringUtils.isNotBlank(adverts.getEndTime())){
+            adverts.setEndTime(adverts.getEndTime() + " 23:59:59");
+        }
         HashMap map = new HashMap();
         PageHelper.offsetPage((page-1) * limit,limit);
         List<Adverts> list = advertsDaoMapper.getList(adverts);
@@ -171,8 +174,10 @@ public class AdvertsController {
         advertsDaoMapper.delete(id);
         // 删除图片
         Adverts adverts = advertsDaoMapper.getById(id);
-        File file = new File(adverts.getImgPath());
-        file.delete();
+        if(StringUtils.isNotBlank(adverts.getImgPath())){
+            File file = new File(adverts.getImgPath());
+            file.delete();
+        }
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;

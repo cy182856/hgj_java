@@ -73,6 +73,12 @@
         <if test="orgId != null and orgId != '' ">
             and c.org_id = #{orgId,jdbcType=VARCHAR}
         </if>
+        <if test="proNumList != null and proNumList.size() > 0">
+            and c.org_id in
+            <foreach collection="proNumList" item="proNum" index="index" open="(" close=")" separator=",">
+                #{proNum,jdbcType=INTEGER}
+            </foreach>
+        </if>
     </select>
 
     <!-- 根据资源ID查询客户名称-->

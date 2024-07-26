@@ -29,4 +29,5 @@ public class ProConfig {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
+    private List<String> proNumList;
 }

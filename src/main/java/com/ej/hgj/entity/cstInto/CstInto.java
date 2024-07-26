@@ -57,4 +57,6 @@ public class CstInto {
 
     private String intoRoleName;
 
+    private List<String> houseList;
+
 }

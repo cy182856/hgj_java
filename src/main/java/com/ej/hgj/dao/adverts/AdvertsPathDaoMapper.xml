@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ej.hgj.dao.config.ProConfDaoMapper">
+<mapper namespace="com.ej.hgj.dao.adverts.AdvertsPathDaoMapper">
 
-    <resultMap id="BaseMap" type="com.ej.hgj.entity.config.ProConfig">
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.adverts.AdvertsPath">
         <result column="id" jdbcType="VARCHAR" property="id"/>
-        <result column="project_num" jdbcType="VARCHAR" property="projectNum"/>
-        <result column="project_name" jdbcType="VARCHAR" property="projectName"/>
+        <result column="path_name" jdbcType="VARCHAR" property="pathName"/>
+        <result column="adverts_path" jdbcType="VARCHAR" property="advertsPath"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -13,7 +13,7 @@
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
     </resultMap>
     <sql id="Base_Column_List" >
-        id, project_num, project_name, create_time, update_time, create_by,
+        id, path_name, adverts_path, create_time, update_time, create_by,
         update_by, delete_flag
     </sql>
 
@@ -21,58 +21,33 @@
     <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
         select
             <include refid="Base_Column_List" />
-        from t_pro_config
+        from t_adverts_path
         where id = #{id}
     </select>
 
-    <!-- 根据项目号查询-->
-    <select id="getByProjectNum" resultMap="BaseMap" parameterType="java.lang.String" >
-        select
-        <include refid="Base_Column_List" />
-        from t_pro_config
-        where delete_flag = 0 and project_num = #{projectNum}
-    </select>
-
-    <!-- 根据企业号查询-->
-    <select id="getByCorpId" resultMap="BaseMap" parameterType="java.lang.String" >
-        select
-        <include refid="Base_Column_List" />
-        from t_pro_config
-        where delete_flag = 0 and corp_id = #{corpId}
-    </select>
-
     <!-- 查询列表-->
-    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.config.ProConfig">
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.adverts.AdvertsPath">
         select
         <include refid="Base_Column_List" />
-        from t_pro_config
+        from t_adverts_path
         where delete_flag = 0
-        <if test="projectNum != null">
-            and project_num = #{projectNum,jdbcType=VARCHAR}
-        </if>
-        <if test="projectName != null">
-            and project_name like CONCAT('%', #{projectName,jdbcType=VARCHAR},'%') ESCAPE '/'
-        </if>
-        <if test="proNumList != null and proNumList.size() > 0">
-            and project_num in
-            <foreach collection="proNumList" item="proNum" index="index" open="(" close=")" separator=",">
-                #{proNum,jdbcType=INTEGER}
-            </foreach>
+        <if test="pathName != null and pathName != ''">
+            and path_name like CONCAT('%', #{pathName,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
         order by update_time desc
     </select>
 
     <!-- 保存-->
-    <insert id="save" parameterType="com.ej.hgj.entity.role.Role" >
-        insert into  t_pro_config(
+    <insert id="save" parameterType="com.ej.hgj.entity.adverts.AdvertsPath" >
+        insert into t_adverts_path(
         <if test="id != null">
             id,
         </if>
-        <if test="projectNum != null">
-            project_num,
+        <if test="pathName != null">
+            path_name,
         </if>
-        <if test="projectName != null">
-            project_name,
+        <if test="advertsPath != null">
+            adverts_path,
         </if>
         <if test="createTime != null">
             create_time,
@@ -94,11 +69,11 @@
             <if test="id != null" >
                 #{id,jdbcType=VARCHAR},
             </if>
-            <if test="projectNum != null" >
-                #{projectNum,jdbcType=VARCHAR},
+            <if test="pathName != null" >
+                #{pathName,jdbcType=VARCHAR},
             </if>
-            <if test="projectName != null" >
-                #{projectName,jdbcType=VARCHAR},
+            <if test="advertsPath != null" >
+                #{advertsPath,jdbcType=VARCHAR},
             </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
@@ -118,16 +93,36 @@
         </trim>
     </insert>
 
+    <!-- 批量插入-->
+    <insert id="insertList" parameterType="java.util.List">
+        insert into t_adverts_path (
+        id, path_name, adverts_path, create_time, update_time, create_by, update_by, delete_flag
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.pathName,jdbcType=VARCHAR},
+            #{item.advertsPath,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.deleteFlag,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+
     <!-- 更新-->
-    <update id="update" parameterType="com.ej.hgj.entity.role.Role" >
+    <update id="update" parameterType="com.ej.hgj.entity.adverts.AdvertsPath" >
         update
-        t_pro_config
+        t_adverts_path
         <set>
-            <if test="projectName != null">
-                project_name = #{projectName,jdbcType=VARCHAR},
+            <if test="pathName != null">
+                path_name = #{pathName,jdbcType=VARCHAR},
             </if>
-            <if test="updateBy != null">
-                update_by = #{updateBy,jdbcType=VARCHAR},
+            <if test="advertsPath != null">
+                adverts_path = #{advertsPath,jdbcType=VARCHAR},
             </if>
             <if test="updateTime != null">
                 update_time = #{updateTime,jdbcType=TIMESTAMP},
@@ -138,7 +133,7 @@
 
     <!-- 删除-->
     <update id="delete" parameterType="java.lang.String" >
-        delete from t_pro_config where id=#{id}
+        update t_adverts_path set delete_flag = 1 where id=#{id}
     </update>
 
 </mapper>

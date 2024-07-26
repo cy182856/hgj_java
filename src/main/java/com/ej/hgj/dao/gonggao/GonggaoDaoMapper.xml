@@ -5,6 +5,7 @@
     <resultMap id="BaseMap" type="com.ej.hgj.entity.gonggao.Gonggao">
         <result column="id" jdbcType="VARCHAR" property="id"/>
         <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
+        <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
         <result column="article_id" jdbcType="VARCHAR" property="articleId"/>
         <result column="media_id" jdbcType="VARCHAR" property="mediaId"/>
         <result column="type" jdbcType="VARCHAR" property="type"/>
@@ -12,6 +13,7 @@
         <result column="title" jdbcType="VARCHAR" property="title"/>
         <result column="author" jdbcType="VARCHAR" property="author"/>
         <result column="is_deleted" jdbcType="VARCHAR" property="isDeleted"/>
+        <result column="file_path" jdbcType="VARCHAR" property="filePath"/>
         <result column="url" jdbcType="VARCHAR" property="url"/>
         <result column="thumb_url" jdbcType="VARCHAR" property="thumbUrl"/>
         <result column="is_show" jdbcType="INTEGER" property="isShow"/>
@@ -23,7 +25,7 @@
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
     </resultMap>
     <sql id="Base_Column_List" >
-        id, pro_num, article_id, media_id, `type`, title, author, is_deleted, url, thumb_url, is_show, `source`, create_time, update_time, create_by,
+        id, pro_num, article_id, media_id, `type`, title, author, is_deleted, file_path, url, thumb_url, is_show, `source`, create_time, update_time, create_by,
         update_by, delete_flag
     </sql>
 
@@ -38,13 +40,15 @@
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.gonggao.Gonggao">
         select
-        g.*,t.name as type_name
-        from t_gonggao g left join t_gonggao_type t on g.type = t.id
-        where g.delete_flag = 0
+        g.*,t.name as type_name,pc.project_name as pro_name
+        from t_gonggao g
+            left join t_gonggao_type t on g.type = t.id
+            left join t_pro_config pc ON pc.project_num = g.pro_num
+        where g.delete_flag = 0 and g.`source` = 2
         <if test="title != null">
             and g.title like CONCAT('%', #{title,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
-        <if test="proNum != null">
+        <if test="proNum != null and proNum != ''">
             and g.pro_num = #{proNum,jdbcType=VARCHAR}
         </if>
         order by g.update_time desc
@@ -76,6 +80,9 @@
         </if>
         <if test="isDeleted != null">
             is_deleted,
+        </if>
+        <if test="filePath != null">
+            file_path,
         </if>
         <if test="url != null">
             url,
@@ -129,6 +136,9 @@
             </if>
             <if test="isDeleted != null" >
                 #{isDeleted,jdbcType=VARCHAR},
+            </if>
+            <if test="filePath != null" >
+                #{filePath,jdbcType=VARCHAR},
             </if>
             <if test="url != null" >
                 #{url,jdbcType=VARCHAR},
@@ -200,6 +210,12 @@
             </if>
             <if test="type != null">
                 `type` = #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="proNum != null">
+                pro_num = #{proNum,jdbcType=VARCHAR},
+            </if>
+            <if test="title != null">
+                title = #{title,jdbcType=VARCHAR},
             </if>
             <if test="updateTime != null">
                 update_time = #{updateTime,jdbcType=TIMESTAMP},

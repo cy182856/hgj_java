@@ -9,12 +9,16 @@
         <result column="title" jdbcType="VARCHAR" property="title"/>
         <result column="img_path" jdbcType="VARCHAR" property="imgPath"/>
         <result column="url" jdbcType="VARCHAR" property="url"/>
+        <result column="adverts_path_id" jdbcType="VARCHAR" property="advertsPathId"/>
         <result column="is_show" jdbcType="INTEGER" property="isShow"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+
+        <result column="path_name" jdbcType="VARCHAR" property="pathName"/>
+
     </resultMap>
     <sql id="Base_Column_List" >
         id, pro_num, title, img_path, url, is_show, create_time, update_time, create_by,
@@ -32,14 +36,19 @@
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.adverts.Adverts">
         select
-            a.*,p.project_name as pro_name
-        from t_adverts a left join t_pro_config p on a.pro_num = p.project_num
+            a.*,p.project_name as pro_name, ap.path_name
+        from t_adverts a
+            left join t_pro_config p on a.pro_num = p.project_num
+            left join t_adverts_path ap on ap.id = a.adverts_path_id and ap.delete_flag = 0
         where a.delete_flag = 0
         <if test="title != null and title != ''">
             and a.title like CONCAT('%', #{title,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
         <if test="proNum != null and proNum != ''">
             and a.pro_num = #{proNum,jdbcType=VARCHAR}
+        </if>
+        <if test="advertsPathId != null and advertsPathId != ''">
+            and a.adverts_path_id = #{advertsPathId,jdbcType=VARCHAR}
         </if>
         <if test="startTime != null and startTime != ''">
             and a.create_time >= #{startTime,jdbcType=VARCHAR}
@@ -67,6 +76,9 @@
         </if>
         <if test="url != null">
             url,
+        </if>
+        <if test="advertsPathId != null">
+            adverts_path_id,
         </if>
         <if test="isShow != null">
             is_show,
@@ -103,6 +115,9 @@
             <if test="url != null" >
                 #{url,jdbcType=VARCHAR},
             </if>
+            <if test="advertsPathId != null" >
+                #{advertsPathId,jdbcType=VARCHAR},
+            </if>
             <if test="isShow != null" >
                 #{isShow,jdbcType=INTEGER},
             </if>
@@ -127,7 +142,7 @@
     <!-- 批量插入-->
     <insert id="insertList" parameterType="java.util.List">
         insert into t_adverts (
-        id, pro_num, title, img_path, url, is_show, create_time, update_time, create_by,
+        id, pro_num, title, img_path, url, advertsPathId, is_show, create_time, update_time, create_by,
         update_by, delete_flag
         )
         VALUES
@@ -138,6 +153,7 @@
             #{item.title,jdbcType=VARCHAR},
             #{item.imgPath,jdbcType=VARCHAR},
             #{item.url,jdbcType=VARCHAR},
+            #{item.advertsPathId,jdbcType=VARCHAR},
             #{item.isShow,jdbcType=INTEGER},
             #{item.createTime,jdbcType=TIMESTAMP},
             #{item.updateTime,jdbcType=TIMESTAMP},
@@ -164,6 +180,9 @@
             </if>
             <if test="url != null">
                 url = #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="advertsPathId != null">
+                adverts_path_id = #{advertsPathId,jdbcType=VARCHAR},
             </if>
             <if test="imgPath != null">
                 img_path = #{imgPath,jdbcType=VARCHAR},

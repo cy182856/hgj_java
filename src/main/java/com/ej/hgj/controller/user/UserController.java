@@ -10,6 +10,7 @@ import com.ej.hgj.dao.config.ProConfDaoMapper;
 import com.ej.hgj.dao.corp.CorpDaoMapper;
 import com.ej.hgj.dao.user.UserDaoMapper;
 import com.ej.hgj.dao.user.UserDutyPhoneDaoMapper;
+import com.ej.hgj.entity.adverts.Adverts;
 import com.ej.hgj.entity.build.Build;
 import com.ej.hgj.entity.config.ConstantConfig;
 import com.ej.hgj.entity.config.ProConfig;
@@ -24,19 +25,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,6 +68,9 @@ public class UserController {
     @Autowired
     private UserDaoMapper userDaoMapper;
 
+    @Value("${upload.path}")
+    private String uploadPath;
+
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(@RequestParam(value = "page",defaultValue = "1") int page,
                            @RequestParam(value = "limit",defaultValue = "10") int limit,
@@ -90,6 +96,21 @@ public class UserController {
             List<UserDutyPhone> userDutyPhoneListFilter = userDutyPhoneList.stream().filter(dutyPhone -> dutyPhone.getMobile().equals(user1.getUserId())).collect(Collectors.toList());
             if (!userDutyPhoneListFilter.isEmpty()) {
                 user1.setPhone(userDutyPhoneListFilter.get(0).getPhone());
+            }
+
+            // 企微二维码
+            if(StringUtils.isNotBlank(user1.getQrCode())){
+                String base64Image = "";
+                try {
+                    BufferedImage image = ImageIO.read(new File(user1.getQrCode()));
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    ImageIO.write(image, "png", baos);
+                    byte[] imageBytes = baos.toByteArray();
+                    base64Image = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                user1.setQrCode(base64Image);
             }
 
         }
@@ -172,6 +193,49 @@ public class UserController {
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;
+    }
+
+    // 上传文件
+    @PostMapping("/file/upload")
+    public AjaxResult upload(@RequestParam("file") MultipartFile file, String userKey) throws IOException {
+        AjaxResult ajaxResult = new AjaxResult();
+        String qrCodePath = uploadFile(file, userKey);
+        User user = userDaoMapper.getById(userKey);
+        user.setQrCode(qrCodePath);
+        user.setUpdateTime(new Date());
+        userDaoMapper.updateById(user);
+        ajaxResult.setCode(20000);
+        ajaxResult.setMessage("成功");
+        return ajaxResult;
+    }
+
+    public String uploadFile(MultipartFile file, String id) {
+        String path = "";
+        if (file != null) {
+            //目录不存在则直接创建
+            File filePath = new File(uploadPath + "/user");
+            if (!filePath.exists()) {
+                filePath.mkdirs();
+            }
+            //创建年月日文件夹
+            File ymdFile = new File(uploadPath + "/user" + File.separator + new SimpleDateFormat("yyyyMMdd").format(new Date()));
+            //目录不存在则直接创建
+            if (!ymdFile.exists()) {
+                ymdFile.mkdirs();
+            }
+            String uploadPath = ymdFile.getPath();
+            //获取文件名
+            String fileName = file.getOriginalFilename();
+            int lastIndex = fileName.lastIndexOf('.');
+            String fileExtension = fileName.substring(lastIndex + 1);
+            path = uploadPath + "/" + id+"."+fileExtension;
+            try {
+                file.transferTo(new File(path));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return path;
     }
 
     public String getAccessToken(String cropId, String addressBookSecret) {

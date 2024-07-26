@@ -128,4 +128,5 @@ public class Constant {
      * 第三方应用的suite_ticket
      */
     public static final String SUITE_TICKET = "suite_ticket";
+
 }

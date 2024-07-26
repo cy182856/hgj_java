@@ -28,6 +28,8 @@ public class Gonggao {
 
     private String isDeleted;
 
+    private String filePath;
+
     private String url;
 
     private String thumbUrl;
@@ -51,5 +53,7 @@ public class Gonggao {
     private Date createTime;
 
     private String content;
+
+    private String proName;
 
 }

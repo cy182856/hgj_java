@@ -7,21 +7,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Data
-public class Adverts {
+public class AdvertsPath {
 
     private String id;
 
-    private String advertsPathId;
+    private String pathName;
 
-    private String proNum;
-
-    private String title;
-
-    private String imgPath;
-
-    private String url;
-
-    private Integer isShow;
+    private String advertsPath;
 
     private String createBy;
 
@@ -37,12 +29,5 @@ public class Adverts {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
-    private String startTime;
-
-    private String endTime;
-
-    private String proName;
-
-    private String pathName;
 
 }
