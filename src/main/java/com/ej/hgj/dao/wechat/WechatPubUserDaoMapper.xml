@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ej.hgj.dao.wechat.WechatPubDaoMapper">
+<mapper namespace="com.ej.hgj.dao.wechat.WechatPubUserDaoMapper">
 
-    <resultMap id="BaseMap" type="com.ej.hgj.entity.wechat.WechatPub">
-        <result column="id" jdbcType="INTEGER" property="id"/>
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.wechat.WechatPubUser">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
         <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
         <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
-        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="pub_name" jdbcType="VARCHAR" property="pubName"/>
         <result column="original_id" jdbcType="VARCHAR" property="originalId"/>
         <result column="app_id" jdbcType="VARCHAR" property="appId"/>
-        <result column="app_secret" jdbcType="VARCHAR" property="appSecret"/>
+        <result column="open_id" jdbcType="VARCHAR" property="openid"/>
+        <result column="union_id" jdbcType="VARCHAR" property="unionid"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -17,7 +18,7 @@
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
     </resultMap>
     <sql id="Base_Column_List" >
-        id, pro_num, pro_name, `name`, original_id, app_id, app_secret, create_time, update_time, create_by,
+        id, pro_num, pro_name, pub_name, original_id, app_id, open_id, union_id, create_time, update_time, create_by,
         update_by, delete_flag
     </sql>
 
@@ -25,22 +26,15 @@
     <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
         select
             <include refid="Base_Column_List" />
-        from t_wechat_pub
+        from t_wechat_pub_user
         where id = #{id}
     </select>
 
-    <!-- 查询最大ID-->
-    <select id="getMaxId" resultMap="BaseMap" >
-        select
-            max(id) as id
-        from t_wechat_pub
-    </select>
-
     <!-- 查询列表-->
-    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.wechat.WechatPub">
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.wechat.WechatPubUser">
         select
         <include refid="Base_Column_List" />
-        from t_wechat_pub
+        from t_wechat_pub_user
         where delete_flag = 0
         <if test="name != null">
             and `name` like CONCAT('%', #{name,jdbcType=VARCHAR},'%') ESCAPE '/'
@@ -54,9 +48,9 @@
     </select>
 
     <!-- 更新-->
-    <update id="update" parameterType="com.ej.hgj.entity.wechat.WechatPub" >
+    <update id="update" parameterType="com.ej.hgj.entity.wechat.WechatPubUser" >
         update
-        t_wechat_pub
+        t_wechat_pub_user
         <set>
             <if test="proNum != null">
                 pro_num = #{proNum,jdbcType=VARCHAR},
@@ -87,8 +81,8 @@
     </update>
 
     <!-- 保存-->
-    <insert id="save" parameterType="com.ej.hgj.entity.wechat.WechatPub" >
-        insert into  t_wechat_pub(
+    <insert id="save" parameterType="com.ej.hgj.entity.wechat.WechatPubUser" >
+        insert into  t_wechat_pub_user(
         <if test="id != null">
             id,
         </if>
@@ -98,8 +92,8 @@
         <if test="proName != null">
             pro_name,
         </if>
-        <if test="name != null">
-            `name`,
+        <if test="pubName != null">
+            pub_name,
         </if>
         <if test="originalId != null">
             original_id,
@@ -107,8 +101,11 @@
         <if test="appId != null">
             app_id,
         </if>
-        <if test="appSecret != null">
-            app_secret,
+        <if test="openid != null">
+            open_id,
+        </if>
+        <if test="unionid != null">
+            union_id,
         </if>
         <if test="createTime != null">
             create_time,
@@ -128,7 +125,7 @@
         )
         <trim prefix="values (" suffix=")" suffixOverrides="," >
             <if test="id != null" >
-                #{id,jdbcType=INTEGER},
+                #{id,jdbcType=VARCHAR},
             </if>
             <if test="proNum != null" >
                 #{proNum,jdbcType=VARCHAR},
@@ -136,8 +133,8 @@
             <if test="proName != null" >
                 #{proName,jdbcType=VARCHAR},
             </if>
-            <if test="name != null" >
-                #{name,jdbcType=VARCHAR},
+            <if test="pubName != null" >
+                #{pubName,jdbcType=VARCHAR},
             </if>
             <if test="originalId != null" >
                 #{originalId,jdbcType=VARCHAR},
@@ -145,8 +142,11 @@
             <if test="appId != null" >
                 #{appId,jdbcType=VARCHAR},
             </if>
-            <if test="appSecret != null" >
-                #{appSecret,jdbcType=VARCHAR},
+            <if test="openid != null" >
+                #{openid,jdbcType=VARCHAR},
+            </if>
+            <if test="unionid != null" >
+                #{unionid,jdbcType=VARCHAR},
             </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
@@ -165,5 +165,36 @@
             </if>
         </trim>
     </insert>
+
+    <!-- 批量插入-->
+    <insert id="insertList" parameterType="java.util.List">
+        insert into t_wechat_pub_user (
+        id, pro_num, pro_name, pub_name, original_id, app_id, open_id, union_id, create_time, update_time, create_by,
+        update_by, delete_flag
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.proNum,jdbcType=VARCHAR},
+            #{item.proName,jdbcType=VARCHAR},
+            #{item.pubName,jdbcType=VARCHAR},
+            #{item.originalId,jdbcType=VARCHAR},
+            #{item.appId,jdbcType=VARCHAR},
+            #{item.openid,jdbcType=VARCHAR},
+            #{item.unionid,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.deleteFlag,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 删除-->
+    <delete id="deleteByWechatPub" parameterType="java.lang.String" >
+        delete from t_wechat_pub_user where app_id=#{appId}
+    </delete>
 
 </mapper>

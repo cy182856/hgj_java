@@ -140,12 +140,14 @@ public class CstIntoServiceImpl implements CstIntoService {
         // 判断是否是客户、业主
         CstInto cstInto = cstIntoDaoMapper.getById(id);
         if(cstInto.getIntoRole() == Constant.INTO_ROLE_CST || cstInto.getIntoRole() == Constant.INTO_ROLE_PROPERTY_OWNER){
-            // 查询已入住该客户的委托人或者住户
+            // 查询已入住该客户的员工或者住户
             List<CstInto> cstIntoList = cstIntoDaoMapper.getByCstCode(cstInto.getCstCode());
-            // 客户、业主解绑需要先解除委托人、住户
-            if(!cstIntoList.isEmpty()){
+            // 查询已入住该客户的客户或者产权人
+            List<CstInto> cstIntoList2 = cstIntoDaoMapper.getByCstCode2(cstInto.getCstCode());
+            // 客户、业主解绑需要先解除员工、住户 ， 入住的客户或者产权人数量大于1的时候才能解除， 至少需要保留1个客户或者产权人
+            if(!cstIntoList.isEmpty() && !cstIntoList2.isEmpty() && cstIntoList2.size() == 1){
                 ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
-                ajaxResult.setMessage("请先解除委托人或者住户");
+                ajaxResult.setMessage("请先解除员工或者住户");
                 return ajaxResult;
             }else {
                 CstInto cst = new CstInto();

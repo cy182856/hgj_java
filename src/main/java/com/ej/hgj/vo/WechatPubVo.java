@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 微信公众号
@@ -14,5 +15,13 @@ import java.util.Date;
 public class WechatPubVo {
 
     private String[] id;
+
+    private String count;
+
+    private String total;
+
+    private String nextOpenId;
+
+    private List<String> openIdList;
 
 }

@@ -1,18 +1,22 @@
 package com.ej.hgj.controller.wechat;
 
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.wechat.WechatPubDaoMapper;
 import com.ej.hgj.dao.wechat.WechatPubMenuDaoMapper;
-import com.ej.hgj.entity.build.Build;
+import com.ej.hgj.dao.wechat.WechatPubUserDaoMapper;
 import com.ej.hgj.entity.gonggao.Gonggao;
-import com.ej.hgj.entity.user.User;
 import com.ej.hgj.entity.wechat.WechatPub;
 import com.ej.hgj.entity.wechat.WechatPubMenu;
-import com.ej.hgj.service.house.HouseService;
+import com.ej.hgj.entity.wechat.WechatPubUser;
+import com.ej.hgj.utils.GenerateUniqueIdUtil;
+import com.ej.hgj.utils.HttpClientUtil;
 import com.ej.hgj.utils.TimestampGenerator;
+import com.ej.hgj.vo.WechatPubOpenId;
+import com.ej.hgj.vo.WechatPubOpenIdVo;
 import com.ej.hgj.vo.WechatPubVo;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -26,10 +30,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @CrossOrigin
@@ -44,6 +45,9 @@ public class WechatServiceController {
 
     @Autowired
     private WechatPubMenuDaoMapper wechatPubMenuDaoMapper;
+
+    @Autowired
+    private WechatPubUserDaoMapper wechatPubUserDaoMapper;
 
     @RequestMapping(value = "/addMenu",method = RequestMethod.POST)
     public AjaxResult addMenu(@RequestBody WechatPubVo wechatPubVo) throws Exception {
@@ -378,6 +382,131 @@ public class WechatServiceController {
         ajaxResult.setData(map);
         //logger.info("responseMsg:"+ JSON.toJSONString(ajaxResult));
         return ajaxResult;
+    }
+
+    @RequestMapping(value = "/addUser",method = RequestMethod.POST)
+    public AjaxResult addUser(@RequestBody WechatPubVo wechatPubVo) throws Exception {
+        AjaxResult ajaxResult = new AjaxResult();
+        String message = "成功";
+        String[] ids = wechatPubVo.getId();
+        WechatPub wechatPub = new WechatPub();
+        if(ids.length > 0){
+            for(int i=0;i<ids.length;i++){
+                // 根据id查询公众号
+                wechatPub.setId(Integer.valueOf(ids[i]));
+                List<WechatPub> wechatPubList = wechatPubDaoMapper.getList(wechatPub);
+                if (!wechatPubList.isEmpty()) {
+                    for (WechatPub wp : wechatPubList) {
+                        addUser(wp);
+                    }
+                }
+            }
+        }else {
+            // 查询所有公众号
+            List<WechatPub> wechatPubList = wechatPubDaoMapper.getList(wechatPub);
+            if (!wechatPubList.isEmpty()) {
+                for (WechatPub wp : wechatPubList) {
+                    addUser(wp);
+                }
+            }
+        }
+        ajaxResult.setCode(20000);
+        ajaxResult.setMessage(message);
+        return ajaxResult;
+    }
+
+    public void addUser(WechatPub wechatPub) throws Exception {
+        // 根据项目号删除用户，在插入
+        wechatPubUserDaoMapper.deleteByWechatPub(wechatPub.getAppId());
+        List<String> openIdListAll = new ArrayList<>();
+        String pubToken = getPubToken(wechatPub.getAppId(),wechatPub.getAppSecret());
+        WechatPubVo wechatPubVo = getUserOpenidList(pubToken,null);
+        // 每页条数
+        int pageSize = 10000;
+        // 总条数
+        int total = Integer.valueOf(wechatPubVo.getTotal());
+        // 总页数
+        int totalPages = (total + pageSize - 1) / pageSize;
+        WechatPubVo w = new WechatPubVo();
+        for(int i = 1; i <= totalPages; i++){
+            if(i == 1){
+                w = getUserOpenidList(pubToken,null);
+            }else {
+                w = getUserOpenidList(pubToken,w.getNextOpenId());
+            }
+            openIdListAll.addAll(w.getOpenIdList());
+        }
+
+        // 根据用户公众号openId获取unionId
+        List<List<String>> partitions = new ArrayList<>();
+        // 将openid集合分为100条每组
+        int listSize = openIdListAll.size();
+        for (int i = 0; i < listSize; i += 100) {
+            partitions.add(openIdListAll.subList(i, Math.min(i + 100, listSize)));
+        }
+
+        for(List<String> list : partitions){
+            List<WechatPubOpenId> wechatPubOpenIds = new ArrayList<>();
+           for(String openId : list){
+               WechatPubOpenId wechatPubOpenId = new WechatPubOpenId();
+               wechatPubOpenId.setOpenid(openId);
+               wechatPubOpenIds.add(wechatPubOpenId);
+           }
+           WechatPubOpenIdVo wechatPubOpenIdVo = new WechatPubOpenIdVo();
+           wechatPubOpenIdVo.setUser_list(wechatPubOpenIds);
+           String userList = JSONObject.toJSONString(wechatPubOpenIdVo);
+           String url = "https://api.weixin.qq.com/cgi-bin/user/info/batchget?access_token="+pubToken;
+           JSONObject jsonObjectPost = HttpClientUtil.httpRequest(url, "POST", userList);
+           JSONArray jsonArrayUserInfoList = jsonObjectPost.getJSONArray("user_info_list");
+           List<WechatPubUser> wechatPubUserList = jsonArrayUserInfoList.toJavaList(WechatPubUser.class);
+           for(WechatPubUser wechatPubUser : wechatPubUserList){
+               wechatPubUser.setId(TimestampGenerator.generateSerialNumber());
+               wechatPubUser.setProNum(wechatPub.getProNum());
+               wechatPubUser.setProName(wechatPub.getProName());
+               wechatPubUser.setPubName(wechatPub.getName());
+               wechatPubUser.setOriginalId(wechatPub.getOriginalId());
+               wechatPubUser.setAppId(wechatPub.getAppId());
+               wechatPubUser.setCreateBy("");
+               wechatPubUser.setCreateTime(new Date());
+               wechatPubUser.setUpdateBy("");
+               wechatPubUser.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+               wechatPubUser.setUpdateTime(new Date());
+           }
+           wechatPubUserDaoMapper.insertList(wechatPubUserList);
+
+        }
+    }
+
+    public String getPubToken(String appid, String secret) throws Exception {
+        String access_token_url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="+appid+"&secret="+secret;
+        JSONObject jsonObject = JSONObject.parseObject(HttpClientUtil.doGet(access_token_url));
+        logger.info("获取token返回jsonObject" + jsonObject);
+        String access_token = jsonObject.getString("access_token");
+        return access_token;
+    }
+
+    public WechatPubVo getUserOpenidList(String accessToken, String nextOpenId) throws Exception {
+        WechatPubVo wechatPubVo = new WechatPubVo();
+        String user_list_url = "";
+        if(StringUtils.isBlank(nextOpenId)){
+            user_list_url = "https://api.weixin.qq.com/cgi-bin/user/get?access_token="+accessToken;
+        }else {
+            user_list_url = "https://api.weixin.qq.com/cgi-bin/user/get?access_token="+accessToken+"&next_openid="+nextOpenId;
+        }
+        JSONObject jsonObject = JSONObject.parseObject(HttpClientUtil.doGet(user_list_url));
+        logger.info("获取用户返回jsonObject" + jsonObject);
+        String total = jsonObject.getString("total");
+        String count = jsonObject.getString("count");
+        String next_openid = jsonObject.getString("next_openid");
+        String data = jsonObject.getString("data");
+        JSONObject jsonData = JSONObject.parseObject(data);
+        JSONArray jsonArrayOpenIds = jsonData.getJSONArray("openid");
+        List<String> openIdList = jsonArrayOpenIds.toJavaList(String.class);
+        wechatPubVo.setTotal(total);
+        wechatPubVo.setCount(count);
+        wechatPubVo.setNextOpenId(next_openid);
+        wechatPubVo.setOpenIdList(openIdList);
+        return wechatPubVo;
     }
 
 }

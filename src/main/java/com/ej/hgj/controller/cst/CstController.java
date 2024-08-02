@@ -180,7 +180,7 @@ public class CstController {
             Date date = new Date();
             // 二维码创建时间
             map.put("qrCreateTime", DateUtils.wechatPubFormat(date));
-            // 委托人、住户查询所要入住的房间
+            // 员工、住户查询所要入住的房间
             List<String> houseList = new ArrayList<>();
             if("1".equals(intoVo.getIntoType()) || "3".equals(intoVo.getIntoType())){
                 List<HgjHouse> hgjHouseList = hgjHouseDaoMapper.getByCstIntoId(cstIntoId);

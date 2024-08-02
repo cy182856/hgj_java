@@ -13,6 +13,8 @@ public interface CstIntoDaoMapper {
 
     List<CstInto> getByCstCode(String cstCode);
 
+    List<CstInto> getByCstCode2(String cstCode);
+
     List<CstInto> getByCstCodeAndTime(String cstCode);
 
     List<CstInto> getList(CstInto cstInto);

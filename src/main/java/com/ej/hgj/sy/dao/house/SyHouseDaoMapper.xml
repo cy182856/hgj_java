@@ -66,6 +66,7 @@
                 code = #{cstCode,jdbcType=VARCHAR}
             )
         ) t
+        order by t.ResCode
     </select>
 
 </mapper>

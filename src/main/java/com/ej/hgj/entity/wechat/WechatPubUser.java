@@ -5,28 +5,29 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * 微信公众号
  * @version V1.0
  */
 @Data
-public class WechatPub {
+public class WechatPubUser {
 
-    private Integer id;
+    private String id;
 
     private String proNum;
 
     private String proName;
 
-    private String name;
-
-    private String originalId;
+    private String pubName;
 
     private String appId;
 
-    private String appSecret;
+    private String originalId;
+
+    private String openid;
+
+    private String unionid;
 
     private String createBy;
 

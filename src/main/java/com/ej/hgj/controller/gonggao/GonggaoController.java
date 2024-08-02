@@ -1,5 +1,7 @@
 package com.ej.hgj.controller.gonggao;
 
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -9,24 +11,15 @@ import com.ej.hgj.dao.config.ConstantConfDaoMapper;
 import com.ej.hgj.dao.config.ProConfDaoMapper;
 import com.ej.hgj.dao.gonggao.GonggaoDaoMapper;
 import com.ej.hgj.dao.gonggao.GonggaoTypeDaoMapper;
-import com.ej.hgj.entity.build.Build;
 import com.ej.hgj.entity.config.ConstantConfig;
 import com.ej.hgj.entity.config.ProConfig;
 import com.ej.hgj.entity.gonggao.Gonggao;
-import com.ej.hgj.utils.HttpClientUtil;
-import com.ej.hgj.utils.MyX509TrustManager;
-import com.ej.hgj.utils.TimestampGenerator;
+import com.ej.hgj.entity.wechat.*;
+import com.ej.hgj.utils.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -306,6 +299,47 @@ public class GonggaoController {
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;
+    }
+
+    @RequestMapping(value = "/sendMsg",method = RequestMethod.GET)
+    public AjaxResult sendMsg(@RequestParam(required=false, value = "id") String id) throws Exception {
+        AjaxResult ajaxResult = new AjaxResult();
+        String accessToken = JSONUtil.parseObj(HttpUtil.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="+"wx1e92221e543cdb18"+"&secret=" + "8f3e27e182751e75439c7f14ab62527c")).get("access_token").toString();
+        Miniprogram miniprogram = new Miniprogram("wxf2dfa410991adfcb", "pages/main/main");
+        TempleModelGongGaoXh templeModel = new TempleModelGongGaoXh();
+        templeModel.setThing18(new ModelData("新弘北外滩"));
+        templeModel.setTime8(new ModelData(DateUtils.strYmdHms()));
+        templeModel.setThing16(new ModelData("新公告通知"));
+        ModelMessageGongGaoXh modelMessage = new ModelMessageGongGaoXh("ovl7_6uVGIL4U3ckco33pgBHqqV8", "ts_1vX04ZgSR8e-oy88uGMUhsPz4IoETO-kZX3THFFU", templeModel, miniprogram);
+        String jsonMenu = JsonUtils.writeEntiry2JSON(modelMessage);
+        int resp = 0;
+        resp = newSendModel(jsonMenu, accessToken);
+        if (resp != 0) {
+            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+            ajaxResult.setMessage("微信模板消息推送失败");
+        }else {
+            ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+            ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        }
+        return ajaxResult;
+    }
+
+    public static int newSendModel(String jsonMenu, String accessToken) {
+        int result = -1;
+        String url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN".replace("ACCESS_TOKEN", accessToken);
+        jsonMenu = jsonMenu.replace("date", "Date").replace("money", "Money");
+        //}
+        JSONObject jsonObject = HttpClientUtil.sendPost(url, jsonMenu);
+        if (null != jsonObject) {
+            int errorCode = ((Integer) jsonObject.get("errcode"));
+            if (0 != errorCode) {
+                result = errorCode;
+            } else {
+                result = 0;
+            }
+        }
+
+        return result;
     }
 
     /**
