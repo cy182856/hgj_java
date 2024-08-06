@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.message.MsgTemplateDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.message.MsgTemplate">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
+        <result column="template_key" jdbcType="VARCHAR" property="templateKey"/>
+        <result column="template_id" jdbcType="VARCHAR" property="templateId"/>
+        <result column="template_data" jdbcType="VARCHAR" property="templateData"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, pro_num, template_key, template_id, template_data, status, description, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 根据key查询-->
+    <select id="getByKey" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_msg_template
+        where delete_flag = 0 and status = 0 and template_key = #{templateKey}
+    </select>
+
+    <!-- 根据项目号跟key查询-->
+    <select id="getByProNumAndKey" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_msg_template
+        where delete_flag = 0 and status = 0 and pro_num = #{proNum} and template_key = #{templateKey}
+    </select>
+
+</mapper>

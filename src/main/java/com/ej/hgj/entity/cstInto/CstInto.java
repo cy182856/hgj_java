@@ -15,6 +15,8 @@ public class CstInto {
 
     private String projectName;
 
+    private String unionId;
+
     private String wxOpenId;
 
     private String cstCode;
@@ -28,6 +30,8 @@ public class CstInto {
     private Integer intoStatus;
 
     private String userName;
+
+    private String phone;
 
     private String cstName;
 

@@ -218,13 +218,13 @@ public class CstController {
             String intoRole = "";
             Integer intoType = Integer.valueOf(intoVo.getIntoType());
             if(Constant.INTO_ROLE_CST == intoType){
-                intoRole = "客户";
+                intoRole = "租户";
             }else if(Constant.INTO_ROLE_ENTRUST == intoType){
-                intoRole = "员工";
+                intoRole = "租户员工";
             }else if(Constant.INTO_ROLE_PROPERTY_OWNER == intoType){
                 intoRole = "产权人";
             } else if(Constant.INTO_ROLE_HOUSEHOLD == intoType){
-                intoRole = "住户";
+                intoRole = "租客";
             }
             map.put("intoRole",intoRole);
         }

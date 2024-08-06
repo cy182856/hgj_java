@@ -95,7 +95,7 @@ public class JwtInterceptor implements HandlerInterceptor {
                 response.setStatus(401);
             }
             //根据userid查询数据库
-            List<User> userList = userDaoMapper.queryUserByUserId(userId);
+            List<User> userList = userDaoMapper.queryUserListByUserId(userId);
             if (userList.isEmpty()) {
                 logger.info("用户为空，token验证失败");
                 response.setStatus(401);

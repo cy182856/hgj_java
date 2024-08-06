@@ -6,6 +6,7 @@
         <result column="id" jdbcType="VARCHAR" property="id"/>
         <result column="project_num" jdbcType="VARCHAR" property="projectNum"/>
         <result column="project_name" jdbcType="VARCHAR" property="projectName"/>
+        <result column="union_id" jdbcType="VARCHAR" property="unionId"/>
         <result column="wx_open_id" jdbcType="VARCHAR" property="wxOpenId"/>
         <result column="user_name" jdbcType="VARCHAR" property="userName"/>
         <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
@@ -14,6 +15,7 @@
         <result column="into_role" jdbcType="INTEGER" property="intoRole"/>
         <result column="into_status" jdbcType="INTEGER" property="intoStatus"/>
         <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -26,7 +28,7 @@
 
     </resultMap>
     <sql id="Base_Column_List" >
-        id, project_num, wx_open_id, user_name, cst_code, house_id, into_role, into_status, create_time, update_time, create_by,
+        id, project_num, union_id, wx_open_id, user_name, cst_code, house_id, into_role, into_status, create_time, update_time, create_by,
         update_by, delete_flag
     </sql>
 
@@ -132,6 +134,9 @@
         <if test="projectNum != null">
             project_num,
         </if>
+        <if test="unionId != null">
+            `union_id`,
+        </if>
         <if test="wxOpenId != null">
             wx_open_id,
         </if>
@@ -172,6 +177,9 @@
             </if>
             <if test="projectNum != null" >
                 #{projectNum,jdbcType=VARCHAR},
+            </if>
+            <if test="unionId != null" >
+                #{unionId,jdbcType=VARCHAR},
             </if>
             <if test="wxOpenId != null" >
                 #{wxOpenId,jdbcType=VARCHAR},
@@ -230,6 +238,9 @@
         <set>
             <if test="projectNum != null" >
                 project_num = #{projectNum,jdbcType=VARCHAR},
+            </if>
+            <if test="unionId != null">
+                union_id = #{unionId,jdbcType=VARCHAR},
             </if>
             <if test="wxOpenId != null">
                 wx_open_id = #{wxOpenId,jdbcType=VARCHAR},

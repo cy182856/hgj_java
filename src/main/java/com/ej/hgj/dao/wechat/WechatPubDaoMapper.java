@@ -15,6 +15,8 @@ public interface WechatPubDaoMapper {
 
     WechatPub getById(String id);
 
+    WechatPub getByProNum(String proNum);
+
     List<WechatPub> getList(WechatPub wechatPub);
 
     void update(WechatPub wechatPub);

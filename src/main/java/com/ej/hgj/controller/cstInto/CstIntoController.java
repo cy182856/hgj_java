@@ -87,13 +87,13 @@ public class CstIntoController {
 
             // 入住身份
             if(cst.getIntoRole() == Constant.INTO_ROLE_CST){
-                cst.setIntoRoleName("客户");
+                cst.setIntoRoleName("租户");
             } else if(cst.getIntoRole() == Constant.INTO_ROLE_ENTRUST){
-                cst.setIntoRoleName("员工");
+                cst.setIntoRoleName("租户员工");
             } else if(cst.getIntoRole() == Constant.INTO_ROLE_PROPERTY_OWNER){
                 cst.setIntoRoleName("产权人");
             } else if(cst.getIntoRole() == Constant.INTO_ROLE_HOUSEHOLD){
-                cst.setIntoRoleName("住户");
+                cst.setIntoRoleName("租客");
             }
 
             // 客户、产权人查询所有房间号

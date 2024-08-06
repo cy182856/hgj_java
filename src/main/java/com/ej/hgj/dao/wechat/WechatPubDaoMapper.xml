@@ -29,6 +29,14 @@
         where id = #{id}
     </select>
 
+    <!-- 根据项目号查询-->
+    <select id="getByProNum" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_wechat_pub
+        where pro_num = #{proNum}
+    </select>
+
     <!-- 查询最大ID-->
     <select id="getMaxId" resultMap="BaseMap" >
         select

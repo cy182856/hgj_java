@@ -23,6 +23,8 @@ public interface UserDaoMapper {
 
     List<User> queryUserByUserId(@Param("userId") String userId);
 
+    List<User> queryUserListByUserId(@Param("userId") String userId);
+
     void insertList(@Param("list") List<User> users);
 
     List<User> getList(User user);

@@ -9,11 +9,17 @@ import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.config.ConstantConfDaoMapper;
 import com.ej.hgj.dao.config.ProConfDaoMapper;
+import com.ej.hgj.dao.cstInto.CstIntoDaoMapper;
 import com.ej.hgj.dao.gonggao.GonggaoDaoMapper;
 import com.ej.hgj.dao.gonggao.GonggaoTypeDaoMapper;
+import com.ej.hgj.dao.message.MsgTemplateDaoMapper;
+import com.ej.hgj.dao.wechat.WechatPubDaoMapper;
+import com.ej.hgj.dao.wechat.WechatPubUserDaoMapper;
 import com.ej.hgj.entity.config.ConstantConfig;
 import com.ej.hgj.entity.config.ProConfig;
+import com.ej.hgj.entity.cstInto.CstInto;
 import com.ej.hgj.entity.gonggao.Gonggao;
+import com.ej.hgj.entity.message.MsgTemplate;
 import com.ej.hgj.entity.wechat.*;
 import com.ej.hgj.utils.*;
 import com.github.pagehelper.PageHelper;
@@ -65,6 +71,18 @@ public class GonggaoController {
 
     @Autowired
     private GonggaoDaoMapper gonggaoDaoMapper;
+
+    @Autowired
+    private WechatPubDaoMapper wechatPubDaoMapper;
+
+    @Autowired
+    private WechatPubUserDaoMapper wechatPubUserDaoMapper;
+
+    @Autowired
+    private CstIntoDaoMapper cstIntoDaoMapper;
+
+    @Autowired
+    private MsgTemplateDaoMapper msgTemplateDaoMapper;
 
     @RequestMapping(value = "/updateRelease",method = RequestMethod.GET)
     public AjaxResult updateRelease(){
@@ -286,6 +304,12 @@ public class GonggaoController {
     @RequestMapping(value = "/isShow",method = RequestMethod.GET)
     public AjaxResult isShow(@RequestParam(required=false, value = "id") String id){
         AjaxResult ajaxResult = new AjaxResult();
+        Gonggao gonggao = gonggaoDaoMapper.getById(id);
+        if(StringUtils.isBlank(gonggao.getType())){
+            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+            ajaxResult.setMessage("请先选择分类！");
+            return ajaxResult;
+        }
         gonggaoDaoMapper.isShow(id);
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
@@ -304,25 +328,64 @@ public class GonggaoController {
     @RequestMapping(value = "/sendMsg",method = RequestMethod.GET)
     public AjaxResult sendMsg(@RequestParam(required=false, value = "id") String id) throws Exception {
         AjaxResult ajaxResult = new AjaxResult();
-        String accessToken = JSONUtil.parseObj(HttpUtil.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="+"wx1e92221e543cdb18"+"&secret=" + "8f3e27e182751e75439c7f14ab62527c")).get("access_token").toString();
-        Miniprogram miniprogram = new Miniprogram("wxf2dfa410991adfcb", "pages/main/main");
-        TempleModelGongGaoXh templeModel = new TempleModelGongGaoXh();
-        templeModel.setThing18(new ModelData("新弘北外滩"));
-        templeModel.setTime8(new ModelData(DateUtils.strYmdHms()));
-        templeModel.setThing16(new ModelData("新公告通知"));
-        ModelMessageGongGaoXh modelMessage = new ModelMessageGongGaoXh("ovl7_6uVGIL4U3ckco33pgBHqqV8", "ts_1vX04ZgSR8e-oy88uGMUhsPz4IoETO-kZX3THFFU", templeModel, miniprogram);
-        String jsonMenu = JsonUtils.writeEntiry2JSON(modelMessage);
-        int resp = 0;
-        resp = newSendModel(jsonMenu, accessToken);
-        if (resp != 0) {
+        Gonggao gonggao = gonggaoDaoMapper.getById(id);
+        if(gonggao.getIsShow() == 1){
             ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
-            ajaxResult.setMessage("微信模板消息推送失败");
-        }else {
-            ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
-            ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+            ajaxResult.setMessage("公告未发布，不能发送消息！");
+            return ajaxResult;
         }
+        String proNum = gonggao.getProNum();
+        // 根据项目号查询公众号
+        WechatPub wechatPub = wechatPubDaoMapper.getByProNum(proNum);
+        String accessToken = JSONUtil.parseObj(HttpUtil.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="+wechatPub.getAppId()+"&secret=" + wechatPub.getAppSecret())).get("access_token").toString();
+        sendTempMsg(proNum,accessToken,wechatPub.getProName());
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;
     }
+
+    public void sendTempMsg(String proNum, String accessToken, String proName) throws Exception {
+        // 查询小程序配置
+        ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP_EJ_ZHSQ);
+        Miniprogram miniprogram = new Miniprogram(constantConfig.getAppId(), "pages/main/main");// 查询消息模板
+        // 查询消息模板
+        MsgTemplate msgTemplate = msgTemplateDaoMapper.getByProNumAndKey(proNum, Constant.GONGGAO_TEMPLATE);
+        // 根据项目号查询已入住客户
+        CstInto cstInto = new CstInto();
+        cstInto.setProjectNum(proNum);
+        cstInto.setIntoStatus(Constant.INTO_STATUS_Y);
+        List<CstInto> cstIntoList = cstIntoDaoMapper.getList(cstInto);
+        // 根据入住用户unionId获取公众号openId
+        if(!cstIntoList.isEmpty()) {
+            List<String> unionIdList = new ArrayList<>();
+            for (CstInto cst : cstIntoList) {
+                if (StringUtils.isNotBlank(cst.getUnionId()))
+                    unionIdList.add(cst.getUnionId());
+            }
+            // 根据项目号，unionids集合查询公众号用户
+            if (!unionIdList.isEmpty()) {
+                WechatPubUser wechatPubUser = new WechatPubUser();
+                wechatPubUser.setProNum(proNum);
+                wechatPubUser.setUnionIdList(unionIdList);
+                List<WechatPubUser> wechatPubUserList = wechatPubUserDaoMapper.getList(wechatPubUser);
+                if (!wechatPubUserList.isEmpty()) {
+                    for (WechatPubUser wp : wechatPubUserList) {
+                        TempleMessage modelMessage = new TempleMessage();
+                        modelMessage.setTouser(wp.getOpenid());
+                        modelMessage.setTemplate_id(msgTemplate.getTemplateId());
+                        modelMessage.setData("dataParam");
+                        modelMessage.setMiniprogram(miniprogram);
+                        String jsonMenu = JsonUtils.writeEntiry2JSON(modelMessage);
+                        String data = msgTemplate.getTemplateData();
+                        data = data.replace("param1",proName).replace("param2",DateUtils.strYmdHms()).replace("param3","新公告通知");
+                        jsonMenu = jsonMenu.replace("\"dataParam\"",data);
+                        newSendModel(jsonMenu, accessToken);
+                    }
+                }
+            }
+        }
+    }
+
 
     public static int newSendModel(String jsonMenu, String accessToken) {
         int result = -1;

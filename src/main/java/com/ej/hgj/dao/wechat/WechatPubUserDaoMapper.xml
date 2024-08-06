@@ -36,14 +36,20 @@
         <include refid="Base_Column_List" />
         from t_wechat_pub_user
         where delete_flag = 0
-        <if test="name != null">
-            and `name` like CONCAT('%', #{name,jdbcType=VARCHAR},'%') ESCAPE '/'
+        <if test="pubName != null">
+            and pub_name like CONCAT('%', #{pubName,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
         <if test="proNum != null and proNum != ''">
             and pro_num = #{proNum,jdbcType=VARCHAR}
         </if>
         <if test="id != null">
             and id = #{id}
+        </if>
+        <if test="unionIdList != null and unionIdList.size() > 0">
+            and union_id in
+            <foreach collection="unionIdList" item="unionId" index="index" open="(" close=")" separator=",">
+                #{unionId,jdbcType=VARCHAR}
+            </foreach>
         </if>
     </select>
 

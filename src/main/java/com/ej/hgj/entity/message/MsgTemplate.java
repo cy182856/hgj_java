@@ -1,34 +1,26 @@
-package com.ej.hgj.entity.wechat;
+package com.ej.hgj.entity.message;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.List;
 
-/**
- * 微信公众号
- * @version V1.0
- */
 @Data
-public class WechatPubUser {
-
-    private String id;
+public class MsgTemplate {
+    private Integer id;
 
     private String proNum;
 
-    private String proName;
+    private String templateKey;
 
-    private String pubName;
+    private String templateId;
 
-    private String appId;
+    private String templateData;
 
-    private String originalId;
+    private Integer status;
 
-    private String openid;
-
-    private String unionid;
+    private String description;
 
     private String createBy;
 
@@ -43,8 +35,5 @@ public class WechatPubUser {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-
-    // unionId集合
-    private List<String> unionIdList;
 
 }
