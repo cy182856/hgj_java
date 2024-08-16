@@ -32,6 +32,8 @@
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
     </resultMap>
     <sql id="Base_Column_List" >
         id, project_num, project_name, repair_num, wx_open_id, cst_code, cst_name, cst_mobile, house_id,
@@ -176,31 +178,32 @@
     <!-- 查询列表-->
     <select id="getListAll" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.repair.RepairLog">
         select
-        <include refid="Base_Column_List" />
-        from t_repair_log
-        where delete_flag = 0
+        r.*,u.user_name
+        from t_repair_log r
+        left join t_user u on u.user_id = r.create_by
+        where r.delete_flag = 0
         <if test="projectNum != null">
-            and project_num = #{projectNum,jdbcType=VARCHAR}
+            and r.project_num = #{projectNum,jdbcType=VARCHAR}
         </if>
         <if test="cstCode != null and cstCode != ''">
-            and cst_code = #{cstCode,jdbcType=VARCHAR}
+            and r.cst_code = #{cstCode,jdbcType=VARCHAR}
         </if>
         <if test="cstName != null and cstName != ''">
-            and cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+            and r.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
         <if test="repairNum != null and repairNum != ''">
-            and repair_num like CONCAT('%', #{repairNum,jdbcType=VARCHAR},'%') ESCAPE '/'
+            and r.repair_num like CONCAT('%', #{repairNum,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
         <if test="repairStatus != null and repairStatus != ''">
-            and repair_status = #{repairStatus,jdbcType=VARCHAR}
+            and r.repair_status = #{repairStatus,jdbcType=VARCHAR}
         </if>
         <if test="startTime != null and startTime != ''">
-            and create_time >= #{startTime,jdbcType=VARCHAR}
+            and r.create_time >= #{startTime,jdbcType=VARCHAR}
         </if>
         <if test="endTime != null and endTime != ''">
-            and create_time &lt;= #{endTime,jdbcType=VARCHAR}
+            and r.create_time &lt;= #{endTime,jdbcType=VARCHAR}
         </if>
-        order by update_time desc
+        order by r.update_time desc
     </select>
 
 

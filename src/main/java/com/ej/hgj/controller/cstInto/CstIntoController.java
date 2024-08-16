@@ -17,6 +17,7 @@ import com.ej.hgj.service.user.UserRoleService;
 import com.ej.hgj.sy.dao.house.SyHouseDaoMapper;
 import com.ej.hgj.utils.GenerateUniqueIdUtil;
 import com.ej.hgj.utils.TimestampGenerator;
+import com.ej.hgj.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -67,17 +69,17 @@ public class CstIntoController {
             // 入住状态
             if(cst.getIntoRole() == 0 || cst.getIntoRole() == 2){
                 if(cst.getIntoStatus() == Constant.INTO_STATUS_N){
-                    cst.setIntoStatusName("未入住");
+                    cst.setIntoStatusName("未注册");
                 }else if(cst.getIntoStatus() == Constant.INTO_STATUS_Y){
-                    cst.setIntoStatusName("已入住");
+                    cst.setIntoStatusName("已注册");
                 } else if(cst.getIntoStatus() == Constant.INTO_STATUS_U){
                     cst.setIntoStatusName("已解绑");
                 }
             }else if(cst.getIntoRole() == 1 || cst.getIntoRole() == 3){
                 if(cst.getHouseIntoStatus() == Constant.INTO_STATUS_N){
-                    cst.setIntoStatusName("未入住");
+                    cst.setIntoStatusName("未注册");
                 }else if(cst.getHouseIntoStatus() == Constant.INTO_STATUS_Y){
-                    cst.setIntoStatusName("已入住");
+                    cst.setIntoStatusName("已注册");
                 } else if(cst.getHouseIntoStatus() == Constant.INTO_STATUS_U){
                     cst.setIntoStatusName("已解绑");
                 }else if(cst.getHouseIntoStatus() == Constant.INTO_STATUS_A){
@@ -166,10 +168,10 @@ public class CstIntoController {
 //    }
 
     @RequestMapping(value = "/delete",method = RequestMethod.GET)
-    public AjaxResult delete(@RequestParam(required=false, value = "id") String id,
+    public AjaxResult delete(HttpServletRequest request, @RequestParam(required=false, value = "id") String id,
                              @RequestParam(required=false, value = "cstIntoHouseId") String cstIntoHouseId){
         AjaxResult ajaxResult = new AjaxResult();
-        return cstIntoService.unbind(ajaxResult,id,cstIntoHouseId);
+        return cstIntoService.unbind(ajaxResult,id,cstIntoHouseId,TokenUtils.getUserId(request));
     }
 
     /**

@@ -81,4 +81,6 @@ public class RepairLog {
     private String endTime;
 
     private String repairStatusName;
+
+    private String userName;
 }

@@ -14,7 +14,7 @@ public interface CstIntoService {
 
     String saveCstIntoInfo(IntoVo intoVo);
 
-    AjaxResult unbind(AjaxResult ajaxResult, String id, String cstIntoHouseId);
+    AjaxResult unbind(AjaxResult ajaxResult, String id, String cstIntoHouseId, String userId);
 }
 
 

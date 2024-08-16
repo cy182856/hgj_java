@@ -18,6 +18,7 @@
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="project_name" jdbcType="VARCHAR" property="projectName"/>
+        <result column="into_status" jdbcType="INTEGER" property="intoStatus"/>
     </resultMap>
     <sql id="Base_Column_List" >
         id, org_id, code, cst_name, cst_type, cst_level, is_affect, contract_character, cer_type, cer_no, lic_no, mobile, create_time, update_time
@@ -54,30 +55,46 @@
 
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.cst.HgjCst">
-        select
-        c.*,p.project_name
-        from s_cst c left join t_pro_config p on c.org_id = p.project_num
-        where 1 = 1
-        <if test="code != null">
-            and c.code like CONCAT('%', #{code,jdbcType=VARCHAR},'%') ESCAPE '/'
+        select t.* from (
+            select
+            cst.*,p.project_name,
+            (
+            select max(into_status)
+            from t_cst_into
+            where delete_flag = 0
+            and cst_code = cst.`code`
+            and into_status = 1
+            ) as into_status
+            from s_cst cst left join t_pro_config p on cst.org_id = p.project_num
+            where 1 = 1
+            <if test="code != null">
+                and cst.code like CONCAT('%', #{code,jdbcType=VARCHAR},'%') ESCAPE '/'
+            </if>
+            <if test="cstName != null">
+                and cst.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+            </if>
+            <if test="cerNo != null">
+                and cst.cer_no = #{cerNo,jdbcType=VARCHAR}
+            </if>
+            <if test="licNo != null">
+                and cst.lic_no = #{licNo,jdbcType=VARCHAR}
+            </if>
+            <if test="orgId != null and orgId != '' ">
+                and cst.org_id = #{orgId,jdbcType=VARCHAR}
+            </if>
+            <if test="proNumList != null and proNumList.size() > 0">
+                and cst.org_id in
+                <foreach collection="proNumList" item="proNum" index="index" open="(" close=")" separator=",">
+                    #{proNum,jdbcType=INTEGER}
+                </foreach>
+            </if>
+        )t
+        where 1=1
+        <if test="intoStatus == 1">
+            and into_status = 1
         </if>
-        <if test="cstName != null">
-            and c.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
-        </if>
-        <if test="cerNo != null">
-            and c.cer_no = #{cerNo,jdbcType=VARCHAR}
-        </if>
-        <if test="licNo != null">
-            and c.lic_no = #{licNo,jdbcType=VARCHAR}
-        </if>
-        <if test="orgId != null and orgId != '' ">
-            and c.org_id = #{orgId,jdbcType=VARCHAR}
-        </if>
-        <if test="proNumList != null and proNumList.size() > 0">
-            and c.org_id in
-            <foreach collection="proNumList" item="proNum" index="index" open="(" close=")" separator=",">
-                #{proNum,jdbcType=INTEGER}
-            </foreach>
+        <if test="intoStatus == 99">
+            and into_status is null
         </if>
     </select>
 

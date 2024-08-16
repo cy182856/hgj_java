@@ -136,7 +136,7 @@ public class CstIntoServiceImpl implements CstIntoService {
     }
 
     @Override
-    public AjaxResult unbind(AjaxResult ajaxResult,String id, String cstIntoHouseId) {
+    public AjaxResult unbind(AjaxResult ajaxResult,String id, String cstIntoHouseId, String userId) {
         // 判断是否是客户、业主
         CstInto cstInto = cstIntoDaoMapper.getById(id);
         if(cstInto.getIntoRole() == Constant.INTO_ROLE_CST || cstInto.getIntoRole() == Constant.INTO_ROLE_PROPERTY_OWNER){
@@ -153,6 +153,7 @@ public class CstIntoServiceImpl implements CstIntoService {
                 CstInto cst = new CstInto();
                 cst.setId(id);
                 cst.setIntoStatus(Constant.INTO_STATUS_U);
+                cst.setUpdateBy(userId);
                 cst.setUpdateTime(new Date());
                 cstIntoDaoMapper.update(cst);
             }
@@ -161,6 +162,7 @@ public class CstIntoServiceImpl implements CstIntoService {
             CstIntoHouse cstIntoHouse = new CstIntoHouse();
             cstIntoHouse.setId(cstIntoHouseId);
             cstIntoHouse.setIntoStatus(Constant.INTO_STATUS_U);
+            cstIntoHouse.setUpdateBy(userId);
             cstIntoHouse.setUpdateTime(new Date());
             cstIntoHouseDaoMapper.updateById(cstIntoHouse);
 
@@ -171,6 +173,7 @@ public class CstIntoServiceImpl implements CstIntoService {
                 CstInto cst = new CstInto();
                 cst.setId(id);
                 cstInto.setIntoStatus(Constant.INTO_STATUS_U);
+                cstInto.setUpdateBy(userId);
                 cstInto.setUpdateTime(new Date());
                 cstIntoDaoMapper.update(cstInto);
             }

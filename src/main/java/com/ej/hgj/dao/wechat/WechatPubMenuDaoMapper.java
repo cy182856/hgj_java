@@ -12,7 +12,7 @@ import java.util.List;
 @Component
 public interface WechatPubMenuDaoMapper {
 
-    Role getById(String id);
+    WechatPubMenu getById(Integer id);
 
     List<WechatPubMenu> getList(WechatPubMenu wechatPubMenu);
 

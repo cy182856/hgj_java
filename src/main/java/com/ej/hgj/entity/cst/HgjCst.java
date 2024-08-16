@@ -55,4 +55,7 @@ public class HgjCst {
 
     private String projectName;
 
+    // 注册状态
+    private Integer intoStatus;
+
 }

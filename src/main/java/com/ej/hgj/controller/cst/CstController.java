@@ -85,6 +85,7 @@ public class CstController {
                            HgjCst cst){
         AjaxResult ajaxResult = new AjaxResult();
         String userId = TokenUtils.getUserId(request);
+        // 根据登录用户的项目所属查询客户信息
         List<User> userList = userDaoMapper.queryUserByUserId(userId);
         List<String> proNumList = new ArrayList<>();
         if(!userList.isEmpty()){
@@ -107,7 +108,7 @@ public class CstController {
         for(HgjCst hgjCst : list){
             List<Tag> tagListFilter = tagList.stream().filter(tag -> tag.getCstCode() != null && tag.getCstCode().equals(hgjCst.getCode())).collect(Collectors.toList());
             hgjCst.setTagList(tagListFilter);
-            // 客户、产权人查询所有房间号
+            // 查询客户所有房间号
             List<String> houseList = new ArrayList<>();
             HgjHouse hgjHouse = new HgjHouse();
             hgjHouse.setCstCode(hgjCst.getCode());
@@ -117,8 +118,15 @@ public class CstController {
                     houseList.add(house.getResName());
                 }
             }
-
             hgjCst.setHouseList(houseList);
+
+            // 查询客户是否被注册
+            Integer intoStatus = hgjCst.getIntoStatus();
+            if(intoStatus != null && intoStatus==1){
+                hgjCst.setIntoStatus(1);
+            }else {
+                hgjCst.setIntoStatus(0);
+            }
         }
         PageInfo<HgjCst> pageInfo = new PageInfo<>(list);
         //计算总页数

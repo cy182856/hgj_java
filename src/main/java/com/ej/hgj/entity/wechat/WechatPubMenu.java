@@ -93,4 +93,6 @@ public class WechatPubMenu {
     // 公众号名称
     private String wechatPubName;
 
+    private String proNum;
+
 }

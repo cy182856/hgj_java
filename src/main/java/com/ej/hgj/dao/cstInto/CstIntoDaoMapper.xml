@@ -125,6 +125,17 @@
         and i.into_status = 1
     </select>
 
+    <!-- 查询已入住用户信息-->
+    <select id="getByProNumList" resultMap="BaseMap"  parameterType="java.lang.String">
+        select
+            ci.user_name,ci.phone,cst.cst_name,wp.open_id as wx_open_id
+        from t_cst_into ci
+            left join t_wechat_pub_user wp on ci.union_id = wp.union_id
+            left join s_cst cst on cst.`code` = ci.cst_code
+        where ci.into_status = 1
+          and ci.project_num = #{proNum}
+    </select>
+
     <!-- 保存-->
     <insert id="save" parameterType="com.ej.hgj.entity.cstInto.CstInto" >
         insert into  t_cst_into(

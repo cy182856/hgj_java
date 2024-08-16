@@ -28,7 +28,7 @@
     </sql>
 
     <!-- 根据主键查询-->
-    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
+    <select id="getById" resultMap="BaseMap" parameterType="java.lang.Integer" >
         select
             <include refid="Base_Column_List" />
         from t_menu_wechat_pub
@@ -53,6 +53,9 @@
         </if>
         <if test="wechatPubId != null">
             and m.wechat_pub_id = #{wechatPubId}
+        </if>
+        <if test="proNum != null">
+            and p.pro_num = #{proNum}
         </if>
         <if test="name != null">
             and m.`name` like CONCAT('%', #{name,jdbcType=VARCHAR},'%') ESCAPE '/'

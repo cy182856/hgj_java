@@ -129,4 +129,18 @@ public class Constant {
      */
     public static final String SUITE_TICKET = "suite_ticket";
 
+    /**
+     * 公告消息模版key
+     */
+    public static final String GONGGAO_TEMPLATE = "gonggao_template";
+
+    /**
+     * 公众号菜单父级ID,用于问卷调查新增问卷时添加公众号菜单
+     */
+    //public static final String WECHAT_PUB_MENU_PARENT_ID = "wechat_pub_menu_parent_id";
+
+    /**
+     * 金数据api接口调用时的apiKey,apiSecret
+     */
+    public static final String JINSHUJU_API_KEY = "jinshuju_api_key";
 }

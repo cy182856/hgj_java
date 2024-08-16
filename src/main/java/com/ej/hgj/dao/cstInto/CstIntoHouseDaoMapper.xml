@@ -193,6 +193,9 @@
             <if test="intoStatus != null">
                 into_status = #{intoStatus,jdbcType=INTEGER},
             </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
             <if test="updateTime != null">
                 update_time = #{updateTime,jdbcType=TIMESTAMP},
             </if>
