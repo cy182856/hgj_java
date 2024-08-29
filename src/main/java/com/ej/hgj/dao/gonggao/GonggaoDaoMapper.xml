@@ -45,11 +45,14 @@
             left join t_gonggao_type t on g.type = t.id
             left join t_pro_config pc ON pc.project_num = g.pro_num
         where g.delete_flag = 0 and g.`source` = 2
-        <if test="title != null">
+        <if test="title != null and title != ''">
             and g.title like CONCAT('%', #{title,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
         <if test="proNum != null and proNum != ''">
             and g.pro_num = #{proNum,jdbcType=VARCHAR}
+        </if>
+        <if test="isShow != null">
+            and g.is_show = #{isShow,jdbcType=INTEGER}
         </if>
         order by g.update_time desc
     </select>

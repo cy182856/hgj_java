@@ -87,6 +87,9 @@
         <if test="userName != null">
             and c.user_name like CONCAT('%', #{userName,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
+        <if test="phone != null">
+            and c.phone like CONCAT('%', #{phone,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
         <if test="intoRole != null">
             and c.into_role = #{intoRole}
         </if>

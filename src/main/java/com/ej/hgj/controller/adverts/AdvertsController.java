@@ -127,17 +127,17 @@ public class AdvertsController {
                 filePath.mkdirs();
             }
             //创建年月日文件夹
-            File ymdFile = new File(uploadPath + "/adverts" + File.separator + new SimpleDateFormat("yyyyMMdd").format(new Date()));
+            //File ymdFile = new File(uploadPath + "/adverts" + File.separator + new SimpleDateFormat("yyyyMMdd").format(new Date()));
             //目录不存在则直接创建
-            if (!ymdFile.exists()) {
-                ymdFile.mkdirs();
-            }
-            String uploadPath = ymdFile.getPath();
+//            if (!ymdFile.exists()) {
+//                ymdFile.mkdirs();
+//            }
             //获取文件名
             String fileName = file.getOriginalFilename();
             int lastIndex = fileName.lastIndexOf('.');
             String fileExtension = fileName.substring(lastIndex + 1);
-            path = uploadPath + "/" + id+"."+fileExtension;
+            //path = ymdFile.getPath() + "/" + id+"."+fileExtension;
+            path = uploadPath + "/adverts" + "/" + id+"."+fileExtension;
             try {
                 file.transferTo(new File(path));
             } catch (IOException e) {

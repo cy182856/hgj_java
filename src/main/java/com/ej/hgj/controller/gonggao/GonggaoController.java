@@ -514,13 +514,14 @@ public class GonggaoController {
             filePath.mkdirs();
         }
         //创建年月日文件夹
-        File ymdFile = new File(uploadPath + "/gonggao" + File.separator + new SimpleDateFormat("yyyyMMdd").format(new Date()));
+        //File ymdFile = new File(uploadPath + "/gonggao" + File.separator + new SimpleDateFormat("yyyyMMdd").format(new Date()));
         //目录不存在则直接创建
-        if (!ymdFile.exists()) {
-            ymdFile.mkdirs();
-        }
+//        if (!ymdFile.exists()) {
+//            ymdFile.mkdirs();
+//        }
         //在年月日文件夹下面创建txt文本存储图片base64码
-        File txtFile = new File(ymdFile.getPath() + "/" + no + ".html");
+        //File txtFile = new File(ymdFile.getPath() + "/" + no + ".html");
+        File txtFile = new File(uploadPath + "/gonggao" + "/" + no + ".html");
         if (!txtFile.exists()) {
             try {
                 txtFile.createNewFile();

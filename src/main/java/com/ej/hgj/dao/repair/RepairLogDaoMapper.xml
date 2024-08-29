@@ -182,7 +182,7 @@
         from t_repair_log r
         left join t_user u on u.user_id = r.create_by
         where r.delete_flag = 0
-        <if test="projectNum != null">
+        <if test="projectNum != null and projectNum !=  ''">
             and r.project_num = #{projectNum,jdbcType=VARCHAR}
         </if>
         <if test="cstCode != null and cstCode != ''">

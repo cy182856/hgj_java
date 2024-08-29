@@ -150,11 +150,14 @@
 
     <!-- 查询楼栋-->
     <select id="queryBuilding" resultMap="BaseMap" parameterType="java.lang.String" >
-        select
-            bud_id,bud_name
-        from s_house
-        where org_id=#{orgId}
-        group by bud_id,bud_name
+        select t.* from(
+                           select
+                               bud_id,bud_name
+                           from s_house
+                           where org_id=#{orgId}
+                           group by bud_id,bud_name
+                       )t
+        where t.bud_id is not null
     </select>
 
     <!-- 根据入住ID查询列表-->
