@@ -1,8 +1,9 @@
 package com.ej.hgj.dao.house;
 
+import com.ej.hgj.entity.api.HgjHouseFloor;
+import com.ej.hgj.entity.api.HgjHouseRoomInfo;
+import com.ej.hgj.entity.api.HgjHouseUnit;
 import com.ej.hgj.entity.house.HgjHouse;
-import com.ej.hgj.entity.house.SyHouse;
-import com.ej.hgj.entity.user.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,15 @@ public interface HgjHouseDaoMapper {
 
     List<HgjHouse> queryBuilding (String orgId);
 
+    List<HgjHouseUnit> queryUnit (String orgId);
+
+    List<HgjHouseFloor> queryFloor (String orgId);
+
     List<HgjHouse> getByCstIntoId(String cstIntoId);
+
+    List<HgjHouse> queryRoomNum (String budId);
+
+    List<HgjHouseRoomInfo> queryRoomNumAll(String orgId);
 
 
 

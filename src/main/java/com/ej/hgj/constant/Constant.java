@@ -143,4 +143,10 @@ public class Constant {
      * 金数据api接口调用时的apiKey,apiSecret
      */
     public static final String JINSHUJU_API_KEY = "jinshuju_api_key";
+
+    /**
+     * 已发布问卷数量限制
+     */
+    public static final String QN_SHOW_SIZE = "qn_show_size";
+
 }

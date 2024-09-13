@@ -7,35 +7,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Data
-public class CouponGrant {
-
+public class CouponType {
     private String id;
-
-    private String batchId;
-
-    private String couponId;
-
-    private String tagId;
 
     private String typeCode;
 
     private String typeName;
-
-    private Integer couNum;
-
-    private Integer expNum;
-
-    private String startTime;
-
-    private String endTime;
-
-    private String cstCode;
-
-    private String wxOpenId;
-
-    private String userName;
-
-    private Integer range;
 
     private String createBy;
 
@@ -50,11 +27,5 @@ public class CouponGrant {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-
-    private String tagName;
-
-    private String cstName;
-
-    private String title;
 
 }

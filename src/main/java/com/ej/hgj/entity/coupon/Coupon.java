@@ -12,9 +12,13 @@ public class Coupon {
 
     private String title;
 
-    private Integer hour;
+    private Integer couNum;
 
     private Integer isExp;
+
+    private String typeCode;
+
+    private String typeName;
 
     private String createBy;
 

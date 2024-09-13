@@ -20,9 +20,13 @@ public interface TagCstDaoMapper {
 
     List<TagCst> getList(TagCst tagCst);
 
+    List<TagCst> getCstIntoList(TagCst tagCst);
+
     List<TagCst> getListPerson(TagCst tagCst);
 
     List<HgjCst> getCstByTagId(String tagId);
+
+    List<HgjCst> getCstIntoByTagId(String tagId);
 
 
 }

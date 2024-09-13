@@ -15,6 +15,10 @@ public class CouponGrantBatch {
 
     private String tagId;
 
+    private String typeCode;
+
+    private Integer couNum;
+
     private String startTime;
 
     private String endTime;
@@ -33,10 +37,11 @@ public class CouponGrantBatch {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
-    private String name;
+    private String tagName;
 
     private String cstName;
 
     private String title;
 
+    private String typeName;
 }

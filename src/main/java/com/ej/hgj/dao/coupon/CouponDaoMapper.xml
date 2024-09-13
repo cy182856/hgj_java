@@ -5,8 +5,10 @@
     <resultMap id="BaseMap" type="com.ej.hgj.entity.coupon.Coupon">
         <result column="id" jdbcType="VARCHAR" property="id"/>
         <result column="title" jdbcType="VARCHAR" property="title"/>
-        <result column="hour" jdbcType="INTEGER" property="hour"/>
+        <result column="cou_num" jdbcType="INTEGER" property="couNum"/>
         <result column="is_exp" jdbcType="INTEGER" property="isExp"/>
+        <result column="type_code" jdbcType="VARCHAR" property="typeCode"/>
+        <result column="type_name" jdbcType="VARCHAR" property="typeName"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -14,7 +16,7 @@
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
     </resultMap>
     <sql id="Base_Column_List" >
-        id, title, `hour`, is_exp, create_time, update_time, create_by,
+        id, title, cou_num, is_exp, type_code, create_time, update_time, create_by,
         update_by, delete_flag
     </sql>
 
@@ -29,13 +31,16 @@
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.coupon.Coupon">
         select
-        <include refid="Base_Column_List" />
-        from t_coupon
-        where delete_flag = 0
-        <if test="title != null">
-            and `title` like CONCAT('%', #{title,jdbcType=VARCHAR},'%') ESCAPE '/'
+        c.*,t.type_name
+        from t_coupon c left join t_coupon_type t on c.type_code = t.type_code
+        where c.delete_flag = 0
+        <if test="typeCode != null">
+            and c.type_code like CONCAT('%', #{typeCode,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
-        order by update_time desc
+        <if test="typeName != null">
+            and t.type_name like CONCAT('%', #{typeName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        order by c.update_time desc
     </select>
 
     <!-- 保存-->
@@ -47,11 +52,14 @@
         <if test="title != null">
             title,
         </if>
-        <if test="hour != null">
-            `hour`,
+        <if test="couNum != null">
+            cou_num,
         </if>
         <if test="isExp != null">
             is_exp,
+        </if>
+        <if test="typeCode != null">
+            type_code,
         </if>
         <if test="createTime != null">
             create_time,
@@ -76,11 +84,14 @@
             <if test="title != null" >
                 #{title,jdbcType=VARCHAR},
             </if>
-            <if test="hour != null" >
-                #{hour,jdbcType=INTEGER},
+            <if test="couNum != null" >
+                #{couNum,jdbcType=INTEGER},
             </if>
             <if test="isExp != null" >
                 #{isExp,jdbcType=INTEGER},
+            </if>
+            <if test="typeCode != null" >
+                #{typeCode,jdbcType=VARCHAR},
             </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
@@ -103,16 +114,19 @@
     <!-- 更新-->
     <update id="update" parameterType="com.ej.hgj.entity.coupon.Coupon" >
         update
-        t_stop_coupon
+        t_coupon
         <set>
             <if test="title != null">
                 title = #{title,jdbcType=VARCHAR},
             </if>
-            <if test="hour != null">
-                `hour` = #{hour,jdbcType=INTEGER},
+            <if test="couNum != null">
+                cou_num = #{couNum,jdbcType=INTEGER},
             </if>
             <if test="isExp != null">
                 is_exp = #{isExp,jdbcType=INTEGER},
+            </if>
+            <if test="typeCode != null">
+                type_code = #{typeCode,jdbcType=VARCHAR},
             </if>
             <if test="updateBy != null">
                 update_by = #{updateBy,jdbcType=VARCHAR},
@@ -126,7 +140,7 @@
 
     <!-- 删除-->
     <update id="delete" parameterType="java.lang.String" >
-        delete from t_stop_coupon where id=#{id}
+        delete from t_coupon where id=#{id}
     </update>
 
 </mapper>

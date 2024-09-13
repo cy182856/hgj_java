@@ -115,34 +115,36 @@ public class QnController {
      * @param id
      * @return
      */
-//    @RequestMapping(value = "/miniIsShow",method = RequestMethod.GET)
-//    public AjaxResult miniIsShow(@RequestParam(required=false, value = "id") String id){
-//        AjaxResult ajaxResult = new AjaxResult();
-//        // 校验发布的问卷不能超过10个,根据项目号
-//        Qn qn = qnDaoMapper.getById(id);
-//        Qn qnPram = new Qn();
-//        qnPram.setProNum(qn.getProNum());
-//        qnPram.setMiniIsShow(1);
-//        List<Qn> list = qnDaoMapper.getList(qnPram);
-//        if(!list.isEmpty() && list.size() >= 10){
-//            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
-//            ajaxResult.setMessage("已发布问卷不能超过10个！");
-//        }else {
-//            qnDaoMapper.miniIsShow(id);
-//            ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
-//            ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
-//        }
-//        return ajaxResult;
-//    }
+    @RequestMapping(value = "/miniIsShow",method = RequestMethod.GET)
+    public AjaxResult miniIsShow(@RequestParam(required=false, value = "id") String id){
+        AjaxResult ajaxResult = new AjaxResult();
+        // 校验发布的问卷不能超过10个,根据项目号
+        Qn qn = qnDaoMapper.getById(id);
+        Qn qnPram = new Qn();
+        qnPram.setProNum(qn.getProNum());
+        qnPram.setMiniIsShow(1);
+        List<Qn> list = qnDaoMapper.getList(qnPram);
+        ConstantConfig config = constantConfDaoMapper.getByKey(Constant.QN_SHOW_SIZE);
+        Integer size = Integer.valueOf(config.getConfigValue());
+        if(!list.isEmpty() && list.size() >= size){
+            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+            ajaxResult.setMessage("已发布问卷不能超过"+size+"个！");
+        }else {
+            qnDaoMapper.miniIsShow(id);
+            ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+            ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        }
+        return ajaxResult;
+    }
 
-//    @RequestMapping(value = "/notMiniIsShow",method = RequestMethod.GET)
-//    public AjaxResult notMiniIsShow(@RequestParam(required=false, value = "id") String id){
-//        AjaxResult ajaxResult = new AjaxResult();
-//        qnDaoMapper.notMiniIsShow(id);
-//        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
-//        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
-//        return ajaxResult;
-//    }
+    @RequestMapping(value = "/notMiniIsShow",method = RequestMethod.GET)
+    public AjaxResult notMiniIsShow(@RequestParam(required=false, value = "id") String id){
+        AjaxResult ajaxResult = new AjaxResult();
+        qnDaoMapper.notMiniIsShow(id);
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        return ajaxResult;
+    }
 
     /**
      * 公众号发布
@@ -249,13 +251,15 @@ public class QnController {
             }
         }
         // 根据项目号查询所有已注册客户
-        List<CstInto> cstIntoList = cstIntoDaoMapper.getByProNumList(proNum);
+        //List<CstInto> cstIntoList = cstIntoDaoMapper.getByProNumList(proNum); //根据公众号unionId查询openId
+        List<CstInto> cstIntoList = cstIntoDaoMapper.getListByProNum(proNum);// 查询入住表openId
         SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         outputFormat.setTimeZone(TimeZone.getDefault()); // 设置你想要的时区
         for (Map<String,Object> map : mapListAll){
-            String openId = map.get("x_field_weixin_openid")+"";
+            //String openId = map.get("x_field_weixin_openid")+""; // 系统字段公众号openId
+            String openId = map.get("wx_open_id")+"";// 隐藏字段，小程序openId
             // 日期格式转换
             String isoDateString = map.get("updated_at").toString();
             Date date = isoFormat.parse(isoDateString);
@@ -284,7 +288,7 @@ public class QnController {
         List<Map<String,Object>> fieldList = JSONArray.parseObject(fields, List.class);
         // 从表单结构获取标题
         Map<String,Object> mapTitle = new LinkedHashMap<>();
-        mapTitle.put("serial_number","序号");
+        //mapTitle.put("serial_number","序号");
         mapTitle.put("user_name","填表人");
         mapTitle.put("cst_name","客户名称");
         mapTitle.put("phone","手机号");
@@ -293,7 +297,11 @@ public class QnController {
                 String field = mapField.get(key)+"";
                 JSONObject jsonField = JSONObject.parseObject(field);
                 String label = jsonField.getString("label");
-                mapTitle.put(key,label);
+                // 隐藏字段微信号 wx_open_id 不放入标题
+                String api_code_alias = jsonField.getString("api_code_alias");
+                if(!"wx_open_id".equals(api_code_alias)){
+                    mapTitle.put(key, label);
+                }
             });
         }
         mapTitle.put("updated_at","更新时间");
@@ -314,6 +322,12 @@ public class QnController {
             mapFilterAll.add(mapFilter);
         }
         mapFilterAll.add(0,mapTitle);
+
+        // 去掉隐藏字段wx_open_id
+        for (Map<String,Object> map : mapListAll){
+            map.remove("wx_open_id");
+        }
+
         //目录不存在则直接创建
         File filePath = new File(uploadPath + "/qn");
         if (!filePath.exists()) {

@@ -187,7 +187,8 @@ public class TagController {
                 twoChildren.setId(bud.getBudId());
                 twoChildren.setLabel(bud.getBudName());
                 // 获取三级-房号
-                List<HgjHouse> houseList = hgjSyHouseDaoMapper.queryRoomNum(bud.getBudId());
+                //List<HgjHouse> houseList = hgjSyHouseDaoMapper.queryRoomNum(bud.getBudId());
+                List<HgjHouse> houseList = hgjHouseDaoMapper.queryRoomNum(bud.getBudId());
                 List<ThreeChildren> threeChildrenList = new ArrayList<>();
                 for(HgjHouse house : houseList){
                     ThreeChildren threeChildren = new ThreeChildren();
@@ -283,8 +284,14 @@ public class TagController {
     @RequestMapping(value = "/selectCstList",method = RequestMethod.GET)
     public AjaxResult selectCstList(@RequestParam(required=false, value = "id") String id){
         AjaxResult ajaxResult = new AjaxResult();
+        List<HgjCst> list = new ArrayList<>();
         HashMap map = new HashMap();
-        List<HgjCst> list = tagCstDaoMapper.getCstByTagId(id);
+        Tag tag = tagDaoMapper.getById(id);
+        if(tag.getRange() == 1){
+            list = tagCstDaoMapper.getCstByTagId(id);
+        }else if(tag.getRange() == 2){
+            list = tagCstDaoMapper.getCstIntoByTagId(id);
+        }
         //logger.info("list:"+ JSON.toJSONString(list));
         map.put("list",list);
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);

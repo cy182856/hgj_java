@@ -51,6 +51,9 @@
         <if test="proNum != null and proNum != ''">
             and g.pro_num = #{proNum,jdbcType=VARCHAR}
         </if>
+        <if test="type != null and type != ''">
+            and g.type = #{type,jdbcType=VARCHAR}
+        </if>
         <if test="isShow != null">
             and g.is_show = #{isShow,jdbcType=INTEGER}
         </if>

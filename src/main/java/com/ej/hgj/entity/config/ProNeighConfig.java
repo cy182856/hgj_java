@@ -1,41 +1,21 @@
-package com.ej.hgj.entity.coupon;
+package com.ej.hgj.entity.config;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
-public class CouponGrant {
-
+public class ProNeighConfig {
     private String id;
 
-    private String batchId;
+    private String projectNum;
 
-    private String couponId;
+    private String projectName;
 
-    private String tagId;
-
-    private String typeCode;
-
-    private String typeName;
-
-    private Integer couNum;
-
-    private Integer expNum;
-
-    private String startTime;
-
-    private String endTime;
-
-    private String cstCode;
-
-    private String wxOpenId;
-
-    private String userName;
-
-    private Integer range;
+    private String neighNo;
 
     private String createBy;
 
@@ -50,11 +30,5 @@ public class CouponGrant {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-
-    private String tagName;
-
-    private String cstName;
-
-    private String title;
 
 }

@@ -32,11 +32,28 @@
         <result column="status" jdbcType="VARCHAR" property="status"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
-
         <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
         <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
-
     </resultMap>
+
+    <resultMap id="houseUnit" type="com.ej.hgj.entity.api.HgjHouseUnit">
+        <result column="unit_no" jdbcType="VARCHAR" property="unitNo"/>
+    </resultMap>
+
+    <resultMap id="houseFloor" type="com.ej.hgj.entity.api.HgjHouseFloor">
+        <result column="unit_no" jdbcType="VARCHAR" property="unitNo"/>
+        <result column="floor_num" jdbcType="VARCHAR" property="floorNum"/>
+    </resultMap>
+
+    <resultMap id="houseRoomInfo" type="com.ej.hgj.entity.api.HgjHouseRoomInfo">
+        <result column="unit_no" jdbcType="VARCHAR" property="unitNo"/>
+        <result column="floor_num" jdbcType="VARCHAR" property="floorNum"/>
+        <result column="res_code" jdbcType="VARCHAR" property="resCode"/>
+        <result column="res_name" jdbcType="VARCHAR" property="resName"/>
+        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
+        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
+    </resultMap>
+
     <sql id="Base_Column_List" >
             id,
             org_id,
@@ -160,12 +177,58 @@
         where t.bud_id is not null
     </select>
 
+    <!-- 查询单元-->
+    <select id="queryUnit" resultMap="houseUnit" parameterType="java.lang.String" >
+        select t.* from(
+                           select
+                               unit_no
+                           from s_house
+                           where org_id=#{orgId}
+                           group by unit_no
+                       )t
+        where t.unit_no is not null
+    </select>
+
+    <!-- 查询楼层-->
+    <select id="queryFloor" resultMap="houseFloor" parameterType="java.lang.String" >
+        select t.* from(
+                           select
+                               unit_no,floor_num
+                           from s_house
+                           where org_id=#{orgId}
+                           group by unit_no,floor_num
+                       )t
+        where t.unit_no is not null
+    </select>
+
     <!-- 根据入住ID查询列表-->
     <select id="getByCstIntoId" resultMap="BaseMap"  parameterType="java.lang.String">
         select
             h.*
         from s_house h inner join t_cst_into_house i on i.house_id = h.id
         where i.delete_flag = 0 and i.into_status = 0 and i.cst_into_id = #{cstIntoId}
+    </select>
+
+    <!-- 根据楼栋查询房间号-->
+    <select id="queryRoomNum" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.house.HgjHouse">
+        select
+            cst.code as cst_code, cst.cst_name ,h.res_name
+        from s_house h
+                 inner JOIN s_rcr r on r.res_id = h.id
+                 inner JOIN s_cst cst on r.cst_id = cst.id
+        where h.is_affect = 1 and r.is_affect = 1 and h.bud_id = #{budId}
+        group by cst.code,cst.cst_name,h.res_name
+    </select>
+
+    <!-- 查询所有房间号-->
+    <select id="queryRoomNumAll" resultMap="houseRoomInfo"  parameterType="com.ej.hgj.entity.api.HgjHouseRoomInfo">
+        select
+            h.unit_no, cst.code as cst_code, cst.cst_name ,h.res_code, h.res_name, h.floor_num
+        from s_house h
+                 inner JOIN s_rcr r on r.res_id = h.id
+                 inner JOIN s_cst cst on r.cst_id = cst.id
+        where h.is_affect = 1 and r.is_affect = 1 and h.org_id = #{orgId}
+        group by h.unit_no, cst.code,cst.cst_name,h.res_code, h.res_name, h.floor_num
     </select>
 
     <!-- 查询列表-->

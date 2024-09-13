@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.config.ProNeighConfDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.config.ProNeighConfig">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="project_num" jdbcType="VARCHAR" property="projectNum"/>
+        <result column="project_name" jdbcType="VARCHAR" property="projectName"/>
+        <result column="neigh_no" jdbcType="VARCHAR" property="neighNo"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, project_num, project_name, neigh_no, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 根据主键查询-->
+    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+            <include refid="Base_Column_List" />
+        from t_pro_neigh_config
+        where id = #{id}
+    </select>
+
+    <!-- 根据项目号查询-->
+    <select id="getByProjectNum" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_pro_neigh_config
+        where delete_flag = 0 and project_num = #{projectNum}
+    </select>
+
+    <!-- 根据小区号查询-->
+    <select id="getByNeighNo" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_pro_neigh_config
+        where delete_flag = 0 and neigh_no = #{neighNo}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.config.ProNeighConfig">
+        select
+        <include refid="Base_Column_List" />
+        from t_pro_neigh_config
+        where delete_flag = 0
+        <if test="projectNum != null">
+            and project_num = #{projectNum,jdbcType=VARCHAR}
+        </if>
+        <if test="projectName != null">
+            and project_name like CONCAT('%', #{projectName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="proNumList != null and proNumList.size() > 0">
+            and project_num in
+            <foreach collection="proNumList" item="proNum" index="index" open="(" close=")" separator=",">
+                #{proNum,jdbcType=INTEGER}
+            </foreach>
+        </if>
+        order by update_time desc
+    </select>
+
+</mapper>

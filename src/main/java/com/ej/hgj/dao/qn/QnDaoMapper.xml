@@ -50,7 +50,7 @@
         <if test="miniIsShow != null">
             and q.mini_is_show = #{miniIsShow,jdbcType=INTEGER}
         </if>
-        order by q.update_time desc
+        order by q.mini_is_show desc , q.update_time desc
     </select>
 
     <!-- 保存-->

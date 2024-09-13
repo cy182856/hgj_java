@@ -4,9 +4,11 @@ import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.coupon.CouponGrantBatchDaoMapper;
 import com.ej.hgj.dao.coupon.CouponGrantDaoMapper;
 import com.ej.hgj.dao.tag.TagCstDaoMapper;
+import com.ej.hgj.dao.tag.TagDaoMapper;
 import com.ej.hgj.entity.coupon.Coupon;
 import com.ej.hgj.entity.coupon.CouponGrant;
 import com.ej.hgj.entity.coupon.CouponGrantBatch;
+import com.ej.hgj.entity.tag.Tag;
 import com.ej.hgj.entity.tag.TagCst;
 import com.ej.hgj.utils.TimestampGenerator;
 import org.slf4j.Logger;
@@ -34,6 +36,9 @@ public class CouponServiceImpl implements CouponService {
     @Autowired
     private CouponGrantBatchDaoMapper couponGrantBatchDaoMapper;
 
+    @Autowired
+    private TagDaoMapper tagDaoMapper;
+
     @Override
     public void couponGrant(Coupon coupon) {
         String id = coupon.getId();
@@ -41,25 +46,36 @@ public class CouponServiceImpl implements CouponService {
         String startTIme = coupon.getStartTime();
         String endTime = coupon.getEndTime();
         // 保存批次表
-        CouponGrantBatch stopCouponGrantBatch = new CouponGrantBatch();
+        CouponGrantBatch couponGrantBatch = new CouponGrantBatch();
         String batchId = TimestampGenerator.generateSerialNumber();
-        stopCouponGrantBatch.setId(batchId);
-        stopCouponGrantBatch.setCouponId(id);
-        stopCouponGrantBatch.setTagId(tagId);
-        stopCouponGrantBatch.setStartTime(startTIme);
-        stopCouponGrantBatch.setEndTime(endTime);
-        stopCouponGrantBatch.setCreateTime(new Date());
-        stopCouponGrantBatch.setCreateBy("");
-        stopCouponGrantBatch.setUpdateTime(new Date());
-        stopCouponGrantBatch.setUpdateBy("");
-        stopCouponGrantBatch.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-        couponGrantBatchDaoMapper.save(stopCouponGrantBatch);
+        couponGrantBatch.setId(batchId);
+        couponGrantBatch.setCouponId(id);
+        couponGrantBatch.setTagId(tagId);
+        couponGrantBatch.setTypeCode(coupon.getTypeCode());
+        couponGrantBatch.setCouNum(coupon.getCouNum());
+        couponGrantBatch.setStartTime(startTIme);
+        couponGrantBatch.setEndTime(endTime);
+        couponGrantBatch.setCreateTime(new Date());
+        couponGrantBatch.setCreateBy("");
+        couponGrantBatch.setUpdateTime(new Date());
+        couponGrantBatch.setUpdateBy("");
+        couponGrantBatch.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+        couponGrantBatchDaoMapper.save(couponGrantBatch);
 
         // 保存分发表-批次详情
-        TagCst tagCst = new TagCst();
-        tagCst.setTagId(tagId);
-        List<TagCst> tagCstList = tagCstDaoMapper.getList(tagCst);
-        if(!tagCstList.isEmpty()) {
+        Tag tag = tagDaoMapper.getById(tagId);
+        List<TagCst> tagCstList = new ArrayList<>();
+        if(tag.getRange() == 1){
+            TagCst tagCst = new TagCst();
+            tagCst.setTagId(tagId);
+            tagCstList = tagCstDaoMapper.getList(tagCst);
+        }
+        if(tag.getRange() == 2){
+            TagCst tagCst = new TagCst();
+            tagCst.setTagId(tagId);
+            tagCstList = tagCstDaoMapper.getCstIntoList(tagCst);
+        }
+        if (!tagCstList.isEmpty()) {
             List<CouponGrant> couponGrantList = new ArrayList<>();
             for (TagCst cst : tagCstList) {
                 CouponGrant sg = new CouponGrant();
@@ -67,9 +83,21 @@ public class CouponServiceImpl implements CouponService {
                 sg.setBatchId(batchId);
                 sg.setCouponId(id);
                 sg.setTagId(tagId);
+                sg.setTypeCode(coupon.getTypeCode());
+                sg.setCouNum(coupon.getCouNum());
+                sg.setExpNum(coupon.getCouNum());
                 sg.setStartTime(startTIme);
                 sg.setEndTime(endTime);
-                sg.setCstCode(cst.getCstCode());
+                if(tag.getRange() == 1){
+                    sg.setCstCode(cst.getCstCode());
+                    sg.setWxOpenId("");
+                    sg.setRange(1);
+                }
+                if(tag.getRange() == 2){
+                    sg.setWxOpenId(cst.getWxOpenId());
+                    sg.setCstCode("");
+                    sg.setRange(2);
+                }
                 sg.setCreateTime(new Date());
                 sg.setCreateBy("");
                 sg.setUpdateTime(new Date());
@@ -79,6 +107,7 @@ public class CouponServiceImpl implements CouponService {
             }
             couponGrantDaoMapper.insertList(couponGrantList);
         }
+
     }
 
     @Override

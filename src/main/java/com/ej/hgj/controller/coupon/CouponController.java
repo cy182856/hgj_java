@@ -138,13 +138,13 @@ public class CouponController {
     @RequestMapping(value = "/delete",method = RequestMethod.GET)
     public AjaxResult delete(@RequestParam(required=false, value = "id") String id){
         AjaxResult ajaxResult = new AjaxResult();
-        // 查询该停车卷发放记录
+        // 查询卷发放记录
         CouponGrantBatch stopCouponGrantBatch = new CouponGrantBatch();
         stopCouponGrantBatch.setCouponId(id);
         List<CouponGrantBatch> list = couponGrantBatchDaoMapper.getList(stopCouponGrantBatch);
         if(!list.isEmpty()){
             ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
-            ajaxResult.setMessage("该停车券有发放记录，不能删除！");
+            ajaxResult.setMessage("该券有发放记录，不能删除！");
         }else {
             couponDaoMapper.delete(id);
             ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);

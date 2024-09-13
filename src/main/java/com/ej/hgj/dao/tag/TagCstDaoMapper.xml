@@ -31,6 +31,17 @@
         </if>
     </select>
 
+    <!-- 查询入住客户列表-->
+    <select id="getCstIntoList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.tag.TagCst">
+        select
+        a.*
+        from t_tag_cst a inner join t_cst_into b on a.wx_open_id = b.wx_open_id and b.into_status = 1
+        where a.delete_flag = 0
+        <if test="tagId != null">
+            and a.tag_id = #{tagId,jdbcType=VARCHAR}
+        </if>
+    </select>
+
     <!-- 查询个人 -->
     <select id="getListPerson" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.tag.TagCst">
         select
@@ -47,6 +58,14 @@
         select
             c.code as cst_code,c.cst_name
         from t_tag_cst t inner join s_cst c on t.cst_code = c.code
+        where t.delete_flag = 0 and t.tag_id = #{tagId}
+    </select>
+
+    <!-- 根据标签查询入住客户列表-->
+    <select id="getCstIntoByTagId" resultMap="BaseMap"  parameterType="java.lang.String">
+        select
+            i.wx_open_id as cst_code,i.user_name as cst_name
+        from t_tag_cst t inner join t_cst_into i on i.wx_open_id = t.wx_open_id and i.into_status = 1
         where t.delete_flag = 0 and t.tag_id = #{tagId}
     </select>
 
