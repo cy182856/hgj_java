@@ -20,7 +20,7 @@ public class InterceptorConfig extends WebMvcConfigurerAdapter {
                         "/**/upload",
                         "/**/wechatPub/**",
                         "/**/file/**",
-                        "/**/cstInfo/**"
+                        "/**/control/**"
                 ); //放行接口
         super.addInterceptors(registry);
     }
