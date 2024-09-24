@@ -50,5 +50,8 @@ public class QrCodeResVo {
     // 室号
     private String room;
 
+    // 房屋ID
+    private String houseId;
+
 
 }

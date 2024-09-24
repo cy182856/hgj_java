@@ -10,14 +10,10 @@ import java.util.List;
 @Component
 public interface OpenDoorLogDaoMapper {
 
-    OpenDoorLog getById(String id);
+    List<OpenDoorLog> getByCardNoList(String cardNo);
 
     List<OpenDoorLog> getList(OpenDoorLog openDoorLog);
 
     void save(OpenDoorLog openDoorLog);
-
-    void update(OpenDoorLog openDoorLog);
-
-    void delete(String id);
 
 }

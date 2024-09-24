@@ -11,26 +11,13 @@ import java.util.List;
 @Component
 public interface OpenDoorCodeDaoMapper {
 
-    OpenDoorCode getById(String id);
-
-    OpenDoorCode getByRandNum(String randNum);
-
-    QuickCodeInfo getByQuickCode(String quickCode);
+    // 接口调用-查询当天有效快速码
+    QuickCodeInfo getByQuickCode(String quickCode, String expDate);
 
     List<OpenDoorCode> getList(OpenDoorCode openDoorCode);
-
-    List<OpenDoorCode> getQrCodeByExpDate(OpenDoorCode openDoorCode);
-
-    List<OpenDoorCode> getQrCodeByExpDate2(OpenDoorCode openDoorCode);
-
-    List<OpenDoorCode> getCstRanNumList(OpenDoorCode openDoorCode);
 
     void save(OpenDoorCode openDoorCode);
 
     void update(OpenDoorCode openDoorCode);
-
-    void updateByRandNum(String randNum);
-
-    void delete(String id);
 
 }

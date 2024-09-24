@@ -4,18 +4,11 @@
 
     <resultMap id="BaseMap" type="com.ej.hgj.entity.opendoor.OpenDoorLog">
         <result column="id" jdbcType="VARCHAR" property="id"/>
-        <result column="pass_id" jdbcType="VARCHAR" property="passId"/>
-        <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
-        <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
-        <result column="pass_url" jdbcType="VARCHAR" property="passUrl"/>
-        <result column="rand_num" jdbcType="VARCHAR" property="randNum"/>
-        <result column="wx_open_id" jdbcType="VARCHAR" property="wxOpenId"/>
-        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
-        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
-        <result column="cst_mobile" jdbcType="VARCHAR" property="cstMobile"/>
-        <result column="house_id" jdbcType="VARCHAR" property="houseId"/>
-        <result column="visit_name" jdbcType="VARCHAR" property="visitName"/>
-        <result column="car_num" jdbcType="VARCHAR" property="carNum"/>
+        <result column="neigh_no" jdbcType="VARCHAR" property="neighNo"/>
+        <result column="card_no" jdbcType="VARCHAR" property="cardNo"/>
+        <result column="device_no" jdbcType="VARCHAR" property="deviceNo"/>
+        <result column="is_unlock" jdbcType="INTEGER" property="isUnlock"/>
+        <result column="event_time" jdbcType="BIGINT" property="eventTime"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -23,34 +16,39 @@
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
     </resultMap>
     <sql id="Base_Column_List" >
-        id, pass_id, pro_num, pro_name, pass_url, rand_num, wx_open_id, cst_code, cst_name, cst_mobile, house_id,
-        visit_name, car_num, create_time, update_time, create_by, update_by, delete_flag
+        id, neigh_no, card_no, device_no, is_unlock, event_time, create_time, update_time, create_by, update_by, delete_flag
     </sql>
-
-    <!-- 根据id查询-->
-    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
-        select
-            <include refid="Base_Column_List" />
-        from t_open_door_log
-        where id = #{id} and delete_flag = 0
-    </select>
 
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.opendoor.OpenDoorLog">
         select
-            <include refid="Base_Column_List" />
+            l.*,c.pro_num,c.pro_name,c.exp_date,c.cst_code,c.cst_name,
+            c.unit_num,c.floors,c.rand_num, c.phone,c.res_code,c.face_pic_path
+        from t_open_door_log l
+            left join t_open_door_code c on c.card_no = l.card_no
+        where l.delete_flag = 0
+        <if test="cardNo != null and cardNo != ''">
+            and l.card_no like CONCAT('%', #{cardNo,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="proNum != null and proNum != ''">
+            and c.pro_num = #{proNum,jdbcType=VARCHAR}
+        </if>
+        <if test="cstCode != null and cstCode != ''">
+            and c.cst_code = #{cstCode,jdbcType=VARCHAR}
+        </if>
+        <if test="cstName != null and cstName != ''">
+            and c.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        order by l.event_time desc
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getByCardNoList" resultMap="BaseMap"  parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List" />
         from t_open_door_log
-        where delete_flag = 0
-        <if test="proNum != null">
-            and pro_num = #{proNum,jdbcType=VARCHAR}
-        </if>
-        <if test="wxOpenId != null">
-            and wx_open_id = #{wxOpenId,jdbcType=VARCHAR}
-        </if>
-        <if test="cstCode != null">
-            and cst_code = #{cstCode,jdbcType=VARCHAR}
-        </if>
-        order by create_time desc
+        where card_no = #{cardNo}
+        order by event_time desc
     </select>
 
     <!-- 保存-->
@@ -59,50 +57,20 @@
         <if test="id != null">
             id,
         </if>
-        <if test="type != null">
-            `type`,
+        <if test="neighNo != null">
+            neigh_no,
         </if>
-        <if test="cardNum != null">
-            card_num,
+        <if test="cardNo != null">
+            card_no,
         </if>
-        <if test="phone != null">
-            phone,
+        <if test="deviceNo != null">
+            device_no,
         </if>
-        <if test="passId != null">
-            pass_id,
+        <if test="isUnlock != null">
+            is_unlock,
         </if>
-        <if test="proNum != null">
-            pro_num,
-        </if>
-        <if test="proName != null">
-            pro_name,
-        </if>
-        <if test="passUrl != null">
-            pass_url,
-        </if>
-        <if test="randNum != null">
-            rand_num,
-        </if>
-        <if test="wxOpenId != null">
-            wx_open_id,
-        </if>
-        <if test="cstCode != null">
-            cst_code,
-        </if>
-        <if test="cstName != null">
-            cst_name,
-        </if>
-        <if test="cstMobile != null">
-            cst_mobile,
-        </if>
-        <if test="houseId != null">
-            house_id,
-        </if>
-        <if test="visitName != null">
-            visit_name,
-        </if>
-        <if test="carNum != null">
-            car_num,
+        <if test="eventTime != null">
+            event_time,
         </if>
         <if test="createTime != null">
             create_time,
@@ -124,50 +92,20 @@
             <if test="id != null" >
                 #{id,jdbcType=VARCHAR},
             </if>
-            <if test="type != null" >
-                #{type,jdbcType=INTEGER},
+            <if test="neighNo != null" >
+                #{neighNo,jdbcType=VARCHAR},
             </if>
-            <if test="cardNum != null" >
-                #{cardNum,jdbcType=VARCHAR},
+            <if test="cardNo != null" >
+                #{cardNo,jdbcType=VARCHAR},
             </if>
-            <if test="phone != null" >
-                #{phone,jdbcType=VARCHAR},
+            <if test="deviceNo != null" >
+                #{deviceNo,jdbcType=VARCHAR},
             </if>
-            <if test="passId != null" >
-                #{passId,jdbcType=VARCHAR},
+            <if test="isUnlock != null" >
+                #{isUnlock,jdbcType=INTEGER},
             </if>
-            <if test="proNum != null" >
-                #{proNum,jdbcType=VARCHAR},
-            </if>
-            <if test="proName != null" >
-                #{proName,jdbcType=VARCHAR},
-            </if>
-            <if test="passUrl != null" >
-                #{passUrl,jdbcType=VARCHAR},
-            </if>
-            <if test="randNum != null" >
-                #{randNum,jdbcType=VARCHAR},
-            </if>
-            <if test="wxOpenId != null" >
-                #{wxOpenId,jdbcType=VARCHAR},
-            </if>
-            <if test="cstCode != null" >
-                #{cstCode,jdbcType=VARCHAR},
-            </if>
-            <if test="cstName != null" >
-                #{cstName,jdbcType=VARCHAR},
-            </if>
-            <if test="cstMobile != null" >
-                #{cstMobile,jdbcType=VARCHAR},
-            </if>
-            <if test="houseId != null" >
-                #{houseId,jdbcType=VARCHAR},
-            </if>
-            <if test="visitName != null" >
-                #{visitName,jdbcType=VARCHAR},
-            </if>
-            <if test="carNum != null" >
-                #{carNum,jdbcType=VARCHAR},
+            <if test="eventTime != null" >
+                #{eventTime,jdbcType=BIGINT},
             </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
@@ -186,49 +124,5 @@
             </if>
         </trim>
     </insert>
-
-    <!-- 更新-->
-    <update id="update" parameterType="com.ej.hgj.entity.opendoor.OpenDoorLog" >
-        update
-        t_visit_pass
-        <set>
-            <if test="repairStatus != null">
-                repair_status = #{repairStatus,jdbcType=VARCHAR},
-            </if>
-            <if test="repairScore != null">
-                repair_score = #{repairScore,jdbcType=VARCHAR},
-            </if>
-            <if test="satisFaction != null">
-                satis_faction = #{satisFaction,jdbcType=VARCHAR},
-            </if>
-            <if test="repairMsg != null">
-                repair_msg = #{repairMsg,jdbcType=VARCHAR},
-            </if>
-            <if test="labourCost != null">
-                labour_cost = #{labourCost,jdbcType=DECIMAL},
-            </if>
-            <if test="materialCost != null">
-                material_cost = #{materialCost,jdbcType=DECIMAL},
-            </if>
-            <if test="orders != null">
-                orders = #{orders,jdbcType=VARCHAR},
-            </if>
-            <if test="ordersTime != null">
-                orders_time = #{ordersTime,jdbcType=TIMESTAMP},
-            </if>
-            <if test="completionTime != null">
-                completion_time = #{completionTime,jdbcType=TIMESTAMP},
-            </if>
-            <if test="updateTime != null">
-                update_time = #{updateTime,jdbcType=TIMESTAMP},
-            </if>
-        </set>
-        where id=#{id}
-    </update>
-
-    <!-- 删除-->
-    <update id="delete" parameterType="java.lang.String" >
-        delete from t_visit_pass where id=#{id}
-    </update>
 
 </mapper>

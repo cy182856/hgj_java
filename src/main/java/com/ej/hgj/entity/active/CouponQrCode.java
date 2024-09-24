@@ -1,4 +1,4 @@
-package com.ej.hgj.entity.coupon;
+package com.ej.hgj.entity.active;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -7,20 +7,45 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Data
-public class Coupon {
+public class CouponQrCode {
+
     private String id;
 
-    private String title;
+    private String proNum;
 
-    private Integer couNum;
+    private String proName;
 
-    private Integer isExp;
+    private String expDate;
 
-    private String typeCode;
+    private Long startTime;
 
-    private String typeName;
+    private Long endTime;
 
-    private String desc;
+    private String cardNo;
+
+    private String couponId;
+
+    private String qrCodeContent;
+
+    private String neighNo;
+
+    private String addressNum;
+
+    private String unitNum;
+
+    private String floors;
+
+    private String wxOpenId;
+
+    private String cstCode;
+
+    private String cstName;
+
+    private String resCode;
+
+    private Integer isExpire;
+
+    private String errorMsg;
 
     private String createBy;
 
@@ -36,9 +61,4 @@ public class Coupon {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
-    private String tagId;
-
-    private String startTime;
-
-    private String endTime;
 }

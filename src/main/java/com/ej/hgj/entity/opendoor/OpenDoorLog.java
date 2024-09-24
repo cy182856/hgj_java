@@ -11,37 +11,15 @@ public class OpenDoorLog {
 
     private String id;
 
-    private Integer type;
+    private String neighNo;
 
-    private String cardNum;
+    private String cardNo;
 
-    private String randNum;
+    private String deviceNo;
 
-    private String phone;
+    private Integer isUnlock;
 
-    private String passId;
-
-    private String proNum;
-
-    private String proName;
-
-    private String passUrl;
-
-    private String wxOpenId;
-
-    private String cstCode;
-
-    private String cstName;
-
-    private String cstMobile;
-
-    private String houseId;
-
-    // 访客姓名
-    private String visitName;
-
-    // 车牌号
-    private String carNum;
+    private Long eventTime;
 
     private String createBy;
 
@@ -57,11 +35,6 @@ public class OpenDoorLog {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
-    private String houseName;
-
-    // 生效日期
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date effectuateDate;
+    private String openDoorTime;
 
 }

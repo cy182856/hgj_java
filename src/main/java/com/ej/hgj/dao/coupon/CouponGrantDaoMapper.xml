@@ -210,11 +210,14 @@
             <if test="couponId != null">
                 coupon_id = #{couponId,jdbcType=VARCHAR},
             </if>
+            <if test="expNum != null">
+                exp_num = #{expNum,jdbcType=INTEGER},
+            </if>
             <if test="startTime != null">
                 start_time = #{startTime,jdbcType=VARCHAR},
             </if>
             <if test="endTime != null">
-                is_exp = #{isExp,jdbcType=VARCHAR},
+                end_time = #{endTime,jdbcType=VARCHAR},
             </if>
             <if test="cstCode != null">
                 cst_code = #{cstCode,jdbcType=VARCHAR},

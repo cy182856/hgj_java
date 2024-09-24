@@ -16,23 +16,12 @@
         <result column="address_num" jdbcType="VARCHAR" property="addressNum"/>
         <result column="unit_num" jdbcType="VARCHAR" property="unitNum"/>
         <result column="floors" jdbcType="VARCHAR" property="floors"/>
-
-        <result column="pass_url" jdbcType="VARCHAR" property="passUrl"/>
-        <result column="rand_num" jdbcType="VARCHAR" property="randNum"/>
         <result column="wx_open_id" jdbcType="VARCHAR" property="wxOpenId"/>
         <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
         <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
         <result column="phone" jdbcType="VARCHAR" property="phone"/>
         <result column="res_code" jdbcType="VARCHAR" property="resCode"/>
-        <result column="face_pic_path" jdbcType="VARCHAR" property="facePicPath"/>
-        <result column="cst_mobile" jdbcType="VARCHAR" property="cstMobile"/>
         <result column="house_id" jdbcType="VARCHAR" property="houseId"/>
-        <result column="visit_name" jdbcType="VARCHAR" property="visitName"/>
-        <result column="car_num" jdbcType="VARCHAR" property="carNum"/>
-        <result column="exp_num" jdbcType="INTEGER" property="expNum"/>
-        <result column="res_num" jdbcType="INTEGER" property="resNum"/>
-        <result column="effective_time" jdbcType="INTEGER" property="effectiveTime"/>
-        <result column="is_expire" jdbcType="INTEGER" property="isExpire"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -50,34 +39,16 @@
     <sql id="Base_Column_List" >
         id, pro_num, pro_name, `type`, exp_date, start_time, end_time,
         card_no, qr_code_content, neigh_no, address_num, unit_num, floors,
-        pass_url, rand_num, wx_open_id, cst_code, cst_name, phone, res_code,
-        face_pic_path,cst_mobile, house_id, visit_name, car_num, exp_num,
-        res_num, effective_time, is_expire, create_time,
+        wx_open_id, cst_code, cst_name, phone, res_code, house_id, create_time,
         update_time, create_by, update_by, delete_flag
     </sql>
-
-    <!-- 根据id查询-->
-    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
-        select
-            <include refid="Base_Column_List" />
-        from t_open_door_code
-        where id = #{id}
-    </select>
-
-    <!-- 根据快速通行码查询-->
-    <select id="getByRandNum" resultMap="BaseMap" parameterType="java.lang.String" >
-        select
-        <include refid="Base_Column_List" />
-        from t_open_door_code
-        where delete_flag = 0 and is_expire = 1 and rand_num = #{randNum}
-    </select>
 
     <!-- 根据快速通行码查询-接口-->
     <select id="getByQuickCode" resultMap="QuickCodeInfoMap" parameterType="java.lang.String" >
         select
         o.cst_code, o.cst_name, p.neigh_no, o.unit_num, o.floors, o.res_code
-        from t_open_door_code o left join t_pro_neigh_config p on o.pro_num = p.project_num
-        where o.delete_flag = 0 and o.is_expire = 1 and o.rand_num = #{quickCode}
+        from t_open_door_quick_code o left join t_pro_neigh_config p on o.pro_num = p.project_num
+        where o.delete_flag = 0 and o.is_expire = 1 and o.exp_date = #{expDate} and o.quick_code = #{quickCode}
     </select>
 
     <!-- 查询列表-->
@@ -85,53 +56,32 @@
         select
             <include refid="Base_Column_List" />
         from t_open_door_code
-        where delete_flag = 0 and is_expire = 1
-    </select>
-
-    <!-- 查询大于等于当天的二维码生成记录-->
-    <select id="getQrCodeByExpDate" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.opendoor.OpenDoorCode">
-        select
-        <include refid="Base_Column_List" />
-        from t_open_door_code
-        where delete_flag = 0 and is_expire = 1
-        <if test="type != null">
-            and `type` = #{type,jdbcType=VARCHAR}
-        </if>
-        <if test="wxOpenId != null">
-            and wx_open_id = #{wxOpenId,jdbcType=VARCHAR}
-        </if>
-        <if test="expDate != null">
-            and exp_date >= #{expDate,jdbcType=VARCHAR}
-        </if>
-    </select>
-
-    <!-- 根据有效期查询二维码生成记录-->
-    <select id="getQrCodeByExpDate2" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.opendoor.OpenDoorCode">
-        select
-        <include refid="Base_Column_List" />
-        from t_open_door_code
-        where delete_flag = 0 and is_expire = 1
-        <if test="type != null">
-            and `type` = #{type,jdbcType=VARCHAR}
-        </if>
-        <if test="wxOpenId != null">
-            and wx_open_id = #{wxOpenId,jdbcType=VARCHAR}
-        </if>
-        <if test="expDate != null">
-            and exp_date = #{expDate,jdbcType=VARCHAR}
-        </if>
-    </select>
-
-    <!-- 查询客户当天生成的快速通行码-->
-    <select id="getCstRanNumList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.opendoor.OpenDoorCode">
-        select
-        <include refid="Base_Column_List" />
-        from t_open_door_code
         where delete_flag = 0
-        and cst_code=#{cstCode}
-        and wx_open_id=#{wxOpenId}
-        and rand_num is not null
-        and DATE_FORMAT(create_time, '%Y-%m-%d') = DATE(NOW())
+        <if test="type != null">
+            and `type` = #{type,jdbcType=INTEGER}
+        </if>
+        <if test="cardNo != null and cardNo != ''">
+            and card_no = #{cardNo,jdbcType=VARCHAR}
+        </if>
+        <if test="proNum != null and proNum != ''">
+            and pro_num = #{proNum,jdbcType=VARCHAR}
+        </if>
+        <if test="cstCode != null and cstCode != ''">
+            and cst_code = #{cstCode,jdbcType=VARCHAR}
+        </if>
+        <if test="cstName != null and cstName != ''">
+            and cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="phone != null and phone != ''">
+            and phone like CONCAT('%', #{phone,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and create_time >= #{startDate,jdbcType=VARCHAR}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and create_time &lt;= #{endDate,jdbcType=VARCHAR}
+        </if>
+        order by update_time desc
     </select>
 
     <!-- 保存-->
@@ -176,12 +126,6 @@
         <if test="floors != null">
             floors,
         </if>
-        <if test="passUrl != null">
-            pass_url,
-        </if>
-        <if test="randNum != null">
-            rand_num,
-        </if>
         <if test="wxOpenId != null">
             wx_open_id,
         </if>
@@ -197,32 +141,8 @@
         <if test="resCode != null">
             res_code,
         </if>
-        <if test="facePicPath != null">
-            face_pic_path,
-        </if>
-        <if test="cstMobile != null">
-            cst_mobile,
-        </if>
         <if test="houseId != null">
             house_id,
-        </if>
-        <if test="visitName != null">
-            visit_name,
-        </if>
-        <if test="carNum != null">
-            car_num,
-        </if>
-        <if test="expNum != null">
-            exp_num,
-        </if>
-        <if test="resNum != null">
-            res_num,
-        </if>
-        <if test="effectiveTime != null">
-            effective_time,
-        </if>
-        <if test="isExpire != null">
-            is_expire,
         </if>
         <if test="createTime != null">
             create_time,
@@ -280,12 +200,6 @@
             <if test="floors != null" >
                 #{floors,jdbcType=VARCHAR},
             </if>
-            <if test="passUrl != null" >
-                #{passUrl,jdbcType=VARCHAR},
-            </if>
-            <if test="randNum != null" >
-                #{randNum,jdbcType=VARCHAR},
-            </if>
             <if test="wxOpenId != null" >
                 #{wxOpenId,jdbcType=VARCHAR},
             </if>
@@ -301,32 +215,8 @@
             <if test="resCode != null" >
                 #{resCode,jdbcType=VARCHAR},
             </if>
-            <if test="facePicPath != null" >
-                #{facePicPath,jdbcType=VARCHAR},
-            </if>
-            <if test="cstMobile != null" >
-                #{cstMobile,jdbcType=VARCHAR},
-            </if>
             <if test="houseId != null" >
                 #{houseId,jdbcType=VARCHAR},
-            </if>
-            <if test="visitName != null" >
-                #{visitName,jdbcType=VARCHAR},
-            </if>
-            <if test="carNum != null" >
-                #{carNum,jdbcType=VARCHAR},
-            </if>
-            <if test="expNum != null" >
-                #{expNum,jdbcType=INTEGER},
-            </if>
-            <if test="resNum != null" >
-                #{resNum,jdbcType=INTEGER},
-            </if>
-            <if test="effectiveTime != null" >
-                #{effectiveTime,jdbcType=INTEGER},
-            </if>
-            <if test="isExpire != null" >
-                #{isExpire,jdbcType=INTEGER},
             </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
@@ -351,22 +241,14 @@
         update
         t_open_door_code
         <set>
+            <if test="isExpire != null">
+                is_expire = #{isExpire,jdbcType=INTEGER},
+            </if>
             <if test="updateTime != null">
                 update_time = #{updateTime,jdbcType=TIMESTAMP},
             </if>
         </set>
         where id=#{id}
-    </update>
-
-
-    <!-- 更新-->
-    <update id="updateByRandNum" parameterType="java.lang.String" >
-        update t_open_door_code set is_expire = 0 where delete_flag = 0  and `type` = 2 and rand_num = #{randNum}
-    </update>
-
-    <!-- 删除-->
-    <update id="delete" parameterType="java.lang.String" >
-        delete from t_open_door_code where id=#{id}
     </update>
 
 </mapper>

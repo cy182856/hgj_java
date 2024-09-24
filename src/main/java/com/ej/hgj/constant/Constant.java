@@ -149,4 +149,7 @@ public class Constant {
      */
     public static final String QN_SHOW_SIZE = "qn_show_size";
 
+    // 门禁二维码接口地址
+    public static String OPEN_DOOR_QR_CODE_URL = "open_door_qr_code_url";
+
 }

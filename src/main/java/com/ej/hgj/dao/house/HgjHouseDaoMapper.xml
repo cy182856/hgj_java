@@ -46,6 +46,7 @@
     </resultMap>
 
     <resultMap id="houseRoomInfo" type="com.ej.hgj.entity.api.HgjHouseRoomInfo">
+        <result column="id" jdbcType="VARCHAR" property="houseId"/>
         <result column="unit_no" jdbcType="VARCHAR" property="unitNo"/>
         <result column="floor_num" jdbcType="VARCHAR" property="floorNum"/>
         <result column="res_code" jdbcType="VARCHAR" property="resCode"/>
@@ -223,12 +224,12 @@
     <!-- 查询所有房间号-->
     <select id="queryRoomNumAll" resultMap="houseRoomInfo"  parameterType="com.ej.hgj.entity.api.HgjHouseRoomInfo">
         select
-            h.unit_no, cst.code as cst_code, cst.cst_name ,h.res_code, h.res_name, h.floor_num
+            h.id, h.unit_no, cst.code as cst_code, cst.cst_name ,h.res_code, h.res_name, h.floor_num
         from s_house h
                  inner JOIN s_rcr r on r.res_id = h.id
                  inner JOIN s_cst cst on r.cst_id = cst.id
         where h.is_affect = 1 and r.is_affect = 1 and h.org_id = #{orgId}
-        group by h.unit_no, cst.code,cst.cst_name,h.res_code, h.res_name, h.floor_num
+        group by h.id, h.unit_no, cst.code,cst.cst_name,h.res_code, h.res_name, h.floor_num
     </select>
 
     <!-- 查询列表-->

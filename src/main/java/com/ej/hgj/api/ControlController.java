@@ -3,15 +3,24 @@ package com.ej.hgj.api;
 import com.ej.hgj.constant.Constant;
 import com.ej.hgj.constant.api.AjaxResultApi;
 import com.ej.hgj.dao.config.ProNeighConfDaoMapper;
+import com.ej.hgj.dao.coupon.CouponGrantDaoMapper;
 import com.ej.hgj.dao.house.HgjHouseDaoMapper;
 import com.ej.hgj.dao.opendoor.OpenDoorCodeDaoMapper;
+import com.ej.hgj.dao.opendoor.OpenDoorLogDaoMapper;
+import com.ej.hgj.dao.opendoor.OpenDoorQuickCodeDaoMapper;
 import com.ej.hgj.entity.api.HgjHouseFloor;
 import com.ej.hgj.entity.api.HgjHouseRoomInfo;
 import com.ej.hgj.entity.api.HgjHouseUnit;
 import com.ej.hgj.entity.api.QuickCodeInfo;
 import com.ej.hgj.entity.config.ProNeighConfig;
+import com.ej.hgj.entity.coupon.CouponGrant;
 import com.ej.hgj.entity.opendoor.OpenDoorCode;
+import com.ej.hgj.entity.opendoor.OpenDoorLog;
+import com.ej.hgj.entity.opendoor.OpenDoorQuickCode;
+import com.ej.hgj.service.api.ControlService;
+import com.ej.hgj.utils.DateUtils;
 import com.ej.hgj.utils.TimestampGenerator;
+import com.ej.hgj.vo.QrCodeLogResVo;
 import com.ej.hgj.vo.QrCodeResVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +55,12 @@ public class ControlController {
     @Autowired
     private OpenDoorCodeDaoMapper openDoorCodeDaoMapper;
 
+    @Autowired
+    private ControlService controlService;
+
+    @Autowired
+    private OpenDoorQuickCodeDaoMapper openDoorQuickCodeDaoMapper;
+
     /**
      * 单元楼层客户信息查询
      * @param neighNo
@@ -59,21 +74,27 @@ public class ControlController {
             ajaxResult.setResMsg("参数错误");
             return ajaxResult;
         }
-        // 根据小区号查询对应项目号
-        ProNeighConfig proNeighConfig = proNeighConfDaoMapper.getByNeighNo(neighNo);
-        HashMap map = new HashMap();
-        // 根据项目号查询所有单元
-        List<HgjHouseUnit> unitList = hgjHouseDaoMapper.queryUnit(proNeighConfig.getProjectNum());
-        // 根据项目号查询所有楼层
-        List<HgjHouseFloor> floorList = hgjHouseDaoMapper.queryFloor(proNeighConfig.getProjectNum());
-        // 根据项目号查询所有房间
-        List<HgjHouseRoomInfo> houseList = hgjHouseDaoMapper.queryRoomNumAll(proNeighConfig.getProjectNum());
-        map.put("unitList",unitList);
-        map.put("floorList",floorList);
-        map.put("houseList",houseList);
-        ajaxResult.setResCode(1);
-        ajaxResult.setResMsg("成功");
-        ajaxResult.setData(map);
+        try {
+            // 根据小区号查询对应项目号
+            ProNeighConfig proNeighConfig = proNeighConfDaoMapper.getByNeighNo(neighNo);
+            HashMap map = new HashMap();
+            // 根据项目号查询所有单元
+            List<HgjHouseUnit> unitList = hgjHouseDaoMapper.queryUnit(proNeighConfig.getProjectNum());
+            // 根据项目号查询所有楼层
+            List<HgjHouseFloor> floorList = hgjHouseDaoMapper.queryFloor(proNeighConfig.getProjectNum());
+            // 根据项目号查询所有房间
+            List<HgjHouseRoomInfo> houseList = hgjHouseDaoMapper.queryRoomNumAll(proNeighConfig.getProjectNum());
+            map.put("unitList", unitList);
+            map.put("floorList", floorList);
+            map.put("houseList", houseList);
+            ajaxResult.setResCode(1);
+            ajaxResult.setResMsg("成功");
+            ajaxResult.setData(map);
+        }catch (Exception e){
+            e.printStackTrace();
+            ajaxResult.setResCode(0);
+            ajaxResult.setResMsg(e.toString());
+        }
         return ajaxResult;
     }
 
@@ -91,11 +112,22 @@ public class ControlController {
             return ajaxResult;
         }
         HashMap map = new HashMap();
-        QuickCodeInfo quickCodeInfo = openDoorCodeDaoMapper.getByQuickCode(quickCode);
-        map.put("quickCodeInfo",quickCodeInfo);
-        ajaxResult.setResCode(1);
-        ajaxResult.setResMsg("成功");
-        ajaxResult.setData(map);
+        try {
+            QuickCodeInfo quickCodeInfo = openDoorQuickCodeDaoMapper.getByQuickCodeApi(quickCode, DateUtils.strYmd(new Date()));
+            if(quickCodeInfo != null){
+                map.put("quickCodeInfo",quickCodeInfo);
+                ajaxResult.setResCode(1);
+                ajaxResult.setResMsg("成功");
+                ajaxResult.setData(map);
+            }else {
+                ajaxResult.setResCode(0);
+                ajaxResult.setResMsg("快速通行码无效");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            ajaxResult.setResCode(0);
+            ajaxResult.setResMsg(e.toString());
+        }
         return ajaxResult;
     }
 
@@ -110,38 +142,129 @@ public class ControlController {
         AjaxResultApi ajaxResult = new AjaxResultApi();
         String neighNo = qrCodeResVo.getNeighNo();
         Integer type = qrCodeResVo.getType();
-        ProNeighConfig byNeighNo = proNeighConfDaoMapper.getByNeighNo(neighNo);
-        OpenDoorCode openDoorCode = new OpenDoorCode();
-        openDoorCode.setId(TimestampGenerator.generateSerialNumber());
-        openDoorCode.setProNum(byNeighNo.getProjectNum());
-        openDoorCode.setProName(byNeighNo.getProjectName());
-        openDoorCode.setType(type);
-        openDoorCode.setExpDate(qrCodeResVo.getExpDate());
-        openDoorCode.setStartTime(qrCodeResVo.getStartTime());
-        openDoorCode.setEndTime(qrCodeResVo.getEndTime());
-        openDoorCode.setCardNo(qrCodeResVo.getCardNo());
-        openDoorCode.setQrCodeContent(qrCodeResVo.getQrCode());
-        openDoorCode.setNeighNo(qrCodeResVo.getNeighNo());
-        openDoorCode.setUnitNum(qrCodeResVo.getUnitNum()+"");
-        openDoorCode.setFloors(qrCodeResVo.getFloor()+"");
-        if(type == 4){
-            openDoorCode.setRandNum(qrCodeResVo.getQuickCode() + "");
-            String facePicPath = saveFacePic(qrCodeResVo.getCardNo(),qrCodeResVo.getFacePic());
-            openDoorCode.setFacePicPath(facePicPath);
+        String cardNo = qrCodeResVo.getCardNo();
+        String qrCode = qrCodeResVo.getQrCode();
+        String expDate = qrCodeResVo.getExpDate();
+        Long startTime = qrCodeResVo.getStartTime();
+        Long endTime = qrCodeResVo.getEndTime();
+        Long phone = qrCodeResVo.getPhone();
+        String cstCode = qrCodeResVo.getCstCode();
+        String cstName = qrCodeResVo.getCstName();
+        Integer unitNum = qrCodeResVo.getUnitNum();
+        Integer floor = qrCodeResVo.getFloor();
+        String room = qrCodeResVo.getRoom();
+        String houseId = qrCodeResVo.getHouseId();
+        if(type == null || StringUtils.isBlank(cardNo) || StringUtils.isBlank(qrCode)||
+                startTime == null || endTime == null || phone == null ){
+            ajaxResult.setResCode(0);
+            ajaxResult.setResMsg("请求参数错误");
+            return ajaxResult;
         }
-        openDoorCode.setCstCode(qrCodeResVo.getCstCode());
-        openDoorCode.setCstName(qrCodeResVo.getCstName());
-        openDoorCode.setPhone(qrCodeResVo.getPhone()+"");
-        openDoorCode.setResCode(qrCodeResVo.getRoom()+"");
 
-        openDoorCode.setIsExpire(1);
-        openDoorCode.setCreateTime(new Date());
-        openDoorCode.setUpdateTime(new Date());
-        openDoorCode.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-        openDoorCodeDaoMapper.save(openDoorCode);
-        ajaxResult.setResCode(1);
-        ajaxResult.setResMsg("成功");
+        try {
+            // 客服直接创建的二维码
+            if(type == 3){
+                if(StringUtils.isBlank(neighNo) || StringUtils.isBlank(expDate) ||
+                        StringUtils.isBlank(houseId) || StringUtils.isBlank(cstCode) ||
+                        StringUtils.isBlank(cstName) || unitNum == null || floor == null||
+                        StringUtils.isBlank(room)){
+                    ajaxResult.setResCode(0);
+                    ajaxResult.setResMsg("请求参数错误");
+                    return ajaxResult;
+                }
+                OpenDoorCode openDoorCodePram = new OpenDoorCode();
+                openDoorCodePram.setCardNo(cardNo);
+                List<OpenDoorCode> list = openDoorCodeDaoMapper.getList(openDoorCodePram);
+                if(!list.isEmpty()){
+                    ajaxResult.setResCode(0);
+                    ajaxResult.setResMsg("卡号重复");
+                    return ajaxResult;
+                }
+                ProNeighConfig byNeighNo = proNeighConfDaoMapper.getByNeighNo(neighNo);
+                OpenDoorCode openDoorCode = new OpenDoorCode();
+                openDoorCode.setId(TimestampGenerator.generateSerialNumber());
+                openDoorCode.setProNum(byNeighNo.getProjectNum());
+                openDoorCode.setProName(byNeighNo.getProjectName());
+                openDoorCode.setType(2);
+                openDoorCode.setExpDate(expDate);
+                openDoorCode.setStartTime(startTime);
+                openDoorCode.setEndTime(endTime);
+                openDoorCode.setCardNo(cardNo);
+                openDoorCode.setQrCodeContent(qrCode);
+                openDoorCode.setNeighNo(neighNo);
+                openDoorCode.setUnitNum(unitNum.toString());
+                openDoorCode.setFloors(floor.toString());
+                openDoorCode.setCstCode(cstCode);
+                openDoorCode.setCstName(cstName);
+                openDoorCode.setPhone(phone.toString());
+                openDoorCode.setResCode(room);
+                // 截取房间号
+                String[] resCodeSplit = room.split("-");
+                String addressNumber = unitNum+resCodeSplit[2];
+                openDoorCode.setAddressNum(addressNumber);
+                openDoorCode.setHouseId(houseId);
+                openDoorCode.setCreateTime(new Date());
+                openDoorCode.setUpdateTime(new Date());
+                openDoorCode.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+                openDoorCodeDaoMapper.save(openDoorCode);
+                ajaxResult.setResCode(1);
+                ajaxResult.setResMsg("成功");
+            }
+
+            // 客服通过快速码创建的二维码
+            if(type == 4){
+                Integer quickCode = qrCodeResVo.getQuickCode();
+                if(quickCode == null){
+                    ajaxResult.setResCode(0);
+                    ajaxResult.setResMsg("快速通行码为空");
+                    return ajaxResult;
+                }
+                String facePic = qrCodeResVo.getFacePic();
+                if(StringUtils.isBlank(facePic)){
+                    ajaxResult.setResCode(0);
+                    ajaxResult.setResMsg("人脸图像为空");
+                    return ajaxResult;
+                }
+                OpenDoorQuickCode openDoorQuickCodePram = new OpenDoorQuickCode();
+                openDoorQuickCodePram.setCardNo(cardNo);
+                List<OpenDoorQuickCode> list = openDoorQuickCodeDaoMapper.getList(openDoorQuickCodePram);
+                if(!list.isEmpty()){
+                    ajaxResult.setResCode(0);
+                    ajaxResult.setResMsg("卡号重复");
+                    return ajaxResult;
+                }
+                // 根据快速码更新数据
+                OpenDoorQuickCode byQuickCode = openDoorQuickCodeDaoMapper.getByQuickCode(quickCode.toString());
+                byQuickCode.setQuickCode(byQuickCode.getQuickCode());
+                byQuickCode.setStartTime(startTime);
+                byQuickCode.setEndTime(endTime);
+                byQuickCode.setCardNo(cardNo);
+                byQuickCode.setQrCodeContent(qrCode);
+                byQuickCode.setPhone(phone.toString());
+                String facePicPath = saveFacePic(cardNo, qrCode);
+                byQuickCode.setFacePicPath(facePicPath);
+                byQuickCode.setIsExpire(0);
+                byQuickCode.setUpdateTime(new Date());
+                openDoorQuickCodeDaoMapper.updateByQuickCode(byQuickCode);
+                ajaxResult.setResCode(1);
+                ajaxResult.setResMsg("成功");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            ajaxResult.setResCode(0);
+            ajaxResult.setResMsg(e.toString());
+        }
         return ajaxResult;
+    }
+
+    /**
+     * 开门记录
+     * @param qrCodeLogResVo
+     * @return
+     */
+    @RequestMapping(value = "/openDoor/log",method = RequestMethod.POST)
+    public AjaxResultApi save(@RequestBody QrCodeLogResVo qrCodeLogResVo){
+        return controlService.saveOpenDoorLog(qrCodeLogResVo);
     }
 
     public String saveFacePic(String cardNo, String content) {

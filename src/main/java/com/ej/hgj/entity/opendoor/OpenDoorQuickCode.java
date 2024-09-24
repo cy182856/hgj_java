@@ -7,15 +7,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Data
-public class OpenDoorCode {
+public class OpenDoorQuickCode {
 
     private String id;
 
     private String proNum;
 
     private String proName;
-
-    private Integer type;
 
     private String expDate;
 
@@ -35,6 +33,8 @@ public class OpenDoorCode {
 
     private String floors;
 
+    private String quickCode;
+
     private String wxOpenId;
 
     private String cstCode;
@@ -45,7 +45,12 @@ public class OpenDoorCode {
 
     private String resCode;
 
+    private String facePicPath;
+
     private String houseId;
+
+    // 是否失效 0-无效 1-有效
+    private Integer isExpire;
 
     private String createBy;
 

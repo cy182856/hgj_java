@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 public class HgjHouseRoomInfo {
 
+    private String houseId;
+
     private String unitNo;
 
     private String floorNum;
