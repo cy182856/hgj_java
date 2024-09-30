@@ -44,14 +44,29 @@
         <if test="isExpire != null">
             and is_expire = #{isExpire,jdbcType=INTEGER}
         </if>
-        <if test="wxOpenId != null">
+        <if test="wxOpenId != null and wxOpenId !=''">
             and wx_open_id = #{wxOpenId,jdbcType=VARCHAR}
         </if>
-        <if test="cardNo != null">
+        <if test="cardNo != null and cardNo != ''">
             and card_no = #{cardNo,jdbcType=VARCHAR}
         </if>
-        <if test="expDate != null">
+        <if test="expDate != null and expDate != ''">
             and exp_date = #{expDate,jdbcType=VARCHAR}
+        </if>
+        <if test="proNum != null and proNum != ''">
+            and pro_num = #{proNum,jdbcType=VARCHAR}
+        </if>
+        <if test="cstCode != null and cstCode != ''">
+            and cst_code = #{cstCode,jdbcType=VARCHAR}
+        </if>
+        <if test="cstName != null and cstName != ''">
+            and cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and create_time >= #{startDate,jdbcType=VARCHAR}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and create_time &lt;= #{endDate,jdbcType=VARCHAR}
         </if>
     </select>
 

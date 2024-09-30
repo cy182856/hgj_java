@@ -152,4 +152,8 @@ public class Constant {
     // 门禁二维码接口地址
     public static String OPEN_DOOR_QR_CODE_URL = "open_door_qr_code_url";
 
+    // 活动中心券二维码当天开门次数限制
+    public static String COUPON_QR_CODE_OPEN_DOOR_SIZE = "coupon_qr_code_open_door_size";
+
+
 }

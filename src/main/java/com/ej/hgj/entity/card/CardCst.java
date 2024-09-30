@@ -1,51 +1,34 @@
-package com.ej.hgj.entity.active;
+package com.ej.hgj.entity.card;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
-public class CouponQrCode {
+public class CardCst {
 
     private String id;
 
     private String proNum;
 
-    private String proName;
+    private Integer cardId;
 
-    private String expDate;
-
-    private Long startTime;
-
-    private Long endTime;
-
-    private String cardNo;
-
-    private String couponId;
-
-    private String qrCodeContent;
-
-    private String neighNo;
-
-    private String addressNum;
-
-    private String unitNum;
-
-    private String floors;
-
-    private String wxOpenId;
+    private String cardCode;
 
     private String cstCode;
 
-    private String cstName;
+    private Integer totalNum;
 
-    private String resCode;
+    private Integer applyNum;
 
-    private Integer isExpire;
+    private String startTime;
 
-    private String errorMsg;
+    private String endTime;
+
+    private Integer isExp;
 
     private String createBy;
 
@@ -61,8 +44,20 @@ public class CouponQrCode {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
-    private String startDate;
+    private String tagId;
 
-    private String endDate;
+    private String proName;
+
+    private String cstName;
+
+    private String cardName;
+
+    private String cardTypeName;
+
+    private List<String> cstCodeList;
+
+    // 充值次数
+    private Integer rechargeNum;
+
 
 }

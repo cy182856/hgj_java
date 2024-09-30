@@ -2,12 +2,14 @@ package com.ej.hgj.controller.tag;
 
 import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
+import com.ej.hgj.dao.card.CardDaoMapper;
 import com.ej.hgj.dao.config.ProConfDaoMapper;
 import com.ej.hgj.dao.cstInto.CstIntoDaoMapper;
 import com.ej.hgj.dao.house.HgjHouseDaoMapper;
 import com.ej.hgj.dao.tag.TagCstDaoMapper;
 import com.ej.hgj.dao.tag.TagDaoMapper;
 import com.ej.hgj.dao.user.UserRoleDaoMapper;
+import com.ej.hgj.entity.card.Card;
 import com.ej.hgj.entity.config.ProConfig;
 import com.ej.hgj.entity.cst.HgjCst;
 import com.ej.hgj.entity.cstInto.CstInto;
@@ -66,6 +68,9 @@ public class TagController {
 
     @Autowired
     private CstIntoDaoMapper cstIntoDaoMapper;
+
+    @Autowired
+    private CardDaoMapper cardDaoMapper;
 
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(HttpServletRequest request, @RequestParam(value = "page", defaultValue = "1") int page,
@@ -162,7 +167,7 @@ public class TagController {
     }
 
     /**
-     * 客户树结构查询
+     * 客户树结构查询,按标签，项目
      * @param tagId
      * @return
      */
@@ -224,6 +229,72 @@ public class TagController {
         ajaxResult.setData(map);
         return ajaxResult;
     }
+
+    /**
+     * 客户树结构查询,按卡ID
+     * @param cardId
+     * @return
+     */
+    @RequestMapping(value = "/selectCstTreeByCardId",method = RequestMethod.GET)
+    public AjaxResult selectCstTreeByCardId(@RequestParam("cardId") Integer cardId){
+        AjaxResult ajaxResult = new AjaxResult();
+        Card card = cardDaoMapper.getById(cardId);
+        // 查询项目
+        //List<ProConfig> proList = proConfDaoMapper.getList(new ProConfig());
+        ProConfig pc = new ProConfig();
+        pc.setProjectNum(card.getProNum());
+        List<ProConfig> proList = proConfDaoMapper.getList(pc);
+        List<OneTreeData> oneTreeDataList = new ArrayList<>();
+        for(ProConfig proConfig : proList){
+            OneTreeData oneTreeData = new OneTreeData();
+            oneTreeData.setId(proConfig.getProjectNum());
+            oneTreeData.setLabel(proConfig.getProjectName());
+            // 获取二级-楼栋
+            List<HgjHouse> budList = hgjHouseDaoMapper.queryBuilding(proConfig.getProjectNum());
+            List<TwoChildren> twoChildrenList = new ArrayList<>();
+            for(HgjHouse bud : budList){
+                TwoChildren twoChildren = new TwoChildren();
+                twoChildren.setId(bud.getBudId());
+                twoChildren.setLabel(bud.getBudName());
+                // 获取三级-房号
+                //List<HgjHouse> houseList = hgjSyHouseDaoMapper.queryRoomNum(bud.getBudId());
+                List<HgjHouse> houseList = hgjHouseDaoMapper.queryRoomNum(bud.getBudId());
+                List<ThreeChildren> threeChildrenList = new ArrayList<>();
+                for(HgjHouse house : houseList){
+                    ThreeChildren threeChildren = new ThreeChildren();
+                    threeChildren.setId(house.getCstCode());
+                    threeChildren.setLabel(house.getCstName() + "(" + house.getResName() + ")");
+                    threeChildrenList.add(threeChildren);
+                }
+                twoChildren.setChildren(threeChildrenList);
+                twoChildrenList.add(twoChildren);
+            }
+            oneTreeData.setChildren(twoChildrenList);
+            oneTreeDataList.add(oneTreeData);
+        }
+
+        HashMap map = new HashMap();
+        // web所有菜单
+        map.put("cstTreeData",oneTreeDataList);
+
+//        // 获取已被选中的客户树
+//        TagCst tagCstPram = new TagCst();
+//        tagCstPram.setTagId(tagId);
+//        List<TagCst> tagCstList = tagCstDaoMapper.getList(tagCstPram);
+//        // list转数组满足前端需求
+//        List<String> cstCodes = tagCstList.stream().map(tagCst -> tagCst.getCstCode()).collect(Collectors.toList());
+//        String[] tagExpandedKeys = cstCodes.toArray(new String[cstCodes.size()]);
+//        String[] tagCheckedKeys = cstCodes.toArray(new String[cstCodes.size()]);
+//        // 展开菜单数组
+//        map.put("tagExpandedKeys",tagExpandedKeys);
+//        // 选中的菜单数组
+//        map.put("tagCheckedKeys",tagCheckedKeys);
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        ajaxResult.setData(map);
+        return ajaxResult;
+    }
+
 
     /**
      * 个人树结构查询

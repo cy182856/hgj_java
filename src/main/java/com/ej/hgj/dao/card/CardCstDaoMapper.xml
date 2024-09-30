@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.card.CardCstDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.card.CardCst">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
+        <result column="card_id" jdbcType="VARCHAR" property="cardId"/>
+        <result column="card_code" jdbcType="VARCHAR" property="cardCode"/>
+        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
+        <result column="total_num" jdbcType="INTEGER" property="totalNum"/>
+        <result column="apply_num" jdbcType="INTEGER" property="applyNum"/>
+        <result column="start_time" jdbcType="VARCHAR" property="startTime"/>
+        <result column="end_time" jdbcType="VARCHAR" property="endTime"/>
+        <result column="is_exp" jdbcType="INTEGER" property="isExp"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+
+        <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
+        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
+        <result column="card_name" jdbcType="VARCHAR" property="cardName"/>
+        <result column="card_type_name" jdbcType="VARCHAR" property="cardTypeName"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, pro_num, card_id, card_code, cst_code, total_num, apply_num, start_time, end_time,is_exp, create_time, update_time, create_by, update_by, delete_flag
+    </sql>
+
+    <!-- 根据主键查询-->
+    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_card_cst
+        where id = #{id}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.card.CardCst">
+        select
+        a.*,s.cst_name, pc.project_name as pro_name, c.name as card_name, d.name as card_type_name
+        from t_card_cst a
+        left join s_cst s on s.`code` = a.cst_code
+        left join t_pro_config pc on pc.project_num = a.pro_num
+        left join t_card c on c.id = a.card_id
+        left join t_card_type d on d.id = c.type
+        where a.delete_flag = 0
+        <if test="proNum != null and proNum != ''">
+            and a.pro_num = #{proNum}
+        </if>
+        <if test="cardCode != null and cardCode != ''">
+            and a.card_code = #{cardCode}
+        </if>
+        <if test="cstCode != null and cstCode != ''">
+            and a.cst_code = #{cstCode}
+        </if>
+        <if test="cstName != null and cstName != ''">
+            and s.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="isExp != null">
+            and a.is_exp = #{isExp}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            and a.start_time >= #{startTime,jdbcType=VARCHAR}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and a.end_time &lt;= #{endTime,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+    <!-- 批量插入-->
+    <insert id="insertList" parameterType="java.util.List">
+        insert into t_card_cst (
+        id, pro_num, card_id, card_code, cst_code, total_num, apply_num, start_time, end_time,is_exp, create_time, update_time, create_by, update_by, delete_flag
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.proNum,jdbcType=VARCHAR},
+            #{item.cardId,jdbcType=INTEGER},
+            #{item.cardCode,jdbcType=VARCHAR},
+            #{item.cstCode,jdbcType=VARCHAR},
+            #{item.totalNum,jdbcType=INTEGER},
+            #{item.applyNum,jdbcType=INTEGER},
+            #{item.startTime,jdbcType=VARCHAR},
+            #{item.endTime,jdbcType=VARCHAR},
+            #{item.isExp,jdbcType=INTEGER},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.deleteFlag,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+
+    <!--根据卡ID,标签更新总次数-->
+    <update id="updateTotalNumByCardIdAndTag"  parameterType="com.ej.hgj.entity.card.CardCst">
+        update
+            t_card_cst
+        set total_num = total_num + #{rechargeNum}, update_time = NOW()
+        where id in(
+            select
+                a.id
+            from
+                (select id from t_card_cst where cst_code in (select cst_code from t_tag_cst where tag_id = #{tagId}) and card_id = #{cardId})AS a
+            )
+    </update>
+
+    <!--根据卡ID,标签更新有效期-->
+    <update id="updateStartEndTimeByCardIdAndTag"  parameterType="com.ej.hgj.entity.card.CardCst">
+        update
+            t_card_cst
+        set start_time = #{startTime}, end_time = #{endTime}, update_time = NOW()
+        where id in(
+            select
+                a.id
+            from
+                (select id from t_card_cst where cst_code in (select cst_code from t_tag_cst where tag_id = #{tagId}) and card_id = #{cardId})AS a
+        )
+    </update>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.card.CardCst" >
+        update
+        t_card_cst
+        <set>
+            <if test="rechargeNum != null" >
+                total_num = total_num + #{rechargeNum},
+            </if>
+            <if test="startTime != null" >
+                start_time =  #{startTime,jdbcType=VARCHAR},
+            </if>
+            <if test="endTime != null" >
+                end_time =  #{endTime,jdbcType=VARCHAR},
+            </if>
+            <if test="isExp != null">
+                is_exp = #{isExp,jdbcType=INTEGER},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+
+</mapper>

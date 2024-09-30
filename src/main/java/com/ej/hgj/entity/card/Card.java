@@ -1,27 +1,20 @@
-package com.ej.hgj.entity.tag;
+package com.ej.hgj.entity.card;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
-public class Tag {
+public class Card {
     private String id;
 
     private String proNum;
 
-    private String proName;
-
-    // 0-系统标签 1-自建标签
-    private Integer type;
-
     private String name;
 
-    // 选择范围：1-客户  2-个人
-    private Integer range;
+    private Integer type;
 
     private String createBy;
 
@@ -36,11 +29,4 @@ public class Tag {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-
-    private List<String> cstCodes;
-
-    private List<String> wxOpenIds;
-
-    private String cstCode;
-
 }
