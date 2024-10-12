@@ -56,12 +56,39 @@ public class CstIntoServiceImpl implements CstIntoService {
         // 查询入住信息
         CstInto cstInto = cstIntoDaoMapper.getById(id);
         Integer intoRole = cstInto.getIntoRole();
-        // 角色是委托人处理
+        // 角色是租户员工，设为租户
         if(intoRole == Constant.INTO_ROLE_ENTRUST){
             updateIntoRole(id,Constant.INTO_ROLE_CST);
-        }else {
+         // 角色是租客，设为产权人
+        }else if(intoRole == Constant.INTO_ROLE_HOUSEHOLD) {
             updateIntoRole(id,Constant.INTO_ROLE_PROPERTY_OWNER);
         }
+    }
+
+    @Override
+    public  AjaxResult cohabit(String id, AjaxResult ajaxResult) {
+        CstInto cstInto = cstIntoDaoMapper.getById(id);
+        // 产权人，设为同住人
+        if(cstInto.getIntoRole() == Constant.INTO_ROLE_PROPERTY_OWNER) {
+            // 查询已入住该房屋的产权人
+            List<CstInto> cstIntoList2 = cstIntoDaoMapper.getByCstCode2(cstInto.getCstCode());
+            // 产权人解绑需要先解除租客，同住人 ， 入住的产权人数量大于1的时候才能解除， 至少需要保留1个产权人
+            if (!cstIntoList2.isEmpty() && cstIntoList2.size() == 1) {
+                ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+                ajaxResult.setMessage("产权人只有一位，无法设为同住人");
+                return ajaxResult;
+            }else {
+                updateIntoRole(id, Constant.INTO_ROLE_COHABIT);
+                ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+                ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+            }
+        // 租客，设为同住人
+        }else {
+            updateIntoRole(id, Constant.INTO_ROLE_COHABIT);
+            ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+            ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        }
+        return ajaxResult;
     }
 
     public void updateIntoRole(String id,Integer intoRole){
@@ -115,8 +142,8 @@ public class CstIntoServiceImpl implements CstIntoService {
         cstInto.setUpdateTime(new Date());
         cstInto.setDeleteFlag(Constant.DELETE_FLAG_NOT);
         cstIntoDaoMapper.save(cstInto);
-        // 如果是委托人或者住户，需要保存房间号
-        if("1".equals(intoType) || "3".equals(intoType)){
+        // 如果是租户员工、租客、同住人，需要保存房间号
+        if("1".equals(intoType) || "3".equals(intoType) || "4".equals(intoType)){
             List<CstIntoHouse> cstIntoHouseList = new ArrayList<>();
             for(int i = 0; i<resIds.length; i++){
                 CstIntoHouse cstIntoHouse = new CstIntoHouse();
@@ -136,7 +163,7 @@ public class CstIntoServiceImpl implements CstIntoService {
     }
 
     @Override
-    public AjaxResult unbind(AjaxResult ajaxResult,String id, String cstIntoHouseId, String userId) {
+    public AjaxResult unbind(AjaxResult ajaxResult,String id, String userId,String cstIntoHouseId) {
         // 判断是否是客户、业主
         CstInto cstInto = cstIntoDaoMapper.getById(id);
         if(cstInto.getIntoRole() == Constant.INTO_ROLE_CST || cstInto.getIntoRole() == Constant.INTO_ROLE_PROPERTY_OWNER){
@@ -158,18 +185,23 @@ public class CstIntoServiceImpl implements CstIntoService {
                 cstIntoDaoMapper.update(cst);
             }
         }else {
-            // 委托人、住户
+            // 租户员工、租客、同住人
+//            CstIntoHouse cstIntoHouse = new CstIntoHouse();
+//            cstIntoHouse.setCstIntoId(id);
+//            cstIntoHouse.setIntoStatus(Constant.INTO_STATUS_U);
+//            cstIntoHouse.setUpdateBy(userId);
+//            cstIntoHouse.setUpdateTime(new Date());
+//            cstIntoHouseDaoMapper.updateByCstIntoId(cstIntoHouse);
             CstIntoHouse cstIntoHouse = new CstIntoHouse();
             cstIntoHouse.setId(cstIntoHouseId);
             cstIntoHouse.setIntoStatus(Constant.INTO_STATUS_U);
             cstIntoHouse.setUpdateBy(userId);
             cstIntoHouse.setUpdateTime(new Date());
             cstIntoHouseDaoMapper.updateById(cstIntoHouse);
-
-            // 如果住户、委托人绑定房间被全部解除，入住表也解除
+            // 如果租客、租户员工绑定房间被全部解除，入住表也解除
             CstInto cs = cstIntoDaoMapper.getById(id);
             List<CstIntoHouse> cstIntoHouseList = cstIntoHouseDaoMapper.getByCstIntoIdAndIntoStatus(id);
-            if(cstIntoHouseList.isEmpty() && cs != null && (cs.getIntoRole() == Constant.INTO_ROLE_ENTRUST || cs.getIntoRole() == Constant.INTO_ROLE_HOUSEHOLD)){
+            if(cstIntoHouseList.isEmpty() && cs != null && (cs.getIntoRole() == Constant.INTO_ROLE_ENTRUST || cs.getIntoRole() == Constant.INTO_ROLE_HOUSEHOLD || cs.getIntoRole() == Constant.INTO_ROLE_COHABIT)){
                 CstInto cst = new CstInto();
                 cst.setId(id);
                 cstInto.setIntoStatus(Constant.INTO_STATUS_U);

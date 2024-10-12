@@ -75,7 +75,7 @@ public class CstIntoController {
                 } else if(cst.getIntoStatus() == Constant.INTO_STATUS_U){
                     cst.setIntoStatusName("已解绑");
                 }
-            }else if(cst.getIntoRole() == 1 || cst.getIntoRole() == 3){
+            }else if(cst.getIntoRole() == 1 || cst.getIntoRole() == 3 || cst.getIntoRole() == 4){
                 if(cst.getHouseIntoStatus() == Constant.INTO_STATUS_N){
                     cst.setIntoStatusName("未注册");
                 }else if(cst.getHouseIntoStatus() == Constant.INTO_STATUS_Y){
@@ -96,9 +96,11 @@ public class CstIntoController {
                 cst.setIntoRoleName("产权人");
             } else if(cst.getIntoRole() == Constant.INTO_ROLE_HOUSEHOLD){
                 cst.setIntoRoleName("租客");
+            } else if(cst.getIntoRole() == Constant.INTO_ROLE_COHABIT){
+                cst.setIntoRoleName("同住人");
             }
 
-            // 客户、产权人查询所有房间号
+            // 租户、产权人、同住人查询所有房间号
             List<String> houseList = new ArrayList<>();
             HgjHouse hgjHouse = new HgjHouse();
             hgjHouse.setCstCode(cst.getCstCode());
@@ -171,7 +173,7 @@ public class CstIntoController {
     public AjaxResult delete(HttpServletRequest request, @RequestParam(required=false, value = "id") String id,
                              @RequestParam(required=false, value = "cstIntoHouseId") String cstIntoHouseId){
         AjaxResult ajaxResult = new AjaxResult();
-        return cstIntoService.unbind(ajaxResult,id,cstIntoHouseId,TokenUtils.getUserId(request));
+        return cstIntoService.unbind(ajaxResult,id,TokenUtils.getUserId(request),cstIntoHouseId);
     }
 
     /**
@@ -186,5 +188,16 @@ public class CstIntoController {
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;
+    }
+
+    /**
+     * 产权人、租客设为同住人
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/cohabit",method = RequestMethod.GET)
+    public AjaxResult cohabit(@RequestParam(required=false, value = "id") String id){
+        AjaxResult ajaxResult = new AjaxResult();
+        return cstIntoService.cohabit(id,ajaxResult);
     }
 }

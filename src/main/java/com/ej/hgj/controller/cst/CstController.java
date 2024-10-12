@@ -188,9 +188,9 @@ public class CstController {
             Date date = new Date();
             // 二维码创建时间
             map.put("qrCreateTime", DateUtils.wechatPubFormat(date));
-            // 员工、住户查询所要入住的房间
+            // 租户员工、租客、同住人查询所要入住的房间
             List<String> houseList = new ArrayList<>();
-            if("1".equals(intoVo.getIntoType()) || "3".equals(intoVo.getIntoType())){
+            if("1".equals(intoVo.getIntoType()) || "3".equals(intoVo.getIntoType()) || "4".equals(intoVo.getIntoType())){
                 List<HgjHouse> hgjHouseList = hgjHouseDaoMapper.getByCstIntoId(cstIntoId);
                 if(!hgjHouseList.isEmpty()){
                     for(HgjHouse hgjHouse : hgjHouseList){
@@ -198,7 +198,7 @@ public class CstController {
                     }
                 }
             }else {
-            // 客户、产权人查询该客户所有房间
+            // 租户、产权人查询该客户所有房间
                 HgjHouse hgjHouse = new HgjHouse();
                 hgjHouse.setCstCode(intoVo.getCstCode());
                 List<HgjHouse> list = syHouseDaoMapper.getListByCstCode(hgjHouse);
@@ -208,7 +208,7 @@ public class CstController {
                     }
                 }else{
                     ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
-                    ajaxResult.setMessage("该客户没有房间无法生成入住二维码");
+                    ajaxResult.setMessage("未查到房间信息无法生成入住二维码");
                     return ajaxResult;
                 }
             }
@@ -233,6 +233,8 @@ public class CstController {
                 intoRole = "产权人";
             } else if(Constant.INTO_ROLE_HOUSEHOLD == intoType){
                 intoRole = "租客";
+            } else if(Constant.INTO_ROLE_COHABIT == intoType){
+                intoRole = "同住人";
             }
             map.put("intoRole",intoRole);
         }

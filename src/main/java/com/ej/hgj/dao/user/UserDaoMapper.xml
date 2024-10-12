@@ -281,6 +281,9 @@
             <if test="updateTime != null">
                 update_time = #{updateTime,jdbcType=TIMESTAMP},
             </if>
+            <if test="deleteFlag != null">
+                delete_flag = #{deleteFlag,jdbcType=INTEGER},
+            </if>
         </set>
         where id=#{id,jdbcType=VARCHAR}
     </update>

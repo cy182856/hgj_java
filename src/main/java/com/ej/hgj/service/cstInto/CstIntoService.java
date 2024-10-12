@@ -12,6 +12,8 @@ public interface CstIntoService {
 
     void owner(String id);
 
+    AjaxResult cohabit(String id, AjaxResult ajaxResult);
+
     String saveCstIntoInfo(IntoVo intoVo);
 
     AjaxResult unbind(AjaxResult ajaxResult, String id, String cstIntoHouseId, String userId);

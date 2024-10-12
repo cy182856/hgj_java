@@ -302,6 +302,8 @@ public class UserController {
         List<Corp> corpList = corpDaoMapper.getList(new Corp());
         // 获取已有通讯录列表
         List<User> alreadyUserList = userService.getList(new User());
+        // 接口中的通讯里
+        List<User> apiUserList = new ArrayList<>();
         for(Corp corp : corpList) {
             // 获取第三方凭证token
             //JSONObject jsonObjectSuiteAcToken = getSuiteAccessToken(miniProgramAppEj.getAppId(), miniProgramAppEj.getAppSecret(), suiteTicket.getConfigValue());
@@ -315,6 +317,7 @@ public class UserController {
             logger.info("---------------------------获取部门列表--------------------" + JSON.toJSONString(departmentList));
             // 根据部门列表获取部门成员详情
             List<User> userInfoList = getDepartmentUserDetailsAll(departmentList, access_token);
+            apiUserList.addAll(userInfoList);
             // 跟据企业通讯录的用户ID查找已有通讯录，不存在就新增
             for (User wxUserInfo : userInfoList) {
                 List<User> alreadyUserFilterList = alreadyUserList.stream().filter(alreadyWxUserInfo -> alreadyWxUserInfo.getUserId().equals(wxUserInfo.getUserId())).collect(Collectors.toList());
@@ -331,6 +334,17 @@ public class UserController {
                     Collectors.collectingAndThen(Collectors.toCollection(
                             () -> new TreeSet<>(Comparator.comparing(User::getUserId))), ArrayList::new));
             userService.insertList(usersAll);
+        }
+        // 删除不在通讯录中的员工
+        for(User alUser : alreadyUserList){
+            List<User> apiUserFilterList = apiUserList.stream().filter(apiUser -> apiUser.getUserId().equals(alUser.getUserId())).collect(Collectors.toList());
+            if(apiUserFilterList.isEmpty()){
+                User userParam = new User();
+                userParam.setId(alUser.getId());
+                userParam.setDeleteFlag(Constant.DELETE_FLAG_YES);
+                userParam.setUpdateTime(new Date());
+                userDaoMapper.updateById(userParam);
+            }
         }
         logger.info("---------------------------同步通讯录结束--------------------" + JSON.toJSONString(usersAll));
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);

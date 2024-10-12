@@ -80,14 +80,16 @@ public class Constant {
     //public static Integer INTO_ROLE_OWNER = 0;
     // 入住角色 1-租户
     //public static Integer INTO_ROLE_TENANT = 1;
-    // 入住角色 1-客户
+    // 入住角色 1-租户
     public static Integer INTO_ROLE_CST = 0;
-    // 入住角色 2-员工
+    // 入住角色 2-租户员工
     public static Integer INTO_ROLE_ENTRUST = 1;
     // 入住角色 3-产权人
     public static Integer INTO_ROLE_PROPERTY_OWNER = 2;
-    // 入住角色 4-住户
+    // 入住角色 4-租客
     public static Integer INTO_ROLE_HOUSEHOLD = 3;
+    // 入住角色 5-同住人
+    public static Integer INTO_ROLE_COHABIT = 4;
     // 入住状态 0-未入住
     public static Integer INTO_STATUS_N = 0;
     // 入住状态 1-已入住
@@ -154,6 +156,9 @@ public class Constant {
 
     // 活动中心券二维码当天开门次数限制
     public static String COUPON_QR_CODE_OPEN_DOOR_SIZE = "coupon_qr_code_open_door_size";
+
+    // 活动中心游泳卡二维码当天开门次数限制
+    public static String CARD_QR_CODE_OPEN_DOOR_SIZE = "card_qr_code_open_door_size";
 
 
 }

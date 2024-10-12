@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ej.hgj.dao.active.CouponQrCodeDaoMapper">
+<mapper namespace="com.ej.hgj.dao.card.CardQrCodeDaoMapper">
 
-    <resultMap id="BaseMap" type="com.ej.hgj.entity.active.CouponQrCode">
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.card.CardQrCode">
         <result column="id" jdbcType="VARCHAR" property="id"/>
         <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
-        <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
         <result column="exp_date" jdbcType="VARCHAR" property="expDate"/>
         <result column="start_time" jdbcType="BIGINT" property="startTime"/>
         <result column="end_time" jdbcType="BIGINT" property="endTime"/>
         <result column="card_no" jdbcType="VARCHAR" property="cardNo"/>
-        <result column="coupon_id" jdbcType="VARCHAR" property="couponId"/>
+        <result column="card_cst_id" jdbcType="VARCHAR" property="cardCstId"/>
         <result column="qr_code_content" jdbcType="VARCHAR" property="qrCodeContent"/>
         <result column="neigh_no" jdbcType="VARCHAR" property="neighNo"/>
         <result column="address_num" jdbcType="VARCHAR" property="addressNum"/>
@@ -20,63 +19,66 @@
         <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
         <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
         <result column="res_code" jdbcType="VARCHAR" property="resCode"/>
-        <result column="is_expire" jdbcType="INTEGER" property="isExpire"/>
+        <result column="is_exp" jdbcType="INTEGER" property="isExp"/>
         <result column="error_msg" jdbcType="VARCHAR" property="errorMsg"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+
+        <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
     </resultMap>
     <sql id="Base_Column_List" >
-        id, pro_num, pro_name, exp_date, start_time, end_time,
-        card_no, coupon_id, qr_code_content, neigh_no, address_num, unit_num, floors,
-        wx_open_id, cst_code, is_expire, error_msg, cst_name, res_code, create_time,
+        id, pro_num, exp_date, start_time, end_time,
+        card_no, card_cst_id, qr_code_content, neigh_no, address_num, unit_num, floors,
+        wx_open_id, cst_code, is_exp, cst_name, res_code, create_time,
         update_time, create_by, update_by, delete_flag
     </sql>
 
     <!-- 查询列表-->
-    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.active.CouponQrCode">
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.card.CardQrCode">
         select
-        <include refid="Base_Column_List" />
-        from t_coupon_qr_code
-        where delete_flag = 0
-        <if test="isExpire != null">
-            and is_expire = #{isExpire,jdbcType=INTEGER}
+        a.*,b.project_name as pro_name
+        from t_card_qr_code a left join t_pro_config b on a.pro_num = b.project_num
+        where a.delete_flag = 0
+        <if test="isExp != null">
+            and a.is_exp = #{isExp,jdbcType=INTEGER}
         </if>
         <if test="wxOpenId != null and wxOpenId !=''">
-            and wx_open_id = #{wxOpenId,jdbcType=VARCHAR}
+            and a.wx_open_id = #{wxOpenId,jdbcType=VARCHAR}
         </if>
         <if test="cardNo != null and cardNo != ''">
-            and card_no = #{cardNo,jdbcType=VARCHAR}
+            and a.card_no = #{cardNo,jdbcType=VARCHAR}
         </if>
         <if test="expDate != null and expDate != ''">
-            and exp_date = #{expDate,jdbcType=VARCHAR}
+            and a.exp_date = #{expDate,jdbcType=VARCHAR}
         </if>
         <if test="proNum != null and proNum != ''">
-            and pro_num = #{proNum,jdbcType=VARCHAR}
+            and a.pro_num = #{proNum,jdbcType=VARCHAR}
         </if>
         <if test="cstCode != null and cstCode != ''">
-            and cst_code = #{cstCode,jdbcType=VARCHAR}
+            and a.cst_code = #{cstCode,jdbcType=VARCHAR}
         </if>
         <if test="cstName != null and cstName != ''">
-            and cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+            and a.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
         <if test="startDate != null and startDate != ''">
-            and create_time >= #{startDate,jdbcType=VARCHAR}
+            and a.create_time >= #{startDate,jdbcType=VARCHAR}
         </if>
         <if test="endDate != null and endDate != ''">
-            and create_time &lt;= #{endDate,jdbcType=VARCHAR}
+            and a.create_time &lt;= #{endDate,jdbcType=VARCHAR}
         </if>
+        order by a.update_time desc
     </select>
 
     <!-- 更新-->
-    <update id="update" parameterType="com.ej.hgj.entity.active.CouponQrCode" >
+    <update id="update" parameterType="com.ej.hgj.entity.card.CardQrCode" >
         update
-        t_coupon_qr_code
+        t_card_qr_code
         <set>
-            <if test="isExpire != null">
-                is_expire = #{isExpire,jdbcType=INTEGER},
+            <if test="isExp != null">
+                is_exp = #{isExp,jdbcType=INTEGER},
             </if>
             <if test="errorMsg != null">
                 error_msg = #{errorMsg,jdbcType=VARCHAR},
