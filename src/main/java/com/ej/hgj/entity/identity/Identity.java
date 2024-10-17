@@ -1,33 +1,23 @@
-package com.ej.hgj.entity.qn;
+package com.ej.hgj.entity.identity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
-public class Qn {
-
+public class Identity {
     private String id;
 
-    private String proNum;
+    private Integer code;
 
-    private String proName;
+    private String name;
 
-    private Integer pubMenuId;
+    private String webDesc;
 
-    private String formToken;
-
-    private String title;
-
-    private String url;
-
-    private Integer miniIsShow;
-
-    private Integer pubMenuIsShow;
-
-    private String tagId;
+    private String miniDesc;
 
     private String createBy;
 

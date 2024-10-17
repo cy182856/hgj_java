@@ -7,14 +7,20 @@ import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.config.ConstantConfDaoMapper;
 import com.ej.hgj.dao.cstInto.CstIntoDaoMapper;
+import com.ej.hgj.dao.house.HgjHouseDaoMapper;
+import com.ej.hgj.dao.identity.IdentityDaoMapper;
 import com.ej.hgj.dao.qn.QnDaoMapper;
 import com.ej.hgj.dao.wechat.WechatPubMenuDaoMapper;
 import com.ej.hgj.entity.adverts.Adverts;
 import com.ej.hgj.entity.config.ConstantConfig;
 import com.ej.hgj.entity.cstInto.CstInto;
+import com.ej.hgj.entity.house.HgjHouse;
+import com.ej.hgj.entity.identity.Identity;
 import com.ej.hgj.entity.qn.Qn;
+import com.ej.hgj.entity.tag.Tag;
 import com.ej.hgj.entity.wechat.WechatPubMenu;
 import com.ej.hgj.service.qn.QnService;
+import com.ej.hgj.sy.dao.house.SyHouseDaoMapper;
 import com.ej.hgj.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -62,6 +68,15 @@ public class QnController {
 
     @Autowired
     private CstIntoDaoMapper cstIntoDaoMapper;
+
+    @Autowired
+    private SyHouseDaoMapper syHouseDaoMapper;
+
+    @Autowired
+    private HgjHouseDaoMapper hgjHouseDaoMapper;
+
+    @Autowired
+    private IdentityDaoMapper identityDaoMapper;
 
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(@RequestParam(value = "page",defaultValue = "1") int page,
@@ -250,6 +265,8 @@ public class QnController {
                 mapListAll.addAll(mapList);
             }
         }
+        // 查询所有身份
+        List<Identity> identityList = identityDaoMapper.getList(new Identity());
         // 根据项目号查询所有已注册客户
         //List<CstInto> cstIntoList = cstIntoDaoMapper.getByProNumList(proNum); //根据公众号unionId查询openId
         List<CstInto> cstIntoList = cstIntoDaoMapper.getListByProNum(proNum);// 查询入住表openId
@@ -266,17 +283,55 @@ public class QnController {
             String formattedDate = outputFormat.format(date);
             // 更新时间格式化
             map.put("updated_at",formattedDate);
+            // 项目
+            map.put("project_name","");
             // 填表人
-            map.put("user_name","未知");
-            map.put("phone","未知");
-            map.put("cst_name","未知");
+            map.put("user_name","");
+            // 手机号
+            map.put("phone","");
+            // 客户名称
+            map.put("cst_name","");
+            // 房间号
+            map.put("room_num","");
+            // 身份
+            map.put("identity","");
             if(StringUtils.isNotBlank(openId)){
                 List<CstInto> cstIntoListFilter = cstIntoList.stream().filter(cstInto -> openId.equals(cstInto.getWxOpenId())).collect(Collectors.toList());
                 if(!cstIntoListFilter.isEmpty()){
                     CstInto cstInto = cstIntoListFilter.get(0);
+                    map.put("project_name",cstInto.getProjectName());
                     map.put("user_name",cstInto.getUserName());
                     map.put("phone",cstInto.getPhone());
                     map.put("cst_name",cstInto.getCstName());
+                    Integer intoRole = cstInto.getIntoRole();
+                    // 租户员工、租客、同住人查询所要入住的房间
+                    List<String> houseList = new ArrayList<>();
+                    if(intoRole == 1 || intoRole == 3 || intoRole == 4){
+                        List<HgjHouse> hgjHouseList = hgjHouseDaoMapper.getByCstIntoId(cstInto.getId());
+                        if(!hgjHouseList.isEmpty()){
+                            for(HgjHouse hgjHouse : hgjHouseList){
+                                houseList.add(hgjHouse.getResName());
+                            }
+                        }
+                    }else {
+                        // 租户、产权人查询该客户所有房间
+                        HgjHouse hgjHouse = new HgjHouse();
+                        hgjHouse.setCstCode(cstInto.getCstCode());
+                        List<HgjHouse> list = syHouseDaoMapper.getListByCstCode(hgjHouse);
+                        if(!list.isEmpty()){
+                            for(HgjHouse house : list){
+                                houseList.add(house.getResName());
+                            }
+                        }
+                    }
+                    if(!houseList.isEmpty()){
+                        String houses = houseList.stream().collect(Collectors.joining("|"));
+                        map.put("room_num", houses);
+                    }
+
+                    List<Identity> identitiesFilter = identityList.stream().filter(identity -> identity.getCode() == intoRole).collect(Collectors.toList());
+                    map.put("identity",identitiesFilter.get(0).getName());
+
                 }
             }
         }
@@ -289,9 +344,13 @@ public class QnController {
         // 从表单结构获取标题
         Map<String,Object> mapTitle = new LinkedHashMap<>();
         //mapTitle.put("serial_number","序号");
+        mapTitle.put("project_name","项目");
         mapTitle.put("user_name","填表人");
         mapTitle.put("cst_name","客户名称");
         mapTitle.put("phone","手机号");
+        mapTitle.put("room_num","房间号");
+        mapTitle.put("identity","身份");
+
         for(Map<String,Object> mapField : fieldList){
             mapField.forEach((key,value) ->{
                 String field = mapField.get(key)+"";

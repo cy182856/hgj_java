@@ -61,6 +61,9 @@ public class QnServiceImpl implements QnService {
         if(qn.getId() != null){
             qn.setUpdateBy(userId);
             qn.setUpdateTime(new Date());
+            if(StringUtils.isBlank(qn.getTagId())){
+                qn.setTagId("0");
+            }
             qnDaoMapper.update(qn);
         }else{
 
@@ -91,6 +94,9 @@ public class QnServiceImpl implements QnService {
             //qn.setPubMenuId(wechatPubMenu.getId());
             qn.setMiniIsShow(0);
             qn.setPubMenuIsShow(0);
+            if(StringUtils.isBlank(qn.getTagId())){
+                qn.setTagId("0");
+            }
             qn.setUpdateTime(new Date());
             qn.setCreateTime(new Date());
             qn.setCreateBy(userId);

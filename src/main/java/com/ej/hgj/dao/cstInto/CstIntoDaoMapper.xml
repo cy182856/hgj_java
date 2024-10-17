@@ -117,14 +117,35 @@
         order by c.update_time desc, c.into_role
     </select>
 
-    <!-- 查询已入住列表-->
+    <!-- 根据项目号查询已入住列表-->
     <select id="getListByProNum" resultMap="BaseMap"  parameterType="java.lang.String">
         SELECT
-        i.*,s.cst_name
+        i.*,s.cst_name, p.project_name
         FROM
-        t_cst_into i left join s_cst s ON s.`code` = i.cst_code
+        t_cst_into i
+            left join s_cst s ON s.`code` = i.cst_code
+            left join t_pro_config p on i.project_num = p.project_num
         WHERE i.delete_flag = 0
         and i.project_num = #{proNum}
+        and i.into_status = 1
+    </select>
+
+    <!-- 根据项目号、身份查询已入住列表-->
+    <select id="getListByProNumAndIntoRole" resultMap="BaseMap" parameterType="com.ej.hgj.entity.cstInto.CstInto">
+        SELECT
+        i.*,s.cst_name, p.project_name
+        FROM
+        t_cst_into i
+        left join s_cst s ON s.`code` = i.cst_code
+        left join t_pro_config p on i.project_num = p.project_num
+        WHERE i.delete_flag = 0
+        and i.project_num = #{projectNum}
+        <if test="intoRoleList != null and intoRoleList.size() > 0">
+            and i.into_role in
+            <foreach collection="intoRoleList" item="intoRole" index="index" open="(" close=")" separator=",">
+                #{intoRole,jdbcType=INTEGER}
+            </foreach>
+        </if>
         and i.into_status = 1
     </select>
 

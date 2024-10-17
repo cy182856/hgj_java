@@ -19,6 +19,8 @@ public interface CstIntoDaoMapper {
 
     List<CstInto> getList(CstInto cstInto);
 
+    List<CstInto> getListByProNumAndIntoRole(CstInto cstInto);
+
     List<CstInto> getListByProNum(String proNum);
 
     List<CstInto> getByProNumList(String proNum);

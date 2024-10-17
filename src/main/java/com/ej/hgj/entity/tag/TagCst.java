@@ -34,4 +34,7 @@ public class TagCst {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
+    private String proNum;
+
+    private Integer[] intoRole;
 }

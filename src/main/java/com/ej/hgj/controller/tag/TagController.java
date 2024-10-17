@@ -6,6 +6,7 @@ import com.ej.hgj.dao.card.CardDaoMapper;
 import com.ej.hgj.dao.config.ProConfDaoMapper;
 import com.ej.hgj.dao.cstInto.CstIntoDaoMapper;
 import com.ej.hgj.dao.house.HgjHouseDaoMapper;
+import com.ej.hgj.dao.identity.IdentityDaoMapper;
 import com.ej.hgj.dao.tag.TagCstDaoMapper;
 import com.ej.hgj.dao.tag.TagDaoMapper;
 import com.ej.hgj.dao.user.UserRoleDaoMapper;
@@ -15,7 +16,9 @@ import com.ej.hgj.entity.cst.HgjCst;
 import com.ej.hgj.entity.cstInto.CstInto;
 import com.ej.hgj.entity.gonggao.GonggaoType;
 import com.ej.hgj.entity.house.HgjHouse;
+import com.ej.hgj.entity.identity.Identity;
 import com.ej.hgj.entity.tag.*;
+import com.ej.hgj.entity.user.User;
 import com.ej.hgj.entity.user.UserRole;
 import com.ej.hgj.service.tag.TagCstService;
 import com.ej.hgj.sy.dao.house.HgjSyHouseDaoMapper;
@@ -32,10 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @CrossOrigin
@@ -71,6 +71,9 @@ public class TagController {
 
     @Autowired
     private CardDaoMapper cardDaoMapper;
+
+    @Autowired
+    private IdentityDaoMapper identityDaoMapper;
 
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(HttpServletRequest request, @RequestParam(value = "page", defaultValue = "1") int page,
@@ -298,11 +301,18 @@ public class TagController {
 
     /**
      * 个人树结构查询
-     * @param tagId
      * @return
      */
-    @RequestMapping(value = "/selectCstTreePerson",method = RequestMethod.GET)
-    public AjaxResult selectCstTreePerson(@RequestParam("tagId") String tagId, @RequestParam("proNum") String proNum){
+    @RequestMapping(value = "/selectCstTreePerson",method = RequestMethod.POST)
+    public AjaxResult selectCstTreePerson(@RequestBody TagCst tc){
+        //public AjaxResult selectCstTreePerson(@RequestParam("tagId") String tagId, @RequestParam("proNum") String proNum, @RequestParam(required=false, value = "intoRole") Integer[] intoRole){
+        String proNum = tc.getProNum();
+        String tagId = tc.getTagId();
+        Integer[] intoRole = tc.getIntoRole();
+        List<Integer> intoRoleList = new ArrayList<>();
+        if(intoRole != null){
+            intoRoleList = Arrays.asList(intoRole);
+        }
         AjaxResult ajaxResult = new AjaxResult();
         ProConfig proConfig = proConfDaoMapper.getByProjectNum(proNum);
         List<OneTreeData> oneTreeDataList = new ArrayList<>();
@@ -310,12 +320,18 @@ public class TagController {
         oneTreeData.setId(proConfig.getProjectNum());
         oneTreeData.setLabel(proConfig.getProjectName());
         // 获取二级-对应项目下已入住个人
-        List<CstInto> cstIntoList = cstIntoDaoMapper.getListByProNum(proNum);
+        CstInto cstIntoPram = new CstInto();
+        cstIntoPram.setProjectNum(proNum);
+        cstIntoPram.setIntoRoleList(intoRoleList);
+        List<CstInto> cstIntoList = cstIntoDaoMapper.getListByProNumAndIntoRole(cstIntoPram);
         List<TwoChildren> twoChildrenList = new ArrayList<>();
+        // 查询所有身份
+        List<Identity> identityList = identityDaoMapper.getList(new Identity());
         for(CstInto cstInto : cstIntoList){
             TwoChildren twoChildren = new TwoChildren();
             twoChildren.setId(cstInto.getWxOpenId());
-            twoChildren.setLabel(cstInto.getUserName() + "(" + cstInto.getCstName() + ")");
+            List<Identity> identitiesFilter = identityList.stream().filter(identity -> identity.getCode() == cstInto.getIntoRole()).collect(Collectors.toList());
+            twoChildren.setLabel(cstInto.getUserName() + "(" + cstInto.getCstName() + ")" + " || " + identitiesFilter.get(0).getName());
             twoChildrenList.add(twoChildren);
         }
         oneTreeData.setChildren(twoChildrenList);

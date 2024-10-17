@@ -63,4 +63,6 @@ public class CstInto {
 
     private List<String> houseList;
 
+    private List<Integer> intoRoleList;
+
 }

@@ -29,15 +29,6 @@ public class CardQrCodeController {
     Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private ProConfService proConfServic;
-
-    @Autowired
-    private CouponTypeDaoMapper couponTypeDaoMapper;
-
-    @Autowired
-    private CouponQrCodeDaoMapper couponQrCodeDaoMapper;
-
-    @Autowired
     private CardQrCodeDaoMapper cardQrCodeDaoMapper;
 
     @RequestMapping(value = "/list",method = RequestMethod.GET)

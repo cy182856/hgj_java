@@ -12,6 +12,7 @@
         <result column="url" jdbcType="VARCHAR" property="url"/>
         <result column="mini_is_show" jdbcType="INTEGER" property="miniIsShow"/>
         <result column="pub_menu_is_show" jdbcType="INTEGER" property="pubMenuIsShow"/>
+        <result column="tag_id" jdbcType="VARCHAR" property="tagId"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -19,7 +20,7 @@
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
     </resultMap>
     <sql id="Base_Column_List" >
-        id, pro_num, pub_menu_id, form_token, title, url, mini_is_show, pub_menu_is_show, create_time, update_time, create_by,
+        id, pro_num, pub_menu_id, form_token, title, url, mini_is_show, pub_menu_is_show, tag_id, create_time, update_time, create_by,
         update_by, delete_flag
     </sql>
 
@@ -80,6 +81,9 @@
         <if test="pubMenuIsShow != null">
             pub_menu_is_show,
         </if>
+        <if test="tagId != null">
+            tag_id,
+        </if>
         <if test="createTime != null">
             create_time,
         </if>
@@ -116,10 +120,13 @@
                 #{url,jdbcType=VARCHAR},
             </if>
             <if test="miniIsShow != null" >
-                #{miniIsShow,jdbcType=VARCHAR},
+                #{miniIsShow,jdbcType=INTEGER},
             </if>
             <if test="pubMenuIsShow != null" >
                 #{pubMenuIsShow,jdbcType=INTEGER},
+            </if>
+            <if test="tagId != null" >
+                #{tagId,jdbcType=VARCHAR},
             </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
@@ -161,6 +168,9 @@
             </if>
             <if test="url != null">
                 url = #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="tagId != null">
+                tag_id = #{tagId,jdbcType=VARCHAR},
             </if>
             <if test="updateTime != null">
                 update_time = #{updateTime,jdbcType=TIMESTAMP},
