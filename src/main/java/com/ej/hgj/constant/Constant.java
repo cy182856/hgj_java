@@ -160,5 +160,8 @@ public class Constant {
     // 活动中心游泳卡二维码当天开门次数限制
     public static String CARD_QR_CODE_OPEN_DOOR_SIZE = "card_qr_code_open_door_size";
 
+    // 活动中心游泳池闸机扣次数的设备号
+    public static String SWIM_DEVICE_NO = "swim_device_no";
+
 
 }

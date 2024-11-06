@@ -9,7 +9,7 @@
         <result column="start_time" jdbcType="BIGINT" property="startTime"/>
         <result column="end_time" jdbcType="BIGINT" property="endTime"/>
         <result column="card_no" jdbcType="VARCHAR" property="cardNo"/>
-        <result column="card_cst_id" jdbcType="VARCHAR" property="cardCstId"/>
+        <result column="card_cst_batch_id" jdbcType="VARCHAR" property="cardCstBatchId"/>
         <result column="qr_code_content" jdbcType="VARCHAR" property="qrCodeContent"/>
         <result column="neigh_no" jdbcType="VARCHAR" property="neighNo"/>
         <result column="address_num" jdbcType="VARCHAR" property="addressNum"/>
@@ -31,7 +31,7 @@
     </resultMap>
     <sql id="Base_Column_List" >
         id, pro_num, exp_date, start_time, end_time,
-        card_no, card_cst_id, qr_code_content, neigh_no, address_num, unit_num, floors,
+        card_no, card_cst_batch_id, qr_code_content, neigh_no, address_num, unit_num, floors,
         wx_open_id, cst_code, is_exp, cst_name, res_code, create_time,
         update_time, create_by, update_by, delete_flag
     </sql>

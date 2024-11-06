@@ -12,8 +12,6 @@ public class Coupon {
 
     private String title;
 
-    private Integer couNum;
-
     private Integer isExp;
 
     private String typeCode;
@@ -41,4 +39,6 @@ public class Coupon {
     private String startTime;
 
     private String endTime;
+
 }
+

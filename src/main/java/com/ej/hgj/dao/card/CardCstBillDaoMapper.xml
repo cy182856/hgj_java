@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.card.CardCstBillDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.card.CardCstBill">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
+        <result column="card_type" jdbcType="INTEGER" property="cardType"/>
+        <result column="card_id" jdbcType="INTEGER" property="cardId"/>
+        <result column="card_code" jdbcType="VARCHAR" property="cardCode"/>
+        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
+        <result column="bill_num" jdbcType="INTEGER" property="billNum"/>
+        <result column="bill_type" jdbcType="INTEGER" property="billType"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, pro_num, card_type, card_id, card_code, cst_code, bill_num, bill_type, create_time, update_time, create_by, update_by, delete_flag
+    </sql>
+
+    <!-- 根据卡号项目号查询游泳卡当天扣减记录-->
+    <select id="getByCardCodeAndProNum" resultMap="BaseMap"  parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List" />
+        from t_card_cst_bill
+        where delete_flag = 0 and pro_num = #{proNum} and card_code = #{cardCode} and bill_type = 2 and DATE(create_time) = CURDATE()
+    </select>
+
+    <!-- 批量插入-->
+    <insert id="insertList" parameterType="java.util.List">
+        insert into t_card_cst_bill (
+        id, pro_num, card_type, card_id, card_code, cst_code, bill_num, bill_type, create_time, update_time, create_by, update_by, delete_flag
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=VARCHAR},
+            #{item.proNum,jdbcType=VARCHAR},
+            #{item.cardType,jdbcType=INTEGER},
+            #{item.cardId,jdbcType=INTEGER},
+            #{item.cardCode,jdbcType=VARCHAR},
+            #{item.cstCode,jdbcType=VARCHAR},
+            #{item.billNum,jdbcType=INTEGER},
+            #{item.billType,jdbcType=INTEGER},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.deleteFlag,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.card.CardSubDetail" >
+        insert into  t_card_cst_bill(
+        <if test="id != null">
+            id,
+        </if>
+        <if test="proNum != null">
+            pro_num,
+        </if>
+        <if test="cardType != null">
+            card_type,
+        </if>
+        <if test="cardId != null">
+            card_id,
+        </if>
+        <if test="cardCode != null">
+            card_code,
+        </if>
+        <if test="cstCode != null">
+            cst_code,
+        </if>
+        <if test="billNum != null">
+            bill_num,
+        </if>
+        <if test="billType != null">
+            bill_type,
+        </if>
+        <if test="createTime != null">
+            create_time,
+        </if>
+        <if test="createBy != null">
+            create_by,
+        </if>
+        <if test="updateTime != null">
+            update_time,
+        </if>
+        <if test="updateBy != null">
+            update_by,
+        </if>
+        <if test="deleteFlag != null">
+            delete_flag
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="proNum != null" >
+                #{proNum,jdbcType=VARCHAR},
+            </if>
+            <if test="cardType != null" >
+                #{cardType,jdbcType=INTEGER},
+            </if>
+            <if test="cardId != null" >
+                #{cardId,jdbcType=INTEGER},
+            </if>
+            <if test="cardCode != null" >
+                #{cardCode,jdbcType=VARCHAR},
+            </if>
+            <if test="cstCode != null" >
+                #{cstCode,jdbcType=VARCHAR},
+            </if>
+            <if test="billNum != null" >
+                #{billNum,jdbcType=INTEGER},
+            </if>
+            <if test="billType != null" >
+                #{billType,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
+
+</mapper>

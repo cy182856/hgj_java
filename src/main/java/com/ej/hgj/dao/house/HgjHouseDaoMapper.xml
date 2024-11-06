@@ -233,31 +233,31 @@
     </select>
 
     <!-- 查询列表-->
-<!--    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.house.HgjHouse">-->
-<!--        select-->
-<!--            h.*,cst.`code` as cst_code, cst.cst_name-->
-<!--        from s_house h-->
-<!--        LEFT JOIN s_rcr r on r.res_id = h.id-->
-<!--        LEFT JOIN s_cst cst on r.cst_id = cst.id-->
-<!--        where h.is_affect = 1 and r.is_affect = 1-->
-<!--        <if test="budName != null">-->
-<!--            and h.bud_name like CONCAT('%', #{budName,jdbcType=VARCHAR},'%') ESCAPE '/'-->
-<!--        </if>-->
-<!--        <if test="projectNum != null and projectNum != '' ">-->
-<!--            and h.org_id = #{projectNum,jdbcType=VARCHAR}-->
-<!--        </if>-->
-<!--        <if test="unitNo != null">-->
-<!--            and h.unit_no like CONCAT('%', #{unitNo,jdbcType=VARCHAR},'%') ESCAPE '/'-->
-<!--        </if>-->
-<!--        <if test="resName != null">-->
-<!--            and h.res_name like CONCAT('%', #{resName,jdbcType=VARCHAR},'%') ESCAPE '/'-->
-<!--        </if>-->
-<!--        <if test="cstCode != null">-->
-<!--            and cst.code like CONCAT('%', #{cstCode,jdbcType=VARCHAR},'%') ESCAPE '/'-->
-<!--        </if>-->
-<!--        <if test="cstName != null">-->
-<!--            and cst.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'-->
-<!--        </if>-->
-<!--    </select>-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.house.HgjHouse">
+        select
+        h.*,cst.code as cst_code, cst.cst_name
+        from s_house h
+        LEFT JOIN s_rcr r on r.res_id = h.id
+        LEFT JOIN s_cst cst on r.cst_id = cst.id
+        where h.is_affect = 1 and r.is_affect = 1
+        <if test="budName != null">
+            and h.bud_name like CONCAT('%', #{budName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="projectNum != null and projectNum != '' ">
+            and h.org_id = #{projectNum,jdbcType=VARCHAR}
+        </if>
+        <if test="unitNo != null">
+            and h.unit_no like CONCAT('%', #{unitNo,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="resName != null">
+            and h.res_name like CONCAT('%', #{resName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="cstCode != null">
+            and cst.code like CONCAT('%', #{cstCode,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="cstName != null">
+            and cst.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+    </select>
 
 </mapper>

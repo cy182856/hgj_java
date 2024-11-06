@@ -21,7 +21,7 @@ public class CardQrCode {
 
     private String cardNo;
 
-    private String cardCstId;
+    private String cardCstBatchId;
 
     private String qrCodeContent;
 

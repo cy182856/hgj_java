@@ -20,9 +20,6 @@ public interface HgjHouseDaoMapper {
 
     void delete();
 
-    // List<HgjHouse> getList(HgjHouse hgjHouse);
-
-
     List<HgjHouse> queryBuilding (String orgId);
 
     List<HgjHouseUnit> queryUnit (String orgId);
@@ -35,11 +32,6 @@ public interface HgjHouseDaoMapper {
 
     List<HgjHouseRoomInfo> queryRoomNumAll(String orgId);
 
-
-
-
-
-
-
+    List<HgjHouse> getList(HgjHouse hgjHouse);
 
 }

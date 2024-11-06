@@ -35,7 +35,7 @@
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.coupon.CouponGrant">
         select
-        g.*,t.name as tag_name,s.title,p.type_name
+        g.*,t.name as tag_name,s.id as counpon_id, s.title,p.type_name
         from t_coupon_grant_batch g
         left join t_coupon s on s.id = g.coupon_id
         left join t_tag t on t.id = g.tag_id
@@ -163,6 +163,9 @@
         update
         t_coupon_grant_batch
         <set>
+            <if test="rechargeNum != null" >
+                cou_num = cou_num + #{rechargeNum},
+            </if>
             <if test="couponId != null">
                 coupon_id = #{couponId,jdbcType=VARCHAR},
             </if>

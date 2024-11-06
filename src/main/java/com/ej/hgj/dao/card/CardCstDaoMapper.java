@@ -26,4 +26,9 @@ public interface CardCstDaoMapper {
 
     void update(CardCst cardCst);
 
+    void updateIsExp(CardCst cardCst);
+
+    List<CardCst> batchRechargeCstList(CardCst cardCst);
+
+
 }

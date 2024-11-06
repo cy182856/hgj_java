@@ -16,17 +16,11 @@ public class CardCst {
 
     private Integer cardId;
 
+    private Integer cardType;
+
     private String cardCode;
 
     private String cstCode;
-
-    private Integer totalNum;
-
-    private Integer applyNum;
-
-    private String startTime;
-
-    private String endTime;
 
     private Integer isExp;
 
@@ -56,8 +50,23 @@ public class CardCst {
 
     private List<String> cstCodeList;
 
-    // 充值次数
+    // 剩余
+    private Integer expNum;
+
+    private String startTime;
+
+    private String endTime;
+
+    private String startYear;
+
+    private String startYearMonth;
+
+    private String endYear;
+
+    private String endYearMonth;
+
     private Integer rechargeNum;
 
+    private String expDate;
 
 }

@@ -4,9 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.ej.hgj.constant.Constant;
 import com.ej.hgj.constant.api.AjaxResultApi;
 import com.ej.hgj.dao.active.CouponQrCodeDaoMapper;
-import com.ej.hgj.dao.card.CardCstDaoMapper;
-import com.ej.hgj.dao.card.CardQrCodeDaoMapper;
-import com.ej.hgj.dao.card.CardSubDetailDaoMapper;
+import com.ej.hgj.dao.card.*;
 import com.ej.hgj.dao.config.ConstantConfDaoMapper;
 import com.ej.hgj.dao.coupon.CouponGrantDaoMapper;
 import com.ej.hgj.dao.coupon.CouponSubDetailDaoMapper;
@@ -16,9 +14,7 @@ import com.ej.hgj.dao.menu.mini.MenuMiniDaoMapper;
 import com.ej.hgj.dao.opendoor.OpenDoorCodeDaoMapper;
 import com.ej.hgj.dao.opendoor.OpenDoorLogDaoMapper;
 import com.ej.hgj.entity.active.CouponQrCode;
-import com.ej.hgj.entity.card.CardCst;
-import com.ej.hgj.entity.card.CardQrCode;
-import com.ej.hgj.entity.card.CardSubDetail;
+import com.ej.hgj.entity.card.*;
 import com.ej.hgj.entity.config.ConstantConfig;
 import com.ej.hgj.entity.coupon.CouponGrant;
 import com.ej.hgj.entity.coupon.CouponSubDetail;
@@ -82,6 +78,12 @@ public class ControlServiceImpl implements ControlService {
     @Autowired
     private CardSubDetailDaoMapper cardSubDetailDaoMapper;
 
+    @Autowired
+    private CardCstBatchDaoMapper cardCstBatchDaoMapper;
+
+    @Autowired
+    private CardCstBillDaoMapper cardCstBillDaoMapper;
+
     @Override
     //@Transactional(rollbackFor = Exception.class)
     public AjaxResultApi saveOpenDoorLog(QrCodeLogResVo qrCodeLogResVo){
@@ -112,65 +114,77 @@ public class ControlServiceImpl implements ControlService {
 
             // 2-进门
             if(isUnlock == 2){
-                // 游泳卡开门后次数扣减
-                CardQrCode cardQrCodeParam = new CardQrCode();
-                cardQrCodeParam.setCardNo(cardNo);
-                cardQrCodeParam.setIsExp(1);
-                // 根据卡号查询游泳卡二维码记录
-                List<CardQrCode> list = cardQrCodeDaoMapper.getList(cardQrCodeParam);
-                if(!list.isEmpty()){
-                    CardQrCode cardQrCode = list.get(0);
-                    CardCst cardCst = cardCstDaoMapper.getById(cardQrCode.getCardCstId());
-                    // 查询当天扣减记录
-                    List<CardSubDetail> cardSubDetailList = cardSubDetailDaoMapper.getByQrCodeIdList(cardQrCode.getId());
-                    // 总次数
-                    Integer totalNum = cardCst.getTotalNum();
-                    // 已用次数
-                    Integer applyNum = cardCst.getApplyNum();
-                    // 剩余可用次数
-                    Integer expNum = totalNum - applyNum;
-                    // 剩余可用次数大于等于1，并且当天没扣减过
-                    if(expNum >= 1 && cardSubDetailList.isEmpty()){
-                        // 已用次数 + 1
-                        cardCst.setApplyNum(applyNum + 1);
-                        cardCst.setUpdateTime(new Date());
-                        cardCstDaoMapper.update(cardCst);
+                // 需要扣次数的设备号
+                ConstantConfig configDeviceNo = constantConfDaoMapper.getByKey(Constant.SWIM_DEVICE_NO);
+                if(configDeviceNo.getConfigValue().equals(deviceNo)){
+                    // 游泳卡开门后次数扣减
+                    CardQrCode cardQrCodeParam = new CardQrCode();
+                    cardQrCodeParam.setCardNo(cardNo);
+                    cardQrCodeParam.setIsExp(1);
+                    // 根据卡号查询游泳卡二维码记录
+                    List<CardQrCode> list = cardQrCodeDaoMapper.getList(cardQrCodeParam);
+                    if(!list.isEmpty()){
+                        CardQrCode cardQrCode = list.get(0);
+                        CardCstBatch cardCstBatch = cardCstBatchDaoMapper.getById(cardQrCode.getCardCstBatchId());
+                        // 根据卡号项目号查询账单当天扣减记录
+                        CardCstBill cardCstBill = cardCstBillDaoMapper.getByCardCodeAndProNum(cardCstBatch.getCardCode(),cardCstBatch.getProNum());
+                        // 总次数
+                        Integer totalNum = cardCstBatch.getTotalNum();
+                        // 已用次数
+                        Integer applyNum = cardCstBatch.getApplyNum();
+                        // 剩余可用次数
+                        Integer expNum = totalNum - applyNum;
+                        // 剩余可用次数大于等于1，并且当天没扣减过
+                        if(expNum >= 1 && cardCstBill == null){
+                            // 已用次数 + 1
+                            cardCstBatch.setApplyNum(applyNum + 1);
+                            cardCstBatch.setUpdateTime(new Date());
+                            cardCstBatchDaoMapper.update(cardCstBatch);
 
-                        // 插入扣减记录
-                        CardSubDetail cardSubDetail = new CardSubDetail();
-                        cardSubDetail.setId(TimestampGenerator.generateSerialNumber());
-                        cardSubDetail.setCardQrCodeId(cardQrCode.getId());
-                        cardSubDetail.setSubNum(1);
-                        cardSubDetail.setCreateTime(new Date());
-                        cardSubDetail.setUpdateTime(new Date());
-                        cardSubDetail.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-                        cardSubDetailDaoMapper.save(cardSubDetail);
-                    }
+                            // 新增卡账单扣减记录
+                            CardCstBill cardCstBillInsert = new CardCstBill();
+                            cardCstBillInsert.setId(TimestampGenerator.generateSerialNumber());
+                            cardCstBillInsert.setProNum(cardCstBatch.getProNum());
+                            cardCstBillInsert.setCardType(cardCstBatch.getCardType());
+                            cardCstBillInsert.setCardId(cardCstBatch.getCardId());
+                            cardCstBillInsert.setCardCode(cardCstBatch.getCardCode());
+                            cardCstBillInsert.setCstCode(cardCstBatch.getCstCode());
+                            cardCstBillInsert.setBillNum(-1);
+                            cardCstBillInsert.setBillType(2);
+                            cardCstBillInsert.setCreateTime(new Date());
+                            cardCstBillInsert.setCreateBy("");
+                            cardCstBillInsert.setUpdateTime(new Date());
+                            cardCstBillInsert.setUpdateBy("");
+                            cardCstBillInsert.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+                            cardCstBillDaoMapper.save(cardCstBillInsert);
+                            logger.info("门禁回调，卡账单插入成功:" + JSONObject.toJSONString(cardCstBillInsert));
+                        }
 
-                    // 当天同一张卡进门超过N次，调用接口删除二维码，将二维码改为失效
-                    List<OpenDoorLog> byCardNoAndIsUnlock = openDoorLogDaoMapper.getByCardNoAndIsUnlock(cardNo);
-                    ConstantConfig byKey = constantConfDaoMapper.getByKey(Constant.CARD_QR_CODE_OPEN_DOOR_SIZE);
-                    Integer openDoorSize = Integer.valueOf(byKey.getConfigValue());
-                    if(!byCardNoAndIsUnlock.isEmpty() && byCardNoAndIsUnlock.size() >= openDoorSize){
-                        ConstantConfig constantConfigUrl = constantConfDaoMapper.getByKey(Constant.OPEN_DOOR_QR_CODE_URL);
-                        String user_info_url = constantConfigUrl.getConfigValue()+"/Delete?" + "neighNo=" + neighNo + "&cardNo=" + cardNo + "&unitNumber=" + cardQrCode.getUnitNum();
-                        JSONObject jsonObject = JSONObject.parseObject(HttpClientUtil.doGet(user_info_url));
-                        logger.info("删除二维码返回jsonObject:" + jsonObject);
-                        String result = jsonObject.get("result").toString();
-                        String message = jsonObject.getString("message");
-                        // 成功
-                        if("1".equals(result)){
-                            // 更新二维码记录为失效
-                            cardQrCode.setIsExp(0);
-                            cardQrCode.setUpdateTime(new Date());
-                            cardQrCodeDaoMapper.update(cardQrCode);
-                        }else {
-                            cardQrCode.setErrorMsg("调用接口删除二维码失败");
-                            cardQrCode.setUpdateTime(new Date());
-                            cardQrCodeDaoMapper.update(cardQrCode);
-                            ajaxResult.setResCode(0);
-                            ajaxResult.setResMsg("调用接口删除二维码失败:" + message);
-                            return ajaxResult;
+                        // 当天同一张卡同一个设备进门超过N次，调用接口删除二维码，将二维码改为失效
+                        List<OpenDoorLog> byCardNoAndIsUnlock = openDoorLogDaoMapper.getByCardNoAndIsUnlock(cardNo, configDeviceNo.getConfigValue());
+                        ConstantConfig configOpenDoorSize = constantConfDaoMapper.getByKey(Constant.CARD_QR_CODE_OPEN_DOOR_SIZE);
+                        Integer openDoorSize = Integer.valueOf(configOpenDoorSize.getConfigValue());
+                        if(!byCardNoAndIsUnlock.isEmpty() && byCardNoAndIsUnlock.size() >= openDoorSize){
+                            ConstantConfig constantConfigUrl = constantConfDaoMapper.getByKey(Constant.OPEN_DOOR_QR_CODE_URL);
+                            String user_info_url = constantConfigUrl.getConfigValue()+"/Delete?" + "neighNo=" + neighNo + "&cardNo=" + cardNo + "&unitNumber=" + cardQrCode.getUnitNum();
+                            JSONObject jsonObject = JSONObject.parseObject(HttpClientUtil.doGet(user_info_url));
+                            logger.info("删除二维码返回jsonObject:" + jsonObject);
+                            String result = jsonObject.get("result").toString();
+                            String message = jsonObject.getString("message");
+                            // 成功
+                            if("1".equals(result)){
+                                // 更新二维码记录为失效
+                                cardQrCode.setIsExp(0);
+                                cardQrCode.setUpdateTime(new Date());
+                                cardQrCodeDaoMapper.update(cardQrCode);
+                            }else {
+                                cardQrCode.setErrorMsg("调用接口删除二维码失败");
+                                cardQrCode.setUpdateTime(new Date());
+                                cardQrCodeDaoMapper.update(cardQrCode);
+                                ajaxResult.setResCode(0);
+                                ajaxResult.setResMsg("调用接口删除二维码失败:" + message);
+                                return ajaxResult;
+                            }
                         }
                     }
                 }

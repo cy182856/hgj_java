@@ -19,6 +19,7 @@
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="project_name" jdbcType="VARCHAR" property="projectName"/>
         <result column="into_status" jdbcType="INTEGER" property="intoStatus"/>
+        <result column="card_total_num" jdbcType="INTEGER" property="cardTotalNum"/>
     </resultMap>
     <sql id="Base_Column_List" >
         id, org_id, code, cst_name, cst_type, cst_level, is_affect, contract_character, cer_type, cer_no, lic_no, mobile, create_time, update_time
@@ -64,7 +65,16 @@
             where delete_flag = 0
             and cst_code = cst.`code`
             and into_status = 1
-            ) as into_status
+            ) as into_status,
+            (
+            select count(id)
+            from t_card_cst
+            where delete_flag = 0
+            and cst_code = cst.`code`
+                <if test="cardType != null">
+                    and card_type = #{cardType,jdbcType=INTEGER}
+                </if>
+            ) as card_total_num
             from s_cst cst left join t_pro_config p on cst.org_id = p.project_num
             where 1 = 1
             <if test="code != null">
@@ -95,6 +105,12 @@
         </if>
         <if test="intoStatus == 99">
             and into_status is null
+        </if>
+        <if test="sendCardStatus == 1">
+            and card_total_num > 0
+        </if>
+        <if test="sendCardStatus == 0">
+            and card_total_num = 0
         </if>
     </select>
 

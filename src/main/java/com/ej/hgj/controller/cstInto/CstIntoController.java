@@ -4,9 +4,11 @@ import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.cstInto.CstIntoDaoMapper;
 import com.ej.hgj.dao.cstInto.CstIntoHouseDaoMapper;
+import com.ej.hgj.dao.identity.IdentityDaoMapper;
 import com.ej.hgj.entity.cstInto.CstInto;
 import com.ej.hgj.entity.cstInto.CstIntoHouse;
 import com.ej.hgj.entity.house.HgjHouse;
+import com.ej.hgj.entity.identity.Identity;
 import com.ej.hgj.entity.role.Role;
 import com.ej.hgj.entity.user.User;
 import com.ej.hgj.entity.user.UserRole;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin
 @RestController
@@ -54,6 +57,9 @@ public class CstIntoController {
     @Autowired
     private SyHouseDaoMapper syHouseDaoMapper;
 
+    @Autowired
+    private IdentityDaoMapper identityDaoMapper;
+
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(@RequestParam(value = "page",defaultValue = "1") int page,
                            @RequestParam(value = "limit",defaultValue = "10") int limit,
@@ -65,6 +71,8 @@ public class CstIntoController {
         HashMap map = new HashMap();
         PageHelper.offsetPage((page-1) * limit,limit);
         List<CstInto> list = cstIntoDaoMapper.getList(cstInto);
+        // 查询所有身份
+        List<Identity> identityList = identityDaoMapper.getList(new Identity());
         for(CstInto cst : list){
             // 入住状态
             if(cst.getIntoRole() == 0 || cst.getIntoRole() == 2){
@@ -88,17 +96,19 @@ public class CstIntoController {
             }
 
             // 入住身份
-            if(cst.getIntoRole() == Constant.INTO_ROLE_CST){
-                cst.setIntoRoleName("租户");
-            } else if(cst.getIntoRole() == Constant.INTO_ROLE_ENTRUST){
-                cst.setIntoRoleName("租户员工");
-            } else if(cst.getIntoRole() == Constant.INTO_ROLE_PROPERTY_OWNER){
-                cst.setIntoRoleName("产权人");
-            } else if(cst.getIntoRole() == Constant.INTO_ROLE_HOUSEHOLD){
-                cst.setIntoRoleName("租客");
-            } else if(cst.getIntoRole() == Constant.INTO_ROLE_COHABIT){
-                cst.setIntoRoleName("同住人");
-            }
+            List<Identity> identitiesFilter = identityList.stream().filter(identity -> identity.getCode() == cst.getIntoRole()).collect(Collectors.toList());
+            cst.setIntoRoleName(identitiesFilter.get(0).getName());
+//            if(cst.getIntoRole() == Constant.INTO_ROLE_CST){
+//                cst.setIntoRoleName("租户");
+//            } else if(cst.getIntoRole() == Constant.INTO_ROLE_ENTRUST){
+//                cst.setIntoRoleName("租户员工");
+//            } else if(cst.getIntoRole() == Constant.INTO_ROLE_PROPERTY_OWNER){
+//                cst.setIntoRoleName("产权人");
+//            } else if(cst.getIntoRole() == Constant.INTO_ROLE_HOUSEHOLD){
+//                cst.setIntoRoleName("租客");
+//            } else if(cst.getIntoRole() == Constant.INTO_ROLE_COHABIT){
+//                cst.setIntoRoleName("同住人");
+//            }
 
             // 租户、产权人、同住人查询所有房间号
             List<String> houseList = new ArrayList<>();

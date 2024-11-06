@@ -58,4 +58,10 @@ public class HgjCst {
     // 注册状态
     private Integer intoStatus;
 
+    private Integer cardTotalNum;
+
+    private Integer cardType;
+
+    private Integer sendCardStatus;
+
 }

@@ -4,6 +4,7 @@ package com.ej.hgj.controller.house;
 import com.alibaba.fastjson.JSONObject;
 import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
+import com.ej.hgj.dao.house.HgjHouseDaoMapper;
 import com.ej.hgj.entity.build.Build;
 import com.ej.hgj.entity.cst.HgjCst;
 import com.ej.hgj.entity.house.HgjHouse;
@@ -38,6 +39,9 @@ public class HouseController {
     @Autowired
     private SyHouseDaoMapper syHouseDaoMapper;
 
+    @Autowired
+    private HgjHouseDaoMapper hgjHouseDaoMapper;
+
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(@RequestParam(value = "page",defaultValue = "1") int page,
                            @RequestParam(value = "limit",defaultValue = "10") int limit,
@@ -45,8 +49,8 @@ public class HouseController {
         AjaxResult ajaxResult = new AjaxResult();
         HashMap map = new HashMap();
         PageHelper.offsetPage((page-1) * limit,limit);
-        //List<HgjHouse> list = houseService.getList(house);
-        List<HgjHouse> list = hgjSyHouseDaoMapper.getList(house);
+        List<HgjHouse> list = hgjHouseDaoMapper.getList(house);
+        //List<HgjHouse> list = hgjSyHouseDaoMapper.getList(house);
         //logger.info("list:"+ JSON.toJSONString(list));
         PageInfo<HgjHouse> pageInfo = new PageInfo<>(list);
         //计算总页数

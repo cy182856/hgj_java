@@ -1,11 +1,14 @@
 package com.ej.hgj.controller.coupon;
 
+import com.alibaba.fastjson.JSONObject;
 import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.coupon.CouponDaoMapper;
 import com.ej.hgj.dao.coupon.CouponGrantBatchDaoMapper;
 import com.ej.hgj.dao.coupon.CouponGrantDaoMapper;
+import com.ej.hgj.entity.card.CardCst;
 import com.ej.hgj.entity.coupon.Coupon;
+import com.ej.hgj.entity.coupon.CouponGrant;
 import com.ej.hgj.entity.coupon.CouponGrantBatch;
 import com.ej.hgj.service.coupon.CouponService;
 import com.ej.hgj.utils.TimestampGenerator;
@@ -127,8 +130,8 @@ public class CouponController {
     }
 
     @RequestMapping(value = "/grant",method = RequestMethod.POST)
-    public AjaxResult grant(@RequestBody Coupon coupon){
-        couponService.couponGrant(coupon);
+    public AjaxResult grant(@RequestBody CouponGrantBatch couponGrantBatch){
+        couponService.couponGrant(couponGrantBatch);
         AjaxResult ajaxResult = new AjaxResult();
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
@@ -157,6 +160,33 @@ public class CouponController {
     public AjaxResult batchDelete(@RequestParam(required=false, value = "id") String id){
         AjaxResult ajaxResult = new AjaxResult();
         couponService.deleteBatch(id);
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        return ajaxResult;
+    }
+
+    /**
+     * 按批次充值
+     * @param couponGrantBatch
+     * @return
+     */
+    @RequestMapping(value = "/batchRecharge",method = RequestMethod.POST)
+    public AjaxResult batchRecharge(@RequestBody CouponGrantBatch couponGrantBatch){
+        String id = couponGrantBatch.getId();
+        Integer rechargeNum = couponGrantBatch.getRechargeNum();
+        CouponGrantBatch couponGrantBatchParam = new CouponGrantBatch();
+        couponGrantBatchParam.setId(id);
+        couponGrantBatchParam.setRechargeNum(rechargeNum);
+        couponGrantBatchParam.setUpdateTime(new Date());
+        couponGrantBatchDaoMapper.update(couponGrantBatchParam);
+
+        CouponGrant couponGrantParam = new CouponGrant();
+        couponGrantParam.setBatchId(id);
+        couponGrantParam.setRechargeNum(rechargeNum);
+        couponGrantParam.setUpdateTime(new Date());
+        couponGrantDaoMapper.updateByBatchId(couponGrantParam);
+        logger.info("充值成功:"+ JSONObject.toJSONString(couponGrantParam));
+        AjaxResult ajaxResult = new AjaxResult();
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;

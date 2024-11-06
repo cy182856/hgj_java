@@ -19,11 +19,15 @@ public interface CouponGrantDaoMapper {
 
     void update(CouponGrant couponGrant);
 
+    void updateByBatchId(CouponGrant couponGrant);
+
     void delete(String id);
 
     void deleteByBatchId(String batchId);
 
     void insertList(@Param("list") List<CouponGrant> couponGrantList);
+
+    List<CouponGrant> getListByExpDate(String startTime);
 
 
 }

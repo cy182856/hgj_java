@@ -1,23 +1,32 @@
-package com.ej.hgj.entity.coupon;
+package com.ej.hgj.entity.card;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
-public class CouponGrantBatch {
+public class CardCstBatch {
 
     private String id;
 
-    private String couponId;
+    private String proNum;
 
-    private String tagId;
+    private Integer cardType;
 
-    private String typeCode;
+    private Integer cardId;
 
-    private Integer couNum;
+    private String cardCode;
+
+    private String cstCode;
+
+    private Integer totalNum;
+
+    private Integer applyNum;
+
+    private String expDate;
 
     private String startTime;
 
@@ -37,14 +46,9 @@ public class CouponGrantBatch {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
-    private String tagName;
-
-    private String cstName;
-
-    private String title;
-
-    private String typeName;
-
-    // 充值小时
+    // 充值次数/小时
     private Integer rechargeNum;
+
+    private List<String> cstCodeList;
+
 }

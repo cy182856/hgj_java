@@ -23,7 +23,8 @@ public class CouponGrant {
 
     private Integer couNum;
 
-    private Integer expNum;
+    // 已用小时
+    private Integer applyNum;
 
     private String startTime;
 
@@ -56,5 +57,8 @@ public class CouponGrant {
     private String cstName;
 
     private String title;
+
+    // 充值小时
+    private Integer rechargeNum;
 
 }

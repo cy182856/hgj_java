@@ -12,7 +12,7 @@ public interface OpenDoorLogDaoMapper {
 
     List<OpenDoorLog> getByCardNoList(String cardNo);
 
-    List<OpenDoorLog> getByCardNoAndIsUnlock(String cardNo);
+    List<OpenDoorLog> getByCardNoAndIsUnlock(String cardNo, String deviceNo);
 
     List<OpenDoorLog> getList(OpenDoorLog openDoorLog);
 

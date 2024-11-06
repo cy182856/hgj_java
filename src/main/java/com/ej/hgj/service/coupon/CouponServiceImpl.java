@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -40,27 +41,32 @@ public class CouponServiceImpl implements CouponService {
     private TagDaoMapper tagDaoMapper;
 
     @Override
-    public void couponGrant(Coupon coupon) {
-        String id = coupon.getId();
-        String tagId = coupon.getTagId();
-        String startTIme = coupon.getStartTime();
-        String endTime = coupon.getEndTime();
+    public void couponGrant(CouponGrantBatch couponGrantBatchReq) {
+        String id = couponGrantBatchReq.getId();
+        String tagId = couponGrantBatchReq.getTagId();
+        String startTIme = couponGrantBatchReq.getStartTime();
+        //String endTime = coupon.getEndTime();
         // 保存批次表
         CouponGrantBatch couponGrantBatch = new CouponGrantBatch();
         String batchId = TimestampGenerator.generateSerialNumber();
         couponGrantBatch.setId(batchId);
         couponGrantBatch.setCouponId(id);
         couponGrantBatch.setTagId(tagId);
-        couponGrantBatch.setTypeCode(coupon.getTypeCode());
-        couponGrantBatch.setCouNum(coupon.getCouNum());
+        couponGrantBatch.setTypeCode(couponGrantBatchReq.getTypeCode());
+        couponGrantBatch.setCouNum(couponGrantBatchReq.getCouNum());
         couponGrantBatch.setStartTime(startTIme);
-        couponGrantBatch.setEndTime(endTime);
+        //couponGrantBatch.setEndTime(endTime);
         couponGrantBatch.setCreateTime(new Date());
         couponGrantBatch.setCreateBy("");
         couponGrantBatch.setUpdateTime(new Date());
         couponGrantBatch.setUpdateBy("");
         couponGrantBatch.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-        couponGrantBatchDaoMapper.save(couponGrantBatch);
+
+        // 根据券有效日期查询券发放明细
+        List<CouponGrant> listByExpDate = couponGrantDaoMapper.getListByExpDate(startTIme);
+
+        // 发放明细
+        List<CouponGrant> couponGrantList = new ArrayList<>();
 
         // 保存分发表-批次详情
         Tag tag = tagDaoMapper.getById(tagId);
@@ -76,18 +82,17 @@ public class CouponServiceImpl implements CouponService {
             tagCstList = tagCstDaoMapper.getCstIntoList(tagCst);
         }
         if (!tagCstList.isEmpty()) {
-            List<CouponGrant> couponGrantList = new ArrayList<>();
             for (TagCst cst : tagCstList) {
                 CouponGrant sg = new CouponGrant();
                 sg.setId(TimestampGenerator.generateSerialNumber());
                 sg.setBatchId(batchId);
                 sg.setCouponId(id);
                 sg.setTagId(tagId);
-                sg.setTypeCode(coupon.getTypeCode());
-                sg.setCouNum(coupon.getCouNum());
-                sg.setExpNum(coupon.getCouNum());
+                sg.setTypeCode(couponGrantBatchReq.getTypeCode());
+                sg.setCouNum(couponGrantBatchReq.getCouNum());
+                sg.setApplyNum(0);
                 sg.setStartTime(startTIme);
-                sg.setEndTime(endTime);
+                //sg.setEndTime(endTime);
                 if(tag.getRange() == 1){
                     sg.setCstCode(cst.getCstCode());
                     sg.setWxOpenId("");
@@ -103,11 +108,20 @@ public class CouponServiceImpl implements CouponService {
                 sg.setUpdateTime(new Date());
                 sg.setUpdateBy("");
                 sg.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-                couponGrantList.add(sg);
-            }
-            couponGrantDaoMapper.insertList(couponGrantList);
-        }
 
+                // 如果有效月份未发放过券，才可以发放
+                List<CouponGrant> listByExpDateFilter = listByExpDate.stream().filter(couponGrant -> couponGrant.getCstCode().equals(cst.getCstCode())).collect(Collectors.toList());
+                if(listByExpDateFilter.isEmpty()) {
+                    couponGrantList.add(sg);
+                }
+            }
+        }
+        if(!couponGrantList.isEmpty()) {
+            // 保存发放明细
+            couponGrantDaoMapper.insertList(couponGrantList);
+            // 保存批次
+            couponGrantBatchDaoMapper.save(couponGrantBatch);
+        }
     }
 
     @Override

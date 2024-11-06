@@ -9,7 +9,7 @@
         <result column="tag_id" jdbcType="VARCHAR" property="tagId"/>
         <result column="type_code" jdbcType="VARCHAR" property="typeCode"/>
         <result column="cou_num" jdbcType="INTEGER" property="couNum"/>
-        <result column="exp_num" jdbcType="INTEGER" property="expNum"/>
+        <result column="apply_num" jdbcType="INTEGER" property="applyNum"/>
         <result column="start_time" jdbcType="VARCHAR" property="startTime"/>
         <result column="end_time" jdbcType="VARCHAR" property="endTime"/>
         <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
@@ -27,7 +27,7 @@
         <result column="type_name" jdbcType="VARCHAR" property="typeName"/>
     </resultMap>
     <sql id="Base_Column_List" >
-        id, batch_id, coupon_id, tag_id, type_code, cou_num, exp_num, start_time, end_time, cst_code, wx_open_id, `range`, create_time, update_time, create_by,
+        id, batch_id, coupon_id, tag_id, type_code, cou_num, apply_num, start_time, end_time, cst_code, wx_open_id, `range`, create_time, update_time, create_by,
         update_by, delete_flag
     </sql>
 
@@ -68,6 +68,16 @@
         order by g.update_time desc
     </select>
 
+
+    <!-- 根据有效期查询券明细-->
+    <select id="getListByExpDate" resultMap="BaseMap"  parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List" />
+        from t_coupon_grant
+        where delete_flag = 0
+            and start_time = #{startTime}
+    </select>
+
     <!-- 保存-->
     <insert id="save" parameterType="com.ej.hgj.entity.coupon.CouponGrant" >
         insert into  t_coupon_grant(
@@ -86,8 +96,8 @@
         <if test="couNum != null">
             cou_num,
         </if>
-        <if test="expNum != null">
-            exp_num,
+        <if test="applyNum != null">
+            apply_num,
         </if>
         <if test="startTime != null">
             start_time,
@@ -136,8 +146,8 @@
             <if test="couNum != null">
                 #{couNum,jdbcType=INTEGER}
             </if>
-            <if test="expNum != null">
-                #{expNum,jdbcType=INTEGER}
+            <if test="applyNum != null">
+                #{applyNum,jdbcType=INTEGER}
             </if>
             <if test="startTime != null" >
                 #{startTime,jdbcType=VARCHAR},
@@ -175,7 +185,7 @@
     <!-- 批量插入-->
     <insert id="insertList" parameterType="java.util.List">
         insert into t_coupon_grant (
-        id, batch_id, coupon_id, tag_id, type_code, cou_num, exp_num, start_time, end_time, cst_code, wx_open_id, `range`, create_time, update_time, create_by,
+        id, batch_id, coupon_id, tag_id, type_code, cou_num, apply_num, start_time, end_time, cst_code, wx_open_id, `range`, create_time, update_time, create_by,
         update_by, delete_flag
         )
         VALUES
@@ -187,7 +197,7 @@
             #{item.tagId,jdbcType=VARCHAR},
             #{item.typeCode,jdbcType=VARCHAR},
             #{item.couNum,jdbcType=INTEGER},
-            #{item.expNum,jdbcType=INTEGER},
+            #{item.applyNum,jdbcType=INTEGER},
             #{item.startTime,jdbcType=VARCHAR},
             #{item.endTime,jdbcType=VARCHAR},
             #{item.cstCode,jdbcType=VARCHAR},
@@ -210,8 +220,8 @@
             <if test="couponId != null">
                 coupon_id = #{couponId,jdbcType=VARCHAR},
             </if>
-            <if test="expNum != null">
-                exp_num = #{expNum,jdbcType=INTEGER},
+            <if test="applyNum != null">
+                apply_num = #{expNum,jdbcType=INTEGER},
             </if>
             <if test="startTime != null">
                 start_time = #{startTime,jdbcType=VARCHAR},
@@ -230,6 +240,21 @@
             </if>
         </set>
         where id=#{id,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 更新-->
+    <update id="updateByBatchId" parameterType="com.ej.hgj.entity.coupon.CouponGrant" >
+        update
+        t_coupon_grant
+        <set>
+            <if test="rechargeNum != null" >
+                cou_num = cou_num + #{rechargeNum},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where batch_id=#{batchId,jdbcType=VARCHAR}
     </update>
 
     <!-- 删除-->
