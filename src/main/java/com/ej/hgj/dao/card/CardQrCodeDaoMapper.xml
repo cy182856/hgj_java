@@ -57,6 +57,9 @@
         <if test="proNum != null and proNum != ''">
             and a.pro_num = #{proNum,jdbcType=VARCHAR}
         </if>
+        <if test="cardCstBatchId != null and cardCstBatchId != ''">
+            and a.card_cst_batch_id = #{cardCstBatchId,jdbcType=VARCHAR}
+        </if>
         <if test="cstCode != null and cstCode != ''">
             and a.cst_code = #{cstCode,jdbcType=VARCHAR}
         </if>

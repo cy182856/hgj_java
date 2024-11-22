@@ -16,6 +16,6 @@ public interface IdentityMenuDaoMapper {
 
     void insertList(@Param("list") List<IdentityMenu> identityMenuList);
 
-    List<CstMenu> getList(IdentityMenu identityMenu);
+    List<IdentityMenu> getList(IdentityMenu identityMenu);
 
 }

@@ -253,9 +253,9 @@ public class CardServiceImpl implements CardService {
             cardCstBill.setBillNum(cardCst.getRechargeNum());
             cardCstBill.setBillType(1);
             cardCstBill.setCreateTime(new Date());
-            cardCstBill.setCreateBy("");
+            cardCstBill.setCreateBy(userId);
             cardCstBill.setUpdateTime(new Date());
-            cardCstBill.setUpdateBy("");
+            cardCstBill.setUpdateBy(userId);
             cardCstBill.setDeleteFlag(Constant.DELETE_FLAG_NOT);
             cardCstBillDaoMapper.save(cardCstBill);
             logger.info("卡账单插入成功:" + JSONObject.toJSONString(cardCstBill));

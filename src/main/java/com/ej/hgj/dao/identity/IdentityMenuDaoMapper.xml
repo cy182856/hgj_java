@@ -24,6 +24,9 @@
         <include refid="Base_Column_List" />
         from t_identity_menu
         where delete_flag = 0
+        <if test="menuId != null">
+            and menu_id = #{menuId,jdbcType=INTEGER}
+        </if>
     </select>
 
     <!-- 删除-->

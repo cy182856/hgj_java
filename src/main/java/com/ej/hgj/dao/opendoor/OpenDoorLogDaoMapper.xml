@@ -52,16 +52,27 @@
     </select>
 
     <!-- 根据卡号查询进门次数-->
-    <select id="getByCardNoAndIsUnlock" resultMap="BaseMap"  parameterType="java.lang.String">
-        SELECT
-            card_no, event_time
-        FROM
-            t_open_door_log
-        WHERE
-            is_unlock = 2
-            AND card_no = #{cardNo} AND device_no = #{deviceNo} AND DATE(create_time) = CURDATE()
-        GROUP BY card_no, event_time
-    </select>
+<!--    <select id="getByCardNoAndIsUnlock" resultMap="BaseMap"  parameterType="java.lang.String">-->
+<!--        SELECT-->
+<!--            card_no, event_time-->
+<!--        FROM-->
+<!--            t_open_door_log-->
+<!--        WHERE-->
+<!--            is_unlock = 2-->
+<!--            AND card_no = #{cardNo} AND device_no = #{deviceNo} AND DATE(create_time) = CURDATE()-->
+<!--        GROUP BY card_no, event_time-->
+<!--    </select>-->
+
+        <select id="getByCardNoAndIsUnlock" resultMap="BaseMap"  parameterType="java.lang.String">
+            SELECT
+                card_no, event_time
+            FROM
+                t_open_door_log
+            WHERE
+                is_unlock = 2
+              AND card_no = #{cardNo} AND DATE(create_time) = CURDATE()
+            GROUP BY card_no, event_time
+        </select>
 
     <!-- 保存-->
     <insert id="save" parameterType="com.ej.hgj.entity.opendoor.OpenDoorLog" >

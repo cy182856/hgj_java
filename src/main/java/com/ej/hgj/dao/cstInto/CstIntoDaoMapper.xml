@@ -308,8 +308,8 @@
         where id = #{id,jdbcType=VARCHAR}
     </update>
 
-    <!-- 删除7天前未入住数据-->
+    <!-- 删除5天前未入住数据-->
     <delete id="deleteByStatusAndTime" parameterType="com.ej.hgj.entity.house.CstInto" >
-        delete from t_cst_into where delete_flag = 0 and into_status = 0 and create_time &lt;= DATE_SUB(now(), INTERVAL 7 DAY)
+        delete from t_cst_into where delete_flag = 0 and into_status = 0 and create_time &lt;= DATE_SUB(now(), INTERVAL #{day,jdbcType=INTEGER} DAY)
     </delete>
 </mapper>

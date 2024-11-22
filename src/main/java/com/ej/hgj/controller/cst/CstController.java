@@ -8,6 +8,7 @@ import com.ej.hgj.dao.config.ConstantConfDaoMapper;
 import com.ej.hgj.dao.cstInto.CstIntoDaoMapper;
 import com.ej.hgj.dao.cstInto.CstIntoHouseDaoMapper;
 import com.ej.hgj.dao.house.HgjHouseDaoMapper;
+import com.ej.hgj.dao.identity.IdentityDaoMapper;
 import com.ej.hgj.dao.tag.TagCstDaoMapper;
 import com.ej.hgj.dao.tag.TagDaoMapper;
 import com.ej.hgj.dao.user.UserDaoMapper;
@@ -17,6 +18,7 @@ import com.ej.hgj.entity.cstInto.CstInto;
 import com.ej.hgj.entity.cstInto.CstIntoHouse;
 import com.ej.hgj.entity.house.HgjHouse;
 import com.ej.hgj.entity.house.SyHouse;
+import com.ej.hgj.entity.identity.Identity;
 import com.ej.hgj.entity.role.Role;
 import com.ej.hgj.entity.tag.Tag;
 import com.ej.hgj.entity.tag.TagCst;
@@ -78,6 +80,9 @@ public class CstController {
 
     @Autowired
     private UserDaoMapper userDaoMapper;
+
+    @Autowired
+    private IdentityDaoMapper identityDaoMapper;
 
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(HttpServletRequest request, @RequestParam(value = "page", defaultValue = "1") int page,
@@ -223,20 +228,8 @@ public class CstController {
             Date cutOffDate = new Date(longQrCreateTime + qrDefaultSecond * 1000);
             map.put("qrCutOffTime", DateUtils.wechatPubFormat(cutOffDate));
             // 入住二维码角色
-            String intoRole = "";
-            Integer intoType = Integer.valueOf(intoVo.getIntoType());
-            if(Constant.INTO_ROLE_CST == intoType){
-                intoRole = "租户";
-            }else if(Constant.INTO_ROLE_ENTRUST == intoType){
-                intoRole = "租户员工";
-            }else if(Constant.INTO_ROLE_PROPERTY_OWNER == intoType){
-                intoRole = "产权人";
-            } else if(Constant.INTO_ROLE_HOUSEHOLD == intoType){
-                intoRole = "租客";
-            } else if(Constant.INTO_ROLE_COHABIT == intoType){
-                intoRole = "同住人";
-            }
-            map.put("intoRole",intoRole);
+            Identity identity = identityDaoMapper.getByCode(intoVo.getIntoType());
+            map.put("intoRole",identity.getName());
         }
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);

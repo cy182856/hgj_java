@@ -163,5 +163,6 @@ public class Constant {
     // 活动中心游泳池闸机扣次数的设备号
     public static String SWIM_DEVICE_NO = "swim_device_no";
 
-
+    // 智慧管家超过N天未入住的删除入住信息
+    public static String NOT_CST_INTO_DELETE_DAY = "not_cst_into_delete_day";
 }

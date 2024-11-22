@@ -65,4 +65,6 @@ public class CstInto {
 
     private List<Integer> intoRoleList;
 
+    private Integer day;
+
 }
