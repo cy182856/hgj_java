@@ -19,4 +19,6 @@ public interface CardCstBillDaoMapper {
 
     CardCstBill getByCardCodeAndProNum(String cardCode, String proNum);
 
+    List<CardCstBill> getList(CardCstBill cardCstBill);
+
 }

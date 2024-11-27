@@ -6,6 +6,7 @@ import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.config.ConstantConfDaoMapper;
 import com.ej.hgj.dao.cst.CstPayPerDaoMapper;
 import com.ej.hgj.dao.cst.HgjCstDaoMapper;
+import com.ej.hgj.dao.cstInto.CstIntoCardMapper;
 import com.ej.hgj.dao.cstInto.CstIntoDaoMapper;
 import com.ej.hgj.dao.cstInto.CstIntoHouseDaoMapper;
 import com.ej.hgj.dao.menu.mini.MenuMiniDaoMapper;
@@ -50,6 +51,9 @@ public class CstIntoServiceImpl implements CstIntoService {
 
     @Autowired
     private CstIntoHouseDaoMapper cstIntoHouseDaoMapper;
+
+    @Autowired
+    private CstIntoCardMapper cstIntoCardMapper;
 
     @Override
     public void owner(String id) {
@@ -185,7 +189,7 @@ public class CstIntoServiceImpl implements CstIntoService {
                 cstIntoDaoMapper.update(cst);
             }
         }else {
-            // 租户员工、租客、同住人
+            // 租户员工、租客、亲属
 //            CstIntoHouse cstIntoHouse = new CstIntoHouse();
 //            cstIntoHouse.setCstIntoId(id);
 //            cstIntoHouse.setIntoStatus(Constant.INTO_STATUS_U);
@@ -198,7 +202,7 @@ public class CstIntoServiceImpl implements CstIntoService {
             cstIntoHouse.setUpdateBy(userId);
             cstIntoHouse.setUpdateTime(new Date());
             cstIntoHouseDaoMapper.updateById(cstIntoHouse);
-            // 如果租客、租户员工绑定房间被全部解除，入住表也解除
+            // 如果租客、租户员工绑定房间被全部解除，入住表也解除，卡权限也解除
             CstInto cs = cstIntoDaoMapper.getById(id);
             List<CstIntoHouse> cstIntoHouseList = cstIntoHouseDaoMapper.getByCstIntoIdAndIntoStatus(id);
             if(cstIntoHouseList.isEmpty() && cs != null && (cs.getIntoRole() == Constant.INTO_ROLE_ENTRUST || cs.getIntoRole() == Constant.INTO_ROLE_HOUSEHOLD || cs.getIntoRole() == Constant.INTO_ROLE_COHABIT)){
@@ -208,6 +212,8 @@ public class CstIntoServiceImpl implements CstIntoService {
                 cstInto.setUpdateBy(userId);
                 cstInto.setUpdateTime(new Date());
                 cstIntoDaoMapper.update(cstInto);
+                // 解除卡权限
+                cstIntoCardMapper.deleteCardPerm(cs.getProjectNum(), cs.getWxOpenId());
             }
         }
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);

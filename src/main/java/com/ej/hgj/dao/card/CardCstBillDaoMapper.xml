@@ -17,6 +17,11 @@
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
 
+        <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
+        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
+        <result column="card_type_name" jdbcType="VARCHAR" property="cardTypeName"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+
     </resultMap>
     <sql id="Base_Column_List" >
         id, pro_num, card_type, card_id, card_code, cst_code, bill_num, bill_type, create_time, update_time, create_by, update_by, delete_flag
@@ -29,6 +34,41 @@
         from t_card_cst_bill
         where delete_flag = 0 and pro_num = #{proNum} and card_code = #{cardCode} and bill_type = 2 and DATE(create_time) = CURDATE()
     </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.card.CardCstBill">
+        select
+        a.*,b.project_name as pro_name,d.cst_name,c.name as card_type_name,e.user_name
+        from t_card_cst_bill a
+            left join t_pro_config b on b.project_num = a.pro_num
+            left join t_card_type c on c.id = a.card_type
+            left join s_cst d on d.`code` = a.cst_code
+            left join t_user e on e.user_id = a.create_by
+        where a.delete_flag = 0
+        <if test="proNum != null and proNum != ''">
+            and a.pro_num = #{proNum}
+        </if>
+        <if test="cardId != null and cardId != ''">
+            and a.card_id = #{cardId}
+        </if>
+        <if test="cardCode != null and cardCode != ''">
+            and a.card_code = #{cardCode}
+        </if>
+        <if test="cstCode != null and cstCode != ''">
+            and a.cst_code = #{cstCode}
+        </if>
+        <if test="cstName != null and cstName != ''">
+            and d.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and a.create_time >= #{startDate,jdbcType=VARCHAR}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and a.create_time &lt;= #{endDate,jdbcType=VARCHAR}
+        </if>
+        order by a.update_time desc
+    </select>
+
 
     <!-- 批量插入-->
     <insert id="insertList" parameterType="java.util.List">

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.cstInto.CstIntoCardMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.cstInto.CstIntoCard">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
+        <result column="card_id" jdbcType="INTEGER" property="cardId"/>
+        <result column="wx_open_id" jdbcType="VARCHAR" property="wxOpenId"/>
+        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, pro_num, card_id, wx_open_id, cst_code, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 删除卡权限-->
+    <delete id="deleteCardPerm" parameterType="java.lang.String" >
+        delete from t_cst_into_card where pro_num=#{proNum} and wx_open_id = #{tenantWxOpenId}
+    </delete>
+
+</mapper>

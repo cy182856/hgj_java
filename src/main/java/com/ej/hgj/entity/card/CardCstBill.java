@@ -40,5 +40,16 @@ public class CardCstBill {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
+    private String startDate;
+
+    private String endDate;
+
+    private String proName;
+
+    private String cstName;
+
+    private String cardTypeName;
+
+    private String userName;
 
 }

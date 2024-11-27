@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.config.WorkTimeConfDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.config.WorkTimeConfig">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="start_time" jdbcType="VARCHAR" property="startTime"/>
+        <result column="end_time" jdbcType="VARCHAR" property="endTime"/>
+        <result column="desc" jdbcType="VARCHAR" property="desc"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, `type`, start_time, end_time, `desc`, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 查询工作时间-->
+    <select id="getWorkTime" resultMap="BaseMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List" />
+        from t_work_time_config
+        where delete_flag = 0 and `type` = #{type}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.config.WorkTimeConfig">
+        select
+            <include refid="Base_Column_List" />
+        from
+            t_work_time_config
+        where delete_flag = 0
+    </select>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.config.WorkTimeConfig" >
+        update
+        t_work_time_config
+        <set>
+            <if test="startTime != null">
+                start_time = #{startTime,jdbcType=VARCHAR},
+            </if>
+            <if test="endTime != null">
+                end_time = #{endTime,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+
+</mapper>

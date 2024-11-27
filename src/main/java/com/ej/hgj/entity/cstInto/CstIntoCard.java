@@ -1,23 +1,22 @@
-package com.ej.hgj.entity.identity;
+package com.ej.hgj.entity.cstInto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
-public class Identity {
+public class CstIntoCard {
     private String id;
 
-    private Integer code;
+    private String proNum;
 
-    private String name;
+    private Integer cardId;
 
-    private String webDesc;
+    private String wxOpenId;
 
-    private String miniDesc;
+    private String cstCode;
 
     private String createBy;
 
@@ -32,7 +31,5 @@ public class Identity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-
-    private List<String> proNums;
 
 }

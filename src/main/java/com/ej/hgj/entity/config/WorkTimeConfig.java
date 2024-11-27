@@ -1,23 +1,23 @@
-package com.ej.hgj.entity.identity;
+package com.ej.hgj.entity.config;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
-public class Identity {
-    private String id;
+public class WorkTimeConfig {
 
-    private Integer code;
+    private Integer id;
 
-    private String name;
+    private Integer type;
 
-    private String webDesc;
+    private String startTime;
 
-    private String miniDesc;
+    private String endTime;
+
+    private String desc;
 
     private String createBy;
 
@@ -32,7 +32,5 @@ public class Identity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-
-    private List<String> proNums;
 
 }

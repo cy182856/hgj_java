@@ -11,12 +11,14 @@ import com.ej.hgj.dao.tag.TagCstDaoMapper;
 import com.ej.hgj.dao.tag.TagDaoMapper;
 import com.ej.hgj.dao.user.UserRoleDaoMapper;
 import com.ej.hgj.entity.card.Card;
+import com.ej.hgj.entity.card.CardCst;
 import com.ej.hgj.entity.config.ProConfig;
 import com.ej.hgj.entity.cst.HgjCst;
 import com.ej.hgj.entity.cstInto.CstInto;
 import com.ej.hgj.entity.gonggao.GonggaoType;
 import com.ej.hgj.entity.house.HgjHouse;
 import com.ej.hgj.entity.identity.Identity;
+import com.ej.hgj.entity.identity.IdentityMenu;
 import com.ej.hgj.entity.tag.*;
 import com.ej.hgj.entity.user.UserRole;
 import com.ej.hgj.service.tag.TagCstService;
@@ -56,5 +58,19 @@ public class IdentityController {
         return ajaxResult;
     }
 
+    @RequestMapping(value = "/selectByProNums",method = RequestMethod.POST)
+    public AjaxResult delete(@RequestBody Identity identity){
+        AjaxResult ajaxResult = new AjaxResult();
+        HashMap map = new HashMap();
+        List<Identity> list = new ArrayList<>();
+        if(identity != null && identity.getProNums() != null && identity.getProNums().size() > 0){
+            list = identityDaoMapper.getList(identity);
+        }
+        map.put("list",list);
+        ajaxResult.setData(map);
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        return ajaxResult;
+    }
 
 }
