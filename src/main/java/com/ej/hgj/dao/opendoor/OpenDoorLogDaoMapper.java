@@ -16,6 +16,8 @@ public interface OpenDoorLogDaoMapper {
 
     List<OpenDoorLog> getByCardNoAndIsUnlock(String cardNo);
 
+    List<OpenDoorLog> getByCardNoAndEventTime(OpenDoorLog openDoorLog);
+
     List<OpenDoorLog> getList(OpenDoorLog openDoorLog);
 
     void save(OpenDoorLog openDoorLog);

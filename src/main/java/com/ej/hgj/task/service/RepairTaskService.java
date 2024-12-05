@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -218,8 +219,13 @@ public class RepairTaskService {
             repairLog1.setOrders(workOrd.getOrders());
             repairLog1.setOrdersTime(workOrd.getOrdersTime());
             repairLog1.setCompletionTime(workOrd.getCompletionTime());
-            repairLog1.setLabourCost(costSum.getLabourCost());
-            repairLog1.setMaterialCost(costSum.getMaterialCost());
+            if(costSum != null) {
+                repairLog1.setLabourCost(costSum.getLabourCost());
+                repairLog1.setMaterialCost(costSum.getMaterialCost());
+            }else {
+                repairLog1.setLabourCost(BigDecimal.ZERO);
+                repairLog1.setMaterialCost(BigDecimal.ZERO);
+            }
             repairLog1.setRepairStatus("WOSta_Finish");
             repairLog1.setUpdateTime(new Date());
             repairLogDaoMapper.update(repairLog1);

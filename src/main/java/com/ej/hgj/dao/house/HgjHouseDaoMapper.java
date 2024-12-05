@@ -34,4 +34,6 @@ public interface HgjHouseDaoMapper {
 
     List<HgjHouse> getList(HgjHouse hgjHouse);
 
+    List<HgjHouse> getListByCstCode(HgjHouse hgjHouse);
+
 }

@@ -16,6 +16,7 @@ import com.ej.hgj.entity.card.Card;
 import com.ej.hgj.entity.card.CardCst;
 import com.ej.hgj.entity.card.CardCstBatch;
 import com.ej.hgj.entity.card.CardCstBill;
+import com.ej.hgj.entity.config.ConstantConfig;
 import com.ej.hgj.entity.cst.HgjCst;
 import com.ej.hgj.entity.qn.Qn;
 import com.ej.hgj.service.qn.QnService;
@@ -55,8 +56,12 @@ public class CardServiceImpl implements CardService {
     @Autowired
     private CardCstBillDaoMapper cardCstBillDaoMapper;
 
+    @Autowired
+    private ConstantConfDaoMapper constantConfDaoMapper;
+
     @Override
     public AjaxResult cardBulkOperation(CardReqVo cardReqVo, String userId) {
+        AjaxResult ajaxResult = new AjaxResult();
         Integer cardId = cardReqVo.getCardId();
         Integer cardOption = cardReqVo.getCardOption();
         // 卡充值才会有
@@ -71,7 +76,6 @@ public class CardServiceImpl implements CardService {
         // 根据卡id查询所有发卡客户
         CardCst cardCstParam = new CardCst();
         cardCstParam.setCardId(cardId);
-        cardCstParam.setIsExp(1);
         List<CardCst> cardCstListByCardId = cardCstDaoMapper.getList(cardCstParam);
         // 根据卡id、有效年月查询所有发卡客户批次
         CardCstBatch cardCstBatchParam = new CardCstBatch();
@@ -84,17 +88,19 @@ public class CardServiceImpl implements CardService {
         List<CardCstBatch> cardCstBatchList = new ArrayList<>();
         // 已选择客户
         List<String> cstCodeList = cardReqVo.getCstCodeList();
+
         // 发卡
         if(cardOption == 1){
             for(int i = 0; i<cstCodeList.size(); i++){
                 // 保存客户卡
                 String cstCode = cstCodeList.get(i);
+                String cardCode = DateUtils.strYmd() + card.getType() + cstCode;
                 CardCst cc = new CardCst();
                 cc.setId(TimestampGenerator.generateSerialNumber());
                 cc.setProNum(card.getProNum());
                 cc.setCardId(cardId);
                 cc.setCardType(card.getType());
-                cc.setCardCode(DateUtils.strYmd() + card.getType() + cstCode);
+                cc.setCardCode(cardCode);
                 cc.setCstCode(cstCode);
                 cc.setIsExp(1);
                 cc.setCreateTime(new Date());
@@ -102,42 +108,29 @@ public class CardServiceImpl implements CardService {
                 cc.setUpdateTime(new Date());
                 cc.setUpdateBy("");
                 cc.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-                // 查询客户对应项目号，客户项目号与卡的项目号相同才可发卡
-                List<HgjCst> hgjCstListFilter = hgjCstList.stream().filter(hgjCst1 -> hgjCst1.getCode().equals(cstCode)).collect(Collectors.toList());
-                // 根据客户编号查询发卡客户,如果有数据就不再发卡
+                // 根据客户编号查询发卡客户
                 List<CardCst> cardCstListByCardIdFilter = cardCstListByCardId.stream().filter(cardCst -> cardCst.getCstCode().equals(cstCode)).collect(Collectors.toList());
-                if(cardCstListByCardIdFilter.isEmpty() && !hgjCstListFilter.isEmpty()) {
+                // 如果未查询到卡信息
+                if (cardCstListByCardIdFilter.isEmpty()) {
+                    // 保存卡新增集合
                     cardCstList.add(cc);
-                }
-                // 保存卡批次
-                CardCstBatch batch = new CardCstBatch();
-                batch.setId(TimestampGenerator.generateSerialNumber());
-                batch.setProNum(card.getProNum());
-                batch.setCardType(card.getType());
-                batch.setCardId(cardId);
-                batch.setCardCode(DateUtils.strYmd() + card.getType() + cstCode);
-                batch.setCstCode(cstCode);
-                batch.setTotalNum(0);
-                batch.setApplyNum(0);
-                batch.setExpDate(expDate);
-                batch.setCreateTime(new Date());
-                batch.setCreateBy("");
-                batch.setUpdateTime(new Date());
-                batch.setUpdateBy("");
-                batch.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-                // 根据客户编号查询发卡客户,如果有数据就不再发卡
-                List<CardCstBatch> cardCstBatchListByCardIdAndExpDateFilter = cardCstBatchListByCardIdAndExpDate.stream().filter(cardCstBatch -> cardCstBatch.getCstCode().equals(cstCode)).collect(Collectors.toList());
-                if(cardCstBatchListByCardIdAndExpDateFilter.isEmpty() && !hgjCstListFilter.isEmpty()) {
-                    cardCstBatchList.add(batch);
+                    // 新增卡批次
+                    cardCstBatchList = savaCardBatch(cardCstBatchListByCardIdAndExpDate,cardCstBatchList,card,cstCode,expDate,cardCode,cardId);
+                }else {
+                    // 客户卡已存在处理
+                    // 查询已存在卡信息
+                    CardCst cardCst = cardCstListByCardIdFilter.get(0);
+                    // 新增卡批次
+                    cardCstBatchList = savaCardBatch(cardCstBatchListByCardIdAndExpDate,cardCstBatchList,card,cstCode,expDate,cardCst.getCardCode(),cardId);
                 }
             }
-            if(!cardCstList.isEmpty()){
+            if (!cardCstList.isEmpty()) {
                 cardCstDaoMapper.insertList(cardCstList);
-                logger.info("发卡成功:"+ JSONObject.toJSONString(cardCstList));
+                logger.info("发卡成功:" + JSONObject.toJSONString(cardCstList));
             }
-            if(!cardCstBatchList.isEmpty()){
+            if (!cardCstBatchList.isEmpty()) {
                 cardCstBatchDaoMapper.insertList(cardCstBatchList);
-                logger.info("发卡批次成功:"+ JSONObject.toJSONString(cardCstBatchList));
+                logger.info("发卡批次成功:" + JSONObject.toJSONString(cardCstBatchList));
             }
         }
 
@@ -169,100 +162,288 @@ public class CardServiceImpl implements CardService {
 
         // 批量充值
         if(cardOption == 4){
-            // 过滤符合充值要求条件的客户编号
+            ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.CARD_RECHARGE_MAX_NUM);
+            Integer maxNum = Integer.valueOf(constantConfig.getConfigValue());
+            if(totalNum > maxNum){
+                ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+                ajaxResult.setMessage("充值数不能大于" + maxNum);
+                return ajaxResult;
+            }
+            // 查询需要充值的客户
             CardCst cardCst = new CardCst();
             cardCst.setProNum(card.getProNum());
             cardCst.setCardId(cardId);
             cardCst.setCstCodeList(cstCodeList);
             List<CardCst> cardCstRechargeList = cardCstDaoMapper.batchRechargeCstList(cardCst);
-            List<String> cstCodes = new ArrayList<>();
-            List<CardCstBill> cardCstBillList = new ArrayList<>();
+
+            // 需要新增卡客户集合
+            List<CardCst> cardCstList1 = new ArrayList<>();
+
+            // 需要新增卡批次集合
+            List<CardCstBatch> cardCstBatchList1 = new ArrayList<>();
+
+            // 需要新增卡账单集合
+            List<CardCstBill> cardCstBillList1 = new ArrayList<>();
+
+            // 需要更新卡批次数量的客户编号
+            List<String> updateCardBatchTotalNumList = new ArrayList<>();
+
+            // 判断需要充值的客户不为空
             if(!cardCstRechargeList.isEmpty()){
-                for(CardCst c : cardCstRechargeList){
-                    cstCodes.add(c.getCstCode());
-                    // 卡账单
-                    CardCstBill cardCstBill = new CardCstBill();
-                    cardCstBill.setId(TimestampGenerator.generateSerialNumber());
-                    cardCstBill.setProNum(card.getProNum());
-                    cardCstBill.setCardType(card.getType());
-                    cardCstBill.setCardId(cardId);
-                    cardCstBill.setCardCode(c.getCardCode());
-                    cardCstBill.setCstCode(c.getCstCode());
-                    cardCstBill.setBillNum(totalNum);
-                    cardCstBill.setBillType(1);
-                    cardCstBill.setCreateTime(new Date());
-                    cardCstBill.setCreateBy(userId);
-                    cardCstBill.setUpdateTime(new Date());
-                    cardCstBill.setUpdateBy(userId);
-                    cardCstBill.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-                    cardCstBillList.add(cardCstBill);
+                for(CardCst cstRecharge : cardCstRechargeList){
+                    String cardCode = DateUtils.strYmd() + card.getType() + cstRecharge.getCstCode();
+                    String cstCode = cstRecharge.getCstCode();
+                    // 查询客户卡信息
+                    List<CardCst> cardCstRechargeListFilter = cardCstRechargeList.stream().filter(cardCst1 -> cardCst1.getCstCode().equals(cstRecharge.getCstCode())).collect(Collectors.toList());
+                    // 无卡处理
+                    if(cardCstRechargeListFilter.isEmpty()){
+                        // 新增客户卡
+                        CardCst cardCst2 = new CardCst();
+                        cardCst2.setId(TimestampGenerator.generateSerialNumber());
+                        cardCst2.setProNum(card.getProNum());
+                        cardCst2.setCardId(cardId);
+                        cardCst2.setCardType(card.getType());
+                        cardCst2.setCardCode(cardCode);
+                        cardCst2.setCstCode(cstCode);
+                        cardCst2.setIsExp(1);
+                        cardCst2.setCreateTime(new Date());
+                        cardCst2.setCreateBy("");
+                        cardCst2.setUpdateTime(new Date());
+                        cardCst2.setUpdateBy("");
+                        cardCst2.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+                        cardCstList1.add(cardCst2);
+                        // 新增卡批次
+                        cardCstBatchList1 = addCardCstBatch(cardCstBatchList1,card.getProNum(),card.getType(),cardCode,cstCode,cardId,userId,totalNum,expDate);
+                        // 新增账单
+                        cardCstBillList1 = addCardCstBill(cardCstBillList1 ,card.getProNum(),card.getType(),cardCode,cstCode,cardId,userId,totalNum);
+
+                    // 有卡处理
+                    }else {
+                        // 根据卡ID、年月、客户、项目号查询卡批次
+                        CardCstBatch cardCstBatch = new CardCstBatch();
+                        cardCstBatch.setCardId(cardId);
+                        cardCstBatch.setExpDate(expDate);
+                        cardCstBatch.setCstCodeList(cstCodeList);
+                        cardCstBatch.setProNum(card.getProNum());
+                        List<CardCstBatch> cstBatchList = cardCstBatchDaoMapper.getList(cardCstBatch);
+                        // 整个卡批次有数据
+                        if(!cstBatchList.isEmpty()){
+                            List<CardCstBatch> cstBatchListFilter = cstBatchList.stream().filter(cardCstBatch1 -> cardCstBatch1.getCstCode().equals(cstCode)).collect(Collectors.toList());
+                            // 客户无卡批次处理
+                            if(cstBatchListFilter.isEmpty()){
+                                // 查询客户卡信息
+                                CardCst cardCst1 = cardCstRechargeListFilter.get(0);
+                                // 新增卡批次
+                                cardCstBatchList1 = addCardCstBatch(cardCstBatchList1,card.getProNum(),card.getType(),cardCst1.getCardCode(),cstCode,cardId,userId,totalNum,expDate);
+                                // 新增账单
+                                cardCstBillList1 = addCardCstBill(cardCstBillList1 ,card.getProNum(),card.getType(),cardCst1.getCardCode(),cstCode,cardId,userId,totalNum);
+
+                            // 客户有卡批次
+                            }else {
+                                // 更新卡批次次数
+                                updateCardBatchTotalNumList.add(cstCode);
+                            }
+                        // 整个卡批次无数据
+                        }else{
+                            // 查询客户卡信息
+                            CardCst cardCst1 = cardCstRechargeListFilter.get(0);
+                            // 新增卡批次
+                            cardCstBatchList1 = addCardCstBatch(cardCstBatchList1,card.getProNum(),card.getType(),cardCst1.getCardCode(),cstCode,cardId,userId,totalNum,expDate);
+                            // 新增账单
+                            cardCstBillList1 = addCardCstBill(cardCstBillList1 ,card.getProNum(),card.getType(),cardCst1.getCardCode(),cstCode,cardId,userId,totalNum);
+                        }
+                    }
+                }
+
+                // 新增卡
+                if(!cardCstList1.isEmpty()){
+                    cardCstDaoMapper.insertList(cardCstList1);
+                    logger.info("新增卡成功:"+ JSONObject.toJSONString(cardCstList1));
+                }
+
+                // 新增卡批次
+                if (!cardCstBatchList1.isEmpty()) {
+                    cardCstBatchDaoMapper.insertList(cardCstBatchList1);
+                    logger.info("新增卡批次:" + JSONObject.toJSONString(cardCstBatchList1));
+                }
+
+                // 更新卡批次次数
+                if(!updateCardBatchTotalNumList.isEmpty()) {
+                    CardCstBatch cardCstBatchParamRecharge = new CardCstBatch();
+                    cardCstBatchParamRecharge.setCardId(cardId);
+                    cardCstBatchParamRecharge.setExpDate(expDate);
+                    cardCstBatchParamRecharge.setRechargeNum(totalNum);
+                    cardCstBatchParamRecharge.setCstCodeList(updateCardBatchTotalNumList);
+                    cardCstBatchParamRecharge.setProNum(card.getProNum());
+                    cardCstBatchParamRecharge.setUpdateTime(new Date());
+                    cardCstBatchParamRecharge.setUpdateBy(userId);
+                    cardCstBatchDaoMapper.batchRecharge(cardCstBatchParamRecharge);
+                    logger.info("卡充值成功:" + JSONObject.toJSONString(updateCardBatchTotalNumList));
+                }
+
+                // 新增账单
+                if(!cardCstBillList1.isEmpty()) {
+                    cardCstBillDaoMapper.insertList(cardCstBillList1);
+                    logger.info("新增卡账单成功:" + JSONObject.toJSONString(cardCstBillList1));
                 }
             }
-            if(!cstCodes.isEmpty()) {
-                CardCstBatch cardCstBatchParamRecharge = new CardCstBatch();
-                cardCstBatchParamRecharge.setCardId(cardId);
-                cardCstBatchParamRecharge.setExpDate(expDate);
-                cardCstBatchParamRecharge.setRechargeNum(totalNum);
-                cardCstBatchParamRecharge.setCstCodeList(cstCodes);
-                cardCstBatchParamRecharge.setProNum(card.getProNum());
-                cardCstBatchParamRecharge.setUpdateTime(new Date());
-                cardCstBatchParamRecharge.setUpdateBy(userId);
-                cardCstBatchDaoMapper.batchRecharge(cardCstBatchParamRecharge);
-                logger.info("卡充值成功:" + JSONObject.toJSONString(cstCodes));
-            }else {
-                logger.info("卡充值错误:没有符合充值条件的客户");
-            }
-
-            // 插入卡账单数据
-            if(!cardCstBillList.isEmpty()) {
-                cardCstBillDaoMapper.insertList(cardCstBillList);
-                logger.info("卡账单插入成功:" + JSONObject.toJSONString(cardCstBillList));
-            }
         }
-
-        AjaxResult ajaxResult = new AjaxResult();
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;
     }
 
     @Override
-    public AjaxResult cardRecharge(CardCst cardCst, String userId) {
-        CardCst cc = cardCstDaoMapper.getById(cardCst.getId());
-        if(cc != null && cc.getIsExp() == 1){
-            CardCstBatch cardCstBatch = new CardCstBatch();
-            cardCstBatch.setProNum(cc.getProNum());
-            cardCstBatch.setCardType(cc.getCardType());
-            cardCstBatch.setCardId(cc.getCardId());
-            cardCstBatch.setCardCode(cc.getCardCode());
-            cardCstBatch.setCstCode(cc.getCstCode());
-            cardCstBatch.setExpDate(cardCst.getExpDate());
-            cardCstBatch.setRechargeNum(cardCst.getRechargeNum());
-            cardCstBatch.setUpdateTime(new Date());
-            cardCstBatch.setUpdateBy(userId);
-            cardCstBatchDaoMapper.recharge(cardCstBatch);
-            logger.info("充值成功:"+ JSONObject.toJSONString(cc));
-
-            CardCstBill cardCstBill = new CardCstBill();
-            cardCstBill.setId(TimestampGenerator.generateSerialNumber());
-            cardCstBill.setProNum(cc.getProNum());
-            cardCstBill.setCardType(cc.getCardType());
-            cardCstBill.setCardId(cc.getCardId());
-            cardCstBill.setCardCode(cc.getCardCode());
-            cardCstBill.setCstCode(cc.getCstCode());
-            cardCstBill.setBillNum(cardCst.getRechargeNum());
-            cardCstBill.setBillType(1);
-            cardCstBill.setCreateTime(new Date());
-            cardCstBill.setCreateBy(userId);
-            cardCstBill.setUpdateTime(new Date());
-            cardCstBill.setUpdateBy(userId);
-            cardCstBill.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-            cardCstBillDaoMapper.save(cardCstBill);
-            logger.info("卡账单插入成功:" + JSONObject.toJSONString(cardCstBill));
-        }
+    public AjaxResult cardRecharge(CardCst cardCstReq, String userId) {
         AjaxResult ajaxResult = new AjaxResult();
+        ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.CARD_RECHARGE_MAX_NUM);
+        Integer maxNum = Integer.valueOf(constantConfig.getConfigValue());
+        Integer rechargeNum = cardCstReq.getRechargeNum();
+        if(rechargeNum > maxNum){
+            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+            ajaxResult.setMessage("充值数不能大于" + maxNum);
+            return ajaxResult;
+        }
+        CardCst cardCst = cardCstDaoMapper.getById(cardCstReq.getId());
+        Card card = cardDaoMapper.getById(cardCst.getCardId());
+        Integer cardId = Integer.valueOf(card.getId());
+        CardCstBatch cardCstBatchPram = new CardCstBatch();
+        cardCstBatchPram.setCardCode(cardCst.getCardCode());
+        cardCstBatchPram.setExpDate(cardCstReq.getExpDate());
+        List<CardCstBatch> cardCstBatchList = cardCstBatchDaoMapper.getList(cardCstBatchPram);
+        // 充值前校验，充值年月在卡批次中直接充值
+        if(!cardCstBatchList.isEmpty()){
+            if(cardCst != null && cardCst.getIsExp() == 1){
+                CardCstBatch cardCstBatch = new CardCstBatch();
+                cardCstBatch.setProNum(cardCst.getProNum());
+                cardCstBatch.setCardType(cardCst.getCardType());
+                cardCstBatch.setCardId(cardCst.getCardId());
+                cardCstBatch.setCardCode(cardCst.getCardCode());
+                cardCstBatch.setCstCode(cardCst.getCstCode());
+                cardCstBatch.setExpDate(cardCstReq.getExpDate());
+                cardCstBatch.setRechargeNum(rechargeNum);
+                cardCstBatch.setUpdateTime(new Date());
+                cardCstBatch.setUpdateBy(userId);
+                cardCstBatchDaoMapper.recharge(cardCstBatch);
+                logger.info("充值成功:"+ JSONObject.toJSONString(cardCst));
+                // 新增卡账单
+                saveCardCstBill(card.getProNum(),card.getType(),cardCst.getCardCode(),cardCst.getCstCode(),cardId,userId,rechargeNum);
+
+            }
+        }else {
+            // 充值年月不在卡批次中,新增卡批次、账单
+            // 新增卡批次
+            CardCstBatch batch = new CardCstBatch();
+            batch.setId(TimestampGenerator.generateSerialNumber());
+            batch.setProNum(card.getProNum());
+            batch.setCardType(card.getType());
+            batch.setCardId(cardId);
+            batch.setCardCode(cardCst.getCardCode());
+            batch.setCstCode(cardCst.getCstCode());
+            batch.setTotalNum(rechargeNum);
+            batch.setApplyNum(0);
+            batch.setExpDate(cardCstReq.getExpDate());
+            batch.setCreateTime(new Date());
+            batch.setCreateBy("");
+            batch.setUpdateTime(new Date());
+            batch.setUpdateBy("");
+            batch.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+            List<CardCstBatch> cstBatchList = new ArrayList<>();
+            cstBatchList.add(batch);
+            cardCstBatchDaoMapper.insertList(cstBatchList);
+            logger.info("新增卡批次成功:"+ JSONObject.toJSONString(cstBatchList));
+            // 新增卡账单
+            saveCardCstBill(card.getProNum(),card.getType(),cardCst.getCardCode(),cardCst.getCstCode(),cardId,userId,rechargeNum);
+        }
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;
     }
+
+    public void saveCardCstBill(String proNum, Integer cardType, String cardCode, String cstCode, Integer cardId, String userId, Integer rechargeNum){
+        CardCstBill cardCstBill = new CardCstBill();
+        cardCstBill.setId(TimestampGenerator.generateSerialNumber());
+        cardCstBill.setProNum(proNum);
+        cardCstBill.setCardType(cardType);
+        cardCstBill.setCardId(cardId);
+        cardCstBill.setCardCode(cardCode);
+        cardCstBill.setCstCode(cstCode);
+        cardCstBill.setBillNum(rechargeNum);
+        cardCstBill.setBillType(1);
+        cardCstBill.setCreateTime(new Date());
+        cardCstBill.setCreateBy(userId);
+        cardCstBill.setUpdateTime(new Date());
+        cardCstBill.setUpdateBy(userId);
+        cardCstBill.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+        List<CardCstBill> cardCstBillList = new ArrayList<>();
+        cardCstBillList.add(cardCstBill);
+        cardCstBillDaoMapper.insertList(cardCstBillList);
+        logger.info("新增卡账单成功:" + JSONObject.toJSONString(cardCstBillList));
+    }
+
+    public List<CardCstBill> addCardCstBill(List<CardCstBill> cardCstBillList, String proNum, Integer cardType, String cardCode, String cstCode, Integer cardId, String userId, Integer rechargeNum){
+        CardCstBill cardCstBill = new CardCstBill();
+        cardCstBill.setId(TimestampGenerator.generateSerialNumber());
+        cardCstBill.setProNum(proNum);
+        cardCstBill.setCardType(cardType);
+        cardCstBill.setCardId(cardId);
+        cardCstBill.setCardCode(cardCode);
+        cardCstBill.setCstCode(cstCode);
+        cardCstBill.setBillNum(rechargeNum);
+        cardCstBill.setBillType(1);
+        cardCstBill.setCreateTime(new Date());
+        cardCstBill.setCreateBy(userId);
+        cardCstBill.setUpdateTime(new Date());
+        cardCstBill.setUpdateBy(userId);
+        cardCstBill.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+        cardCstBillList.add(cardCstBill);
+        return cardCstBillList;
+    }
+
+    public List<CardCstBatch> addCardCstBatch(List<CardCstBatch> cardCstBatchList, String proNum, Integer cardType, String cardCode, String cstCode, Integer cardId, String userId, Integer totalNum, String expDate){
+        CardCstBatch batch = new CardCstBatch();
+        batch.setId(TimestampGenerator.generateSerialNumber());
+        batch.setProNum(proNum);
+        batch.setCardType(cardType);
+        batch.setCardId(cardId);
+        batch.setCardCode(cardCode);
+        batch.setCstCode(cstCode);
+        batch.setTotalNum(totalNum);
+        batch.setApplyNum(0);
+        batch.setExpDate(expDate);
+        batch.setCreateTime(new Date());
+        batch.setCreateBy("");
+        batch.setUpdateTime(new Date());
+        batch.setUpdateBy("");
+        batch.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+        cardCstBatchList.add(batch);
+        return cardCstBatchList;
+    }
+
+    public List<CardCstBatch> savaCardBatch(List<CardCstBatch> cardCstBatchListByCardIdAndExpDate, List<CardCstBatch> cardCstBatchList, Card card, String cstCode, String expDate, String cardCode, Integer cardId){
+        // 新增卡批次
+        CardCstBatch batch = new CardCstBatch();
+        batch.setId(TimestampGenerator.generateSerialNumber());
+        batch.setProNum(card.getProNum());
+        batch.setCardType(card.getType());
+        batch.setCardId(cardId);
+        batch.setCardCode(cardCode);
+        batch.setCstCode(cstCode);
+        batch.setTotalNum(0);
+        batch.setApplyNum(0);
+        batch.setExpDate(expDate);
+        batch.setCreateTime(new Date());
+        batch.setCreateBy("");
+        batch.setUpdateTime(new Date());
+        batch.setUpdateBy("");
+        batch.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+        // 根据客户编号查询发卡批次客户
+        List<CardCstBatch> cardCstBatchListByCardIdAndExpDateFilter = cardCstBatchListByCardIdAndExpDate.stream().filter(cardCstBatch -> cardCstBatch.getCstCode().equals(cstCode)).collect(Collectors.toList());
+        // 如果未查到卡批次，添加卡批次集合
+        if (cardCstBatchListByCardIdAndExpDateFilter.isEmpty()) {
+            cardCstBatchList.add(batch);
+        }
+        return cardCstBatchList;
+    }
+
 }

@@ -26,6 +26,8 @@ public class CardCstBill {
 
     private Integer billType;
 
+    private String wxOpenId;
+
     private String createBy;
 
     private String updateBy;
@@ -52,4 +54,5 @@ public class CardCstBill {
 
     private String userName;
 
+    private String intoName;
 }

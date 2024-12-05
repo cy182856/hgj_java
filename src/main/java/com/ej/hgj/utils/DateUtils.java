@@ -36,6 +36,7 @@ public abstract class DateUtils {
     public static SimpleDateFormat sdfYmdHms = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public static SimpleDateFormat sdf_Ymd = new SimpleDateFormat("yyyy-MM-dd");
     public static SimpleDateFormat sdfYmd = new SimpleDateFormat("yyyyMMdd");
+    public static SimpleDateFormat sdfY = new SimpleDateFormat("yyyy");
 
     // 获取系统时间 年月日时分秒
     public static String strYmdHms(){
@@ -52,6 +53,11 @@ public abstract class DateUtils {
     public static String strYmd(){
         String ymd = DateUtils.sdfYmd.format(new Date());
         return ymd;
+    }
+
+    public static String strY(){
+        String y = DateUtils.sdfY.format(new Date());
+        return y;
     }
 
     public static Date getNow() {

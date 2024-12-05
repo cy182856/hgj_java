@@ -165,4 +165,7 @@ public class Constant {
 
     // 智慧管家超过N天未入住的删除入住信息
     public static String NOT_CST_INTO_DELETE_DAY = "not_cst_into_delete_day";
+
+    // 卡充值最大数限制
+    public static String CARD_RECHARGE_MAX_NUM = "card_recharge_max_num";
 }

@@ -4,6 +4,7 @@ import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.cstInto.CstIntoDaoMapper;
 import com.ej.hgj.dao.cstInto.CstIntoHouseDaoMapper;
+import com.ej.hgj.dao.house.HgjHouseDaoMapper;
 import com.ej.hgj.dao.identity.IdentityDaoMapper;
 import com.ej.hgj.entity.cstInto.CstInto;
 import com.ej.hgj.entity.cstInto.CstIntoHouse;
@@ -56,6 +57,9 @@ public class CstIntoController {
 
     @Autowired
     private SyHouseDaoMapper syHouseDaoMapper;
+
+    @Autowired
+    private HgjHouseDaoMapper hgjHouseDaoMapper;
 
     @Autowired
     private IdentityDaoMapper identityDaoMapper;
@@ -114,7 +118,8 @@ public class CstIntoController {
             List<String> houseList = new ArrayList<>();
             HgjHouse hgjHouse = new HgjHouse();
             hgjHouse.setCstCode(cst.getCstCode());
-            List<HgjHouse> hgjHouseList = syHouseDaoMapper.getListByCstCode(hgjHouse);
+           // List<HgjHouse> hgjHouseList = syHouseDaoMapper.getListByCstCode(hgjHouse);
+            List<HgjHouse> hgjHouseList = hgjHouseDaoMapper.getListByCstCode(hgjHouse);
             if(!hgjHouseList.isEmpty()){
                 for(HgjHouse house : hgjHouseList){
                     houseList.add(house.getResName());

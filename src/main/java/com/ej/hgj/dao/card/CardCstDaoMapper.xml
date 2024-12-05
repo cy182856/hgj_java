@@ -40,7 +40,7 @@
             select
             a.*,s.cst_name, pc.project_name as pro_name, ca.name as card_name, d.name as card_type_name,
             (select sum(total_num)-sum(apply_num) from t_card_cst_batch
-            where cst_code = a.cst_code and card_id = a.card_id and card_type = 1
+            where cst_code = a.cst_code and card_id = a.card_id and card_type = 1 and card_code = a.card_code and delete_flag = 0
             <if test="startYear != null and startYear != ''">
               and exp_date >= #{startYear}
             </if>
@@ -81,7 +81,7 @@
             select
             a.*,s.cst_name, pc.project_name as pro_name, ca.name as card_name, d.name as card_type_name,
             (select sum(total_num)-sum(apply_num) from t_card_cst_batch
-            where cst_code = a.cst_code and card_id = a.card_id and card_type = 2
+            where cst_code = a.cst_code and card_id = a.card_id and card_type = 2 and card_code = a.card_code and delete_flag = 0
             <if test="startYearMonth != null and startYearMonth != ''">
                 and exp_date >= #{startYearMonth}
             </if>
@@ -126,6 +126,7 @@
         </if>
         order by t.card_type
     </select>
+
 
     <!-- 批量插入-->
     <insert id="insertList" parameterType="java.util.List">

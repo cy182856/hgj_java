@@ -105,25 +105,26 @@ public class CstController {
             }
         }
         cst.setProNumList(proNumList);
-        List<Tag> tagList = tagDaoMapper.getCstTag(new Tag());
+        //List<Tag> tagList = tagDaoMapper.getCstTag(new Tag());
         HashMap map = new HashMap();
         PageHelper.offsetPage((page-1) * limit,limit);
         List<HgjCst> list = cstService.getList(cst);
         //logger.info("list:"+ JSON.toJSONString(list));
         for(HgjCst hgjCst : list){
-            List<Tag> tagListFilter = tagList.stream().filter(tag -> tag.getCstCode() != null && tag.getCstCode().equals(hgjCst.getCode())).collect(Collectors.toList());
-            hgjCst.setTagList(tagListFilter);
+            //List<Tag> tagListFilter = tagList.stream().filter(tag -> tag.getCstCode() != null && tag.getCstCode().equals(hgjCst.getCode())).collect(Collectors.toList());
+            //hgjCst.setTagList(tagListFilter);
             // 查询客户所有房间号
-            List<String> houseList = new ArrayList<>();
-            HgjHouse hgjHouse = new HgjHouse();
-            hgjHouse.setCstCode(hgjCst.getCode());
-            List<HgjHouse> hgjHouseList = syHouseDaoMapper.getListByCstCode(hgjHouse);
-            if(!hgjHouseList.isEmpty()){
-                for(HgjHouse house : hgjHouseList){
-                    houseList.add(house.getResName());
-                }
-            }
-            hgjCst.setHouseList(houseList);
+//            List<String> houseList = new ArrayList<>();
+//            HgjHouse hgjHouse = new HgjHouse();
+//            hgjHouse.setCstCode(hgjCst.getCode());
+            //List<HgjHouse> hgjHouseList = syHouseDaoMapper.getListByCstCode(hgjHouse);
+//            List<HgjHouse> hgjHouseList = hgjHouseDaoMapper.getListByCstCode(hgjHouse);
+//            if(!hgjHouseList.isEmpty()){
+//                for(HgjHouse house : hgjHouseList){
+//                    houseList.add(house.getResName());
+//                }
+//            }
+//            hgjCst.setHouseList(houseList);
 
             // 查询客户是否被注册
             Integer intoStatus = hgjCst.getIntoStatus();
@@ -206,7 +207,9 @@ public class CstController {
             // 租户、产权人查询该客户所有房间
                 HgjHouse hgjHouse = new HgjHouse();
                 hgjHouse.setCstCode(intoVo.getCstCode());
-                List<HgjHouse> list = syHouseDaoMapper.getListByCstCode(hgjHouse);
+                //List<HgjHouse> list = syHouseDaoMapper.getListByCstCode(hgjHouse);
+                List<HgjHouse> list = hgjHouseDaoMapper.getListByCstCode(hgjHouse);
+
                 if(!list.isEmpty()){
                     for(HgjHouse house : list){
                         houseList.add(house.getResName());

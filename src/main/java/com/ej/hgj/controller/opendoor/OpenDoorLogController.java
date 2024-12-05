@@ -37,7 +37,7 @@ public class OpenDoorLogController {
         AjaxResult ajaxResult = new AjaxResult();
         HashMap map = new HashMap();
         List<OpenDoorLog> openDoorLogList = openDoorLogDaoMapper.getByCardNoList(cardNo);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault());
         for(OpenDoorLog doorLog : openDoorLogList) {
             // 时间转换
             Long eventTime = doorLog.getEventTime();

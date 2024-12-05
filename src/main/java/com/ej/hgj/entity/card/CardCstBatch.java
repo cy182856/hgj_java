@@ -51,4 +51,5 @@ public class CardCstBatch {
 
     private List<String> cstCodeList;
 
+
 }

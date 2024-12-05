@@ -317,7 +317,8 @@ public class QnController {
                         // 租户、产权人查询该客户所有房间
                         HgjHouse hgjHouse = new HgjHouse();
                         hgjHouse.setCstCode(cstInto.getCstCode());
-                        List<HgjHouse> list = syHouseDaoMapper.getListByCstCode(hgjHouse);
+                        //List<HgjHouse> list = syHouseDaoMapper.getListByCstCode(hgjHouse);
+                        List<HgjHouse> list = hgjHouseDaoMapper.getListByCstCode(hgjHouse);
                         if(!list.isEmpty()){
                             for(HgjHouse house : list){
                                 houseList.add(house.getResName());

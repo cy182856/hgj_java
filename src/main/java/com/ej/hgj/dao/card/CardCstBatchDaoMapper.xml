@@ -30,7 +30,7 @@
         select
         <include refid="Base_Column_List" />
         from t_card_cst_batch
-        where id = #{id}
+        where id = #{id} and delete_flag = 0
     </select>
 
     <!-- 查询列表-->
@@ -59,6 +59,12 @@
         </if>
         <if test="endTime != null and endTime != ''">
             and end_time &lt;= #{endTime,jdbcType=VARCHAR}
+        </if>
+        <if test="cstCodeList != null and cstCodeList.size() > 0">
+            and cst_code in
+            <foreach collection="cstCodeList" item="cstCode" index="index" open="(" close=")" separator=",">
+                #{cstCode,jdbcType=VARCHAR}
+            </foreach>
         </if>
         order by update_time desc
     </select>
@@ -148,5 +154,15 @@
         and card_code = #{cardCode,jdbcType=VARCHAR}
     </update>
 
+    <!-- 删除-->
+    <update id="deleteByExpDate" parameterType="java.lang.String" >
+        update
+            t_card_cst_batch
+        <set>
+            delete_flag = 1,
+            update_time = NOW(),
+        </set>
+        where SUBSTR(exp_date,1,4) = #{expDate}
+    </update>
 
 </mapper>

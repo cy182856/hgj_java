@@ -20,6 +20,9 @@
         <result column="project_name" jdbcType="VARCHAR" property="projectName"/>
         <result column="into_status" jdbcType="INTEGER" property="intoStatus"/>
         <result column="card_total_num" jdbcType="INTEGER" property="cardTotalNum"/>
+        <result column="cst_tag" jdbcType="VARCHAR" property="cstTag"/>
+        <result column="res_name" jdbcType="VARCHAR" property="resName"/>
+        <result column="card_code" jdbcType="VARCHAR" property="cardCode"/>
     </resultMap>
     <sql id="Base_Column_List" >
         id, org_id, code, cst_name, cst_type, cst_level, is_affect, contract_character, cer_type, cer_no, lic_no, mobile, create_time, update_time
@@ -29,6 +32,13 @@
         <include refid="Base_Column_List" />
         from s_cst where code=#{cstCode}
     </select>
+
+    <select id="findByProNum" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from s_cst where org_id=#{proNum}
+    </select>
+
     <insert id="insertList" parameterType="java.util.List">
         insert into s_cst (
         id, org_id, code, cst_name, cst_type, cst_level, is_affect, create_time, update_time
@@ -60,22 +70,48 @@
             select
             cst.*,p.project_name,
             (
-            select max(into_status)
-            from t_cst_into
-            where delete_flag = 0
-            and cst_code = cst.`code`
-            and into_status = 1
+                select max(into_status)
+                from t_cst_into
+                where delete_flag = 0
+                and cst_code = cst.`code`
+                and into_status = 1
             ) as into_status,
             (
-            select count(id)
-            from t_card_cst
-            where delete_flag = 0
-            and cst_code = cst.`code`
+                select count(id)
+                from t_card_cst
+                where delete_flag = 0
+                and cst_code = cst.`code`
                 <if test="cardType != null">
                     and card_type = #{cardType,jdbcType=INTEGER}
                 </if>
-            ) as card_total_num
-            from s_cst cst left join t_pro_config p on cst.org_id = p.project_num
+            ) as card_total_num,
+            (
+                select GROUP_CONCAT(card_code SEPARATOR ',')
+                from t_card_cst
+                where delete_flag = 0
+                and cst_code = cst.`code`
+            ) as card_code,
+            (
+                select GROUP_CONCAT(b.`name` SEPARATOR ',')
+                from t_tag_cst a
+                left join t_tag b on b.id = a.tag_id
+                where a.cst_code = cst.code
+            ) as cst_tag,
+            (
+                select
+                    GROUP_CONCAT(t.res_name SEPARATOR ',')
+                from
+                (
+                    select
+                        hu.*
+                    from s_rcr rcr
+                    left join s_contract con on con.id = rcr.ctt_id
+                    left join s_house hu on hu.id = rcr.res_id
+                    where rcr.is_affect = 1 and rcr.cst_id in ( select id from s_cst where code = cst.code)
+                ) t
+                order by t.res_code
+            ) as res_name
+        from s_cst cst left join t_pro_config p on cst.org_id = p.project_num
             where 1 = 1
             <if test="code != null">
                 and cst.code like CONCAT('%', #{code,jdbcType=VARCHAR},'%') ESCAPE '/'
@@ -112,7 +148,20 @@
         <if test="sendCardStatus == 0">
             and card_total_num = 0
         </if>
+        <if test="cstTag != null and cstTag != ''">
+            and cst_tag like CONCAT('%', #{cstTag,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="resName != null and resName != ''">
+            and res_name like CONCAT('%', #{resName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="cardCode != null and cardCode != ''">
+            and card_code like CONCAT('%', #{cardCode,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
     </select>
+
+
+
+
 
     <!-- 根据资源ID查询客户名称-->
 <!--    <select id="getCstNameByResId" resultMap="BaseMap" parameterType="java.lang.String" >-->

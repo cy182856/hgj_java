@@ -24,4 +24,7 @@ public interface CardCstBatchDaoMapper {
 
     void recharge(CardCstBatch cardCstBatch);
 
+    void deleteByExpDate(String expDate);
+
+
 }

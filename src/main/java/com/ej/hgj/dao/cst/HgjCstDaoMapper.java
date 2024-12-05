@@ -24,6 +24,8 @@ public interface HgjCstDaoMapper {
 
     List<HgjCst> getList(HgjCst hgjCst);
 
+    List<HgjCst> findByProNum(String proNum);
+
     // HgjCst getCstNameByResId(String resId);
 
 

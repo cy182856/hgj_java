@@ -64,4 +64,9 @@ public class HgjCst {
 
     private Integer sendCardStatus;
 
+    private String cstTag;
+
+    private String resName;
+
+    private String cardCode;
 }

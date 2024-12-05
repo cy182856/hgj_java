@@ -260,4 +260,29 @@
         </if>
     </select>
 
+    <!-- 根据客户编号查询房屋列表-->
+    <select id="getListByCstCode" resultMap="BaseMap" parameterType="com.ej.hgj.entity.house.HgjHouse" >
+        select
+        <include refid="Base_Column_List" />
+        from(
+                select
+                    hu.*
+                from
+                    s_rcr rcr
+                        left join s_contract con on con.id = rcr.ctt_id
+                        left join s_house hu on hu.id = rcr.res_id
+                where
+                    rcr.is_affect = 1
+                    and rcr.cst_id in (
+                        select
+                            id
+                        from
+                            s_cst
+                        where
+                            code = #{cstCode,jdbcType=VARCHAR}
+                    )
+            ) t
+        order by t.res_code
+    </select>
+
 </mapper>

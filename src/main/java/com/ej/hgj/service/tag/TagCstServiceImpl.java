@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,10 +44,13 @@ public class TagCstServiceImpl implements TagCstService {
         List<TagCst> tagCstList = new ArrayList<>();
         // 选择客户
         if(cstCodes != null){
+            // 对已选择的客户编号去重复
+            Set<String> setCstCodes = new HashSet<>(cstCodes);
+            List<String> cstCodeList = new ArrayList<>(setCstCodes);
             List<HgjCst> cstList = hgjCstDaoMapper.getList(new HgjCst());
-            for(int i = 0; i<cstCodes.size(); i++){
+            for(int i = 0; i<cstCodeList.size(); i++){
                 TagCst tagCst = new TagCst();
-                String cstCode = cstCodes.get(i);
+                String cstCode = cstCodeList.get(i);
                 tagCst.setId(TimestampGenerator.generateSerialNumber());
                 tagCst.setTagId(tagId);
                 tagCst.setCstCode(cstCode);

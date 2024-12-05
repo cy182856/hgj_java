@@ -11,6 +11,7 @@
         <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
         <result column="bill_num" jdbcType="INTEGER" property="billNum"/>
         <result column="bill_type" jdbcType="INTEGER" property="billType"/>
+        <result column="wx_open_id" jdbcType="VARCHAR" property="wxOpenId"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -21,10 +22,11 @@
         <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
         <result column="card_type_name" jdbcType="VARCHAR" property="cardTypeName"/>
         <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="into_name" jdbcType="VARCHAR" property="intoName"/>
 
     </resultMap>
     <sql id="Base_Column_List" >
-        id, pro_num, card_type, card_id, card_code, cst_code, bill_num, bill_type, create_time, update_time, create_by, update_by, delete_flag
+        id, pro_num, card_type, card_id, card_code, cst_code, bill_num, bill_type, wx_open_id, create_time, update_time, create_by, update_by, delete_flag
     </sql>
 
     <!-- 根据卡号项目号查询游泳卡当天扣减记录-->
@@ -38,12 +40,13 @@
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.card.CardCstBill">
         select
-        a.*,b.project_name as pro_name,d.cst_name,c.name as card_type_name,e.user_name
+        a.*,b.project_name as pro_name,d.cst_name,c.name as card_type_name,e.user_name,f.user_name as into_name
         from t_card_cst_bill a
             left join t_pro_config b on b.project_num = a.pro_num
             left join t_card_type c on c.id = a.card_type
             left join s_cst d on d.`code` = a.cst_code
-            left join t_user e on e.user_id = a.create_by
+            left join t_user e on e.user_id = a.create_by and e.delete_flag = 0
+            left join t_cst_into f on f.wx_open_id = a.wx_open_id and f.delete_flag = 0 and f.into_status = 1
         where a.delete_flag = 0
         <if test="proNum != null and proNum != ''">
             and a.pro_num = #{proNum}
@@ -73,7 +76,7 @@
     <!-- 批量插入-->
     <insert id="insertList" parameterType="java.util.List">
         insert into t_card_cst_bill (
-        id, pro_num, card_type, card_id, card_code, cst_code, bill_num, bill_type, create_time, update_time, create_by, update_by, delete_flag
+        id, pro_num, card_type, card_id, card_code, cst_code, bill_num, bill_type, wx_open_id, create_time, update_time, create_by, update_by, delete_flag
         )
         VALUES
         <foreach collection="list" item="item" separator=",">
@@ -86,6 +89,7 @@
             #{item.cstCode,jdbcType=VARCHAR},
             #{item.billNum,jdbcType=INTEGER},
             #{item.billType,jdbcType=INTEGER},
+            #{item.wxOpenId,jdbcType=VARCHAR},
             #{item.createTime,jdbcType=TIMESTAMP},
             #{item.updateTime,jdbcType=TIMESTAMP},
             #{item.createBy,jdbcType=VARCHAR},
@@ -121,6 +125,9 @@
         </if>
         <if test="billType != null">
             bill_type,
+        </if>
+        <if test="wxOpenId != null">
+            wx_open_id,
         </if>
         <if test="createTime != null">
             create_time,
@@ -162,6 +169,9 @@
             </if>
             <if test="billType != null" >
                 #{billType,jdbcType=INTEGER},
+            </if>
+            <if test="wxOpenId != null">
+                #{wxOpenId,jdbcType=VARCHAR},
             </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},

@@ -14,7 +14,7 @@ public interface SyHouseDaoMapper {
 
     List<HgjHouse> getList();
 
-    List<HgjHouse> getListByCstCode(HgjHouse hgjHouse);
+    //List<HgjHouse> getListByCstCode(HgjHouse hgjHouse);
 
 
 }

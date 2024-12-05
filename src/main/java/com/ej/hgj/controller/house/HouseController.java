@@ -77,7 +77,8 @@ public class HouseController {
         HashMap map = new HashMap();
         HgjHouse hgjHouse = new HgjHouse();
         hgjHouse.setCstCode(cstCode);
-        List<HgjHouse> list = syHouseDaoMapper.getListByCstCode(hgjHouse);
+        //List<HgjHouse> list = syHouseDaoMapper.getListByCstCode(hgjHouse);
+        List<HgjHouse> list = hgjHouseDaoMapper.getListByCstCode(hgjHouse);
         map.put("list",list);
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);

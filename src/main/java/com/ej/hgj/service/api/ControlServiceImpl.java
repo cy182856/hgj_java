@@ -114,29 +114,34 @@ public class ControlServiceImpl implements ControlService {
 
             // 2-进门
             if(isUnlock == 2){
+                // 根据卡号、event_time分组查询开门记录
+                OpenDoorLog od = new OpenDoorLog();
+                od.setCardNo(cardNo);
+                od.setEventTime(eventTime);
+                List<OpenDoorLog> openDoorLogList = openDoorLogDaoMapper.getByCardNoAndEventTime(od);
                 // 需要扣次数的设备号
                 // ConstantConfig configDeviceNo = constantConfDaoMapper.getByKey(Constant.SWIM_DEVICE_NO);
                 // if(configDeviceNo.getConfigValue().equals(deviceNo)){
                     // 游泳卡开门后次数扣减
                     CardQrCode cardQrCodeParam = new CardQrCode();
                     cardQrCodeParam.setCardNo(cardNo);
-                    cardQrCodeParam.setIsExp(1);
+                    //cardQrCodeParam.setIsExp(1);
                     // 根据卡号查询游泳卡二维码记录
                     List<CardQrCode> list = cardQrCodeDaoMapper.getList(cardQrCodeParam);
-                    if(!list.isEmpty()){
+                    if(!list.isEmpty() && openDoorLogList != null && openDoorLogList.size() == 1){
                         CardQrCode cardQrCode = list.get(0);
                         CardCstBatch cardCstBatch = cardCstBatchDaoMapper.getById(cardQrCode.getCardCstBatchId());
                         // 根据卡号项目号查询账单当天扣减记录
                         //CardCstBill cardCstBill = cardCstBillDaoMapper.getByCardCodeAndProNum(cardCstBatch.getCardCode(),cardCstBatch.getProNum());
                         // 总次数
-                        Integer totalNum = cardCstBatch.getTotalNum();
+                        //Integer totalNum = cardCstBatch.getTotalNum();
                         // 已用次数
                         Integer applyNum = cardCstBatch.getApplyNum();
                         // 剩余可用次数
-                        Integer expNum = totalNum - applyNum;
+                        //Integer expNum = totalNum - applyNum;
                         // 剩余可用次数大于等于1，并且当天没扣减过
                         //if(expNum >= 1 && cardCstBill == null){
-                        if(expNum >= 1){
+                        //if(expNum >= 1){
                             // 已用次数 + 1
                             cardCstBatch.setApplyNum(applyNum + 1);
                             cardCstBatch.setUpdateTime(new Date());
@@ -152,6 +157,7 @@ public class ControlServiceImpl implements ControlService {
                             cardCstBillInsert.setCstCode(cardCstBatch.getCstCode());
                             cardCstBillInsert.setBillNum(-1);
                             cardCstBillInsert.setBillType(2);
+                            cardCstBillInsert.setWxOpenId(cardQrCode.getWxOpenId());
                             cardCstBillInsert.setCreateTime(new Date());
                             cardCstBillInsert.setCreateBy("");
                             cardCstBillInsert.setUpdateTime(new Date());
@@ -159,7 +165,7 @@ public class ControlServiceImpl implements ControlService {
                             cardCstBillInsert.setDeleteFlag(Constant.DELETE_FLAG_NOT);
                             cardCstBillDaoMapper.save(cardCstBillInsert);
                             logger.info("门禁回调，卡账单插入成功:" + JSONObject.toJSONString(cardCstBillInsert));
-                        }
+                        //}
 
                         // 当天同一张卡进门超过N次，调用接口删除二维码，将二维码改为失效
                         //List<OpenDoorLog> byCardNoAndIsUnlock = openDoorLogDaoMapper.getByCardNoAndIsUnlock(cardNo, configDeviceNo.getConfigValue());
