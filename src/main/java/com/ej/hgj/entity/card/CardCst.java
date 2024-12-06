@@ -69,4 +69,8 @@ public class CardCst {
 
     private String expDate;
 
+    private String startExpDate;
+
+    private String endExpDate;
+
 }

@@ -150,6 +150,7 @@ public class ControlServiceImpl implements ControlService {
                             // 新增卡账单扣减记录
                             CardCstBill cardCstBillInsert = new CardCstBill();
                             cardCstBillInsert.setId(TimestampGenerator.generateSerialNumber());
+                            cardCstBillInsert.setCardCstBatchId(cardCstBatch.getId());
                             cardCstBillInsert.setProNum(cardCstBatch.getProNum());
                             cardCstBillInsert.setCardType(cardCstBatch.getCardType());
                             cardCstBillInsert.setCardId(cardCstBatch.getCardId());

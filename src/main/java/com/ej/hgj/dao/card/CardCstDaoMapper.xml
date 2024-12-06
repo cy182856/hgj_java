@@ -35,87 +35,47 @@
     </select>
 
     <!-- 查询列表-->
+
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.card.CardCst">
         select t.* from(
-            select
-            a.*,s.cst_name, pc.project_name as pro_name, ca.name as card_name, d.name as card_type_name,
-            (select sum(total_num)-sum(apply_num) from t_card_cst_batch
-            where cst_code = a.cst_code and card_id = a.card_id and card_type = 1 and card_code = a.card_code and delete_flag = 0
-            <if test="startYear != null and startYear != ''">
-              and exp_date >= #{startYear}
-            </if>
-            <if test="endYear != null and endYear != ''">
-              and exp_date &lt;= #{endYear}
-            </if>
-                )as exp_num
-            from t_card_cst a
-            left join s_cst s on s.`code` = a.cst_code
-            left join t_pro_config pc on pc.project_num = a.pro_num
-            left join t_card ca on ca.id = a.card_id
-            left join t_card_type d on d.id = ca.type
-            where a.delete_flag = 0 and a.card_type = 1
-            <if test="proNum != null and proNum != ''">
-                and a.pro_num = #{proNum}
-            </if>
-            <if test="cardId!= null and cardId != ''">
-                and a.card_id = #{cardId}
-            </if>
-            <if test="cardCode != null and cardCode != ''">
-                and a.card_code = #{cardCode}
-            </if>
-            <if test="cstCode != null and cstCode != ''">
-                and a.cst_code = #{cstCode}
-            </if>
-            <if test="cstName != null and cstName != ''">
-                and s.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
-            </if>
-            <if test="isExp != null">
-                and a.is_exp = #{isExp}
-            </if>
-            <if test="cardType != null">
-                and a.card_type = #{cardType}
-            </if>
-
-            union
-
-            select
-            a.*,s.cst_name, pc.project_name as pro_name, ca.name as card_name, d.name as card_type_name,
-            (select sum(total_num)-sum(apply_num) from t_card_cst_batch
-            where cst_code = a.cst_code and card_id = a.card_id and card_type = 2 and card_code = a.card_code and delete_flag = 0
-            <if test="startYearMonth != null and startYearMonth != ''">
-                and exp_date >= #{startYearMonth}
-            </if>
-            <if test="endYearMonth != null and endYearMonth != ''">
-                and exp_date &lt;= #{endYearMonth}
-            </if>
-            )as exp_num
-            from t_card_cst a
-            left join s_cst s on s.`code` = a.cst_code
-            left join t_pro_config pc on pc.project_num = a.pro_num
-            left join t_card ca on ca.id = a.card_id
-            left join t_card_type d on d.id = ca.type
-            where a.delete_flag = 0 and a.card_type = 2
-            <if test="proNum != null and proNum != ''">
-                and a.pro_num = #{proNum}
-            </if>
-            <if test="cardId!= null and cardId != ''">
-                and a.card_id = #{cardId}
-            </if>
-            <if test="cardCode != null and cardCode != ''">
-                and a.card_code = #{cardCode}
-            </if>
-            <if test="cstCode != null and cstCode != ''">
-                and a.cst_code = #{cstCode}
-            </if>
-            <if test="cstName != null and cstName != ''">
-                and s.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
-            </if>
-            <if test="isExp != null">
-                and a.is_exp = #{isExp}
-            </if>
-            <if test="cardType != null">
-                and a.card_type = #{cardType}
-            </if>
+        select
+        a.*,s.cst_name, pc.project_name as pro_name, ca.name as card_name, d.name as card_type_name,
+        (select sum(total_num)-sum(apply_num) from t_card_cst_batch
+        where cst_code = a.cst_code and card_id = a.card_id and card_code = a.card_code and delete_flag = 0
+        <if test="startExpDate != null and startExpDate != ''">
+            and exp_date >= #{startExpDate}
+        </if>
+        <if test="endExpDate != null and endExpDate != ''">
+            and exp_date &lt;= #{endExpDate}
+        </if>
+        )as exp_num
+        from t_card_cst a
+        left join s_cst s on s.`code` = a.cst_code
+        left join t_pro_config pc on pc.project_num = a.pro_num
+        left join t_card ca on ca.id = a.card_id
+        left join t_card_type d on d.id = ca.type
+        where a.delete_flag = 0
+        <if test="proNum != null and proNum != ''">
+            and a.pro_num = #{proNum}
+        </if>
+        <if test="cardId!= null and cardId != ''">
+            and a.card_id = #{cardId}
+        </if>
+        <if test="cardCode != null and cardCode != ''">
+            and a.card_code = #{cardCode}
+        </if>
+        <if test="cstCode != null and cstCode != ''">
+            and a.cst_code = #{cstCode}
+        </if>
+        <if test="cstName != null and cstName != ''">
+            and s.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="isExp != null">
+            and a.is_exp = #{isExp}
+        </if>
+        <if test="cardType != null">
+            and a.card_type = #{cardType}
+        </if>
         )t
         where 1=1
         <if test="expNum == 0">
@@ -124,8 +84,100 @@
         <if test="expNum == 1">
             and t.exp_num > 0
         </if>
-        order by t.card_type
+        order by t.card_type asc , t.update_time desc
     </select>
+
+    <!--    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.card.CardCst">-->
+<!--        select t.* from(-->
+<!--            select-->
+<!--            a.*,s.cst_name, pc.project_name as pro_name, ca.name as card_name, d.name as card_type_name,-->
+<!--            (select sum(total_num)-sum(apply_num) from t_card_cst_batch-->
+<!--            where cst_code = a.cst_code and card_id = a.card_id and card_type = 1 and card_code = a.card_code and delete_flag = 0-->
+<!--            <if test="startYear != null and startYear != ''">-->
+<!--              and exp_date >= #{startYear}-->
+<!--            </if>-->
+<!--            <if test="endYear != null and endYear != ''">-->
+<!--              and exp_date &lt;= #{endYear}-->
+<!--            </if>-->
+<!--                )as exp_num-->
+<!--            from t_card_cst a-->
+<!--            left join s_cst s on s.`code` = a.cst_code-->
+<!--            left join t_pro_config pc on pc.project_num = a.pro_num-->
+<!--            left join t_card ca on ca.id = a.card_id-->
+<!--            left join t_card_type d on d.id = ca.type-->
+<!--            where a.delete_flag = 0 and a.card_type = 1-->
+<!--            <if test="proNum != null and proNum != ''">-->
+<!--                and a.pro_num = #{proNum}-->
+<!--            </if>-->
+<!--            <if test="cardId!= null and cardId != ''">-->
+<!--                and a.card_id = #{cardId}-->
+<!--            </if>-->
+<!--            <if test="cardCode != null and cardCode != ''">-->
+<!--                and a.card_code = #{cardCode}-->
+<!--            </if>-->
+<!--            <if test="cstCode != null and cstCode != ''">-->
+<!--                and a.cst_code = #{cstCode}-->
+<!--            </if>-->
+<!--            <if test="cstName != null and cstName != ''">-->
+<!--                and s.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'-->
+<!--            </if>-->
+<!--            <if test="isExp != null">-->
+<!--                and a.is_exp = #{isExp}-->
+<!--            </if>-->
+<!--            <if test="cardType != null">-->
+<!--                and a.card_type = #{cardType}-->
+<!--            </if>-->
+
+<!--            union-->
+
+<!--            select-->
+<!--            a.*,s.cst_name, pc.project_name as pro_name, ca.name as card_name, d.name as card_type_name,-->
+<!--            (select sum(total_num)-sum(apply_num) from t_card_cst_batch-->
+<!--            where cst_code = a.cst_code and card_id = a.card_id and card_type = 2 and card_code = a.card_code and delete_flag = 0-->
+<!--            <if test="startYearMonth != null and startYearMonth != ''">-->
+<!--                and exp_date >= #{startYearMonth}-->
+<!--            </if>-->
+<!--            <if test="endYearMonth != null and endYearMonth != ''">-->
+<!--                and exp_date &lt;= #{endYearMonth}-->
+<!--            </if>-->
+<!--            )as exp_num-->
+<!--            from t_card_cst a-->
+<!--            left join s_cst s on s.`code` = a.cst_code-->
+<!--            left join t_pro_config pc on pc.project_num = a.pro_num-->
+<!--            left join t_card ca on ca.id = a.card_id-->
+<!--            left join t_card_type d on d.id = ca.type-->
+<!--            where a.delete_flag = 0 and a.card_type = 2-->
+<!--            <if test="proNum != null and proNum != ''">-->
+<!--                and a.pro_num = #{proNum}-->
+<!--            </if>-->
+<!--            <if test="cardId!= null and cardId != ''">-->
+<!--                and a.card_id = #{cardId}-->
+<!--            </if>-->
+<!--            <if test="cardCode != null and cardCode != ''">-->
+<!--                and a.card_code = #{cardCode}-->
+<!--            </if>-->
+<!--            <if test="cstCode != null and cstCode != ''">-->
+<!--                and a.cst_code = #{cstCode}-->
+<!--            </if>-->
+<!--            <if test="cstName != null and cstName != ''">-->
+<!--                and s.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'-->
+<!--            </if>-->
+<!--            <if test="isExp != null">-->
+<!--                and a.is_exp = #{isExp}-->
+<!--            </if>-->
+<!--            <if test="cardType != null">-->
+<!--                and a.card_type = #{cardType}-->
+<!--            </if>-->
+<!--        )t-->
+<!--        where 1=1-->
+<!--        <if test="expNum == 0">-->
+<!--            and t.exp_num = 0-->
+<!--        </if>-->
+<!--        <if test="expNum == 1">-->
+<!--            and t.exp_num > 0-->
+<!--        </if>-->
+<!--        order by t.card_type-->
+<!--    </select>-->
 
 
     <!-- 批量插入-->
@@ -229,6 +281,7 @@
         and is_exp = 1
         and pro_num = #{proNum,jdbcType=VARCHAR}
         and card_id = #{cardId,jdbcType=INTEGER}
+        and card_type = #{cardType,jdbcType=INTEGER}
         and cst_code in
         <foreach collection="cstCodeList" item="cstCode" index="index" open="(" close=")" separator=",">
             #{cstCode,jdbcType=VARCHAR}

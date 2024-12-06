@@ -12,6 +12,8 @@ public class CardCstBill {
 
     private String id;
 
+    private String cardCstBatchId;
+
     private String proNum;
 
     private Integer cardType;
@@ -55,4 +57,10 @@ public class CardCstBill {
     private String userName;
 
     private String intoName;
+
+    private String expDate;
+
+    private String startExpDate;
+
+    private String endExpDate;
 }

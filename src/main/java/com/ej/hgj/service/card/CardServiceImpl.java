@@ -174,6 +174,7 @@ public class CardServiceImpl implements CardService {
             cardCst.setProNum(card.getProNum());
             cardCst.setCardId(cardId);
             cardCst.setCstCodeList(cstCodeList);
+            cardCst.setCardType(card.getType());
             List<CardCst> cardCstRechargeList = cardCstDaoMapper.batchRechargeCstList(cardCst);
             // 需要新增卡客户集合
             List<CardCst> cardCstList1 = new ArrayList<>();
@@ -208,14 +209,17 @@ public class CardServiceImpl implements CardService {
                         cardCst2.setDeleteFlag(Constant.DELETE_FLAG_NOT);
                         cardCstList1.add(cardCst2);
                         // 新增卡批次
-                        cardCstBatchList1 = addCardCstBatch(cardCstBatchList1,card.getProNum(),card.getType(),cardCode,cstCode,cardId,userId,totalNum,expDate);
+                        CardCstBatch cardCstBatchAdd1 = addCardCstBatch(card.getProNum(),card.getType(),cardCode,cstCode,cardId,userId,totalNum,expDate);
+                        cardCstBatchList1.add(cardCstBatchAdd1);
                         // 新增账单
-                        cardCstBillList1 = addCardCstBill(cardCstBillList1 ,card.getProNum(),card.getType(),cardCode,cstCode,cardId,userId,totalNum);
-
+                        CardCstBill cardCstBill1 = addCardCstBill(cardCstBatchAdd1.getId(), card.getProNum(),card.getType(),cardCode,cstCode,cardId,userId,totalNum);
+                        cardCstBillList1.add(cardCstBill1);
                     // 有卡处理
                     }else {
-                        // 根据卡ID、年月、客户、项目号查询卡批次
+                        // 根据卡号、类型、有效期、卡ID、项目、客户号集合查询卡批次
                         CardCstBatch cardCstBatch = new CardCstBatch();
+                        cardCstBatch.setCardCode(cardCode);
+                        cardCstBatch.setCardType(card.getType());
                         cardCstBatch.setCardId(cardId);
                         cardCstBatch.setExpDate(expDate);
                         cardCstBatch.setCstCodeList(cstCodeList);
@@ -227,29 +231,33 @@ public class CardServiceImpl implements CardService {
                             // 客户无卡批次处理
                             if(cstBatchListFilter.isEmpty()){
                                 // 查询客户卡信息
-                                CardCst cardCst1 = cardCstRechargeListFilter.get(0);
+                                CardCst cardCst2 = cardCstRechargeListFilter.get(0);
                                 // 新增卡批次
-                                cardCstBatchList1 = addCardCstBatch(cardCstBatchList1,card.getProNum(),card.getType(),cardCst1.getCardCode(),cstCode,cardId,userId,totalNum,expDate);
+                                CardCstBatch cardCstBatchAdd2 = addCardCstBatch(card.getProNum(),card.getType(),cardCst2.getCardCode(),cstCode,cardId,userId,totalNum,expDate);
+                                cardCstBatchList1.add(cardCstBatchAdd2);
                                 // 新增账单
-                                cardCstBillList1 = addCardCstBill(cardCstBillList1 ,card.getProNum(),card.getType(),cardCst1.getCardCode(),cstCode,cardId,userId,totalNum);
-
+                                CardCstBill cardCstBill2 = addCardCstBill(cardCstBatchAdd2.getId(), card.getProNum(),card.getType(),cardCst2.getCardCode(),cstCode,cardId,userId,totalNum);
+                                cardCstBillList1.add(cardCstBill2);
                             // 客户有卡批次
                             }else {
                                 // 查询卡批次信息
-                                CardCstBatch cardCstBatch1 = cstBatchListFilter.get(0);
+                                CardCstBatch cardCstBatch3 = cstBatchListFilter.get(0);
                                 // 更新卡批次次数
                                 updateCardBatchTotalNumList.add(cstCode);
                                 // 新增账单
-                                cardCstBillList1 = addCardCstBill(cardCstBillList1 ,card.getProNum(),card.getType(),cardCstBatch1.getCardCode(),cstCode,cardId,userId,totalNum);
+                                CardCstBill cardCstBill3 = addCardCstBill(cardCstBatch3.getId(),card.getProNum(),card.getType(),cardCstBatch3.getCardCode(),cstCode,cardId,userId,totalNum);
+                                cardCstBillList1.add(cardCstBill3);
                             }
                         // 整个卡批次无数据
                         }else{
                             // 查询客户卡信息
-                            CardCst cardCst1 = cardCstRechargeListFilter.get(0);
+                            CardCst cardCst3 = cardCstRechargeListFilter.get(0);
                             // 新增卡批次
-                            cardCstBatchList1 = addCardCstBatch(cardCstBatchList1,card.getProNum(),card.getType(),cardCst1.getCardCode(),cstCode,cardId,userId,totalNum,expDate);
+                            CardCstBatch cardCstBatchAdd3 = addCardCstBatch(card.getProNum(),card.getType(),cardCst3.getCardCode(),cstCode,cardId,userId,totalNum,expDate);
+                            cardCstBatchList1.add(cardCstBatchAdd3);
                             // 新增账单
-                            cardCstBillList1 = addCardCstBill(cardCstBillList1 ,card.getProNum(),card.getType(),cardCst1.getCardCode(),cstCode,cardId,userId,totalNum);
+                            CardCstBill cardCstBill4 = addCardCstBill(cardCstBatchAdd3.getId(),card.getProNum(),card.getType(),cardCst3.getCardCode(),cstCode,cardId,userId,totalNum);
+                            cardCstBillList1.add(cardCstBill4);
                         }
                     }
                 }
@@ -306,8 +314,12 @@ public class CardServiceImpl implements CardService {
         CardCstBatch cardCstBatchPram = new CardCstBatch();
         cardCstBatchPram.setCardCode(cardCst.getCardCode());
         cardCstBatchPram.setExpDate(cardCstReq.getExpDate());
+        cardCstBatchPram.setCardId(cardId);
+        cardCstBatchPram.setCstCode(cardCst.getCstCode());
+        cardCstBatchPram.setCardType(card.getType());
+        cardCstBatchPram.setProNum(cardCst.getProNum());
+        // 根据卡号、类型、有效期、卡ID、项目、客户号查询卡批次
         List<CardCstBatch> cardCstBatchList = cardCstBatchDaoMapper.getList(cardCstBatchPram);
-        // 充值前校验，充值年月在卡批次中直接充值
         if(!cardCstBatchList.isEmpty()){
             if(cardCst != null && cardCst.getIsExp() == 1){
                 CardCstBatch cardCstBatch = new CardCstBatch();
@@ -323,8 +335,7 @@ public class CardServiceImpl implements CardService {
                 cardCstBatchDaoMapper.recharge(cardCstBatch);
                 logger.info("充值成功:"+ JSONObject.toJSONString(cardCst));
                 // 新增卡账单
-                saveCardCstBill(card.getProNum(),card.getType(),cardCst.getCardCode(),cardCst.getCstCode(),cardId,userId,rechargeNum);
-
+                saveCardCstBill(cardCstBatchList.get(0).getId(),card.getProNum(),card.getType(),cardCst.getCardCode(),cardCst.getCstCode(),cardId,userId,rechargeNum);
             }
         }else {
             // 充值年月不在卡批次中,新增卡批次、账单
@@ -349,16 +360,17 @@ public class CardServiceImpl implements CardService {
             cardCstBatchDaoMapper.insertList(cstBatchList);
             logger.info("新增卡批次成功:"+ JSONObject.toJSONString(cstBatchList));
             // 新增卡账单
-            saveCardCstBill(card.getProNum(),card.getType(),cardCst.getCardCode(),cardCst.getCstCode(),cardId,userId,rechargeNum);
+            saveCardCstBill(batch.getId(),card.getProNum(),card.getType(),cardCst.getCardCode(),cardCst.getCstCode(),cardId,userId,rechargeNum);
         }
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;
     }
 
-    public void saveCardCstBill(String proNum, Integer cardType, String cardCode, String cstCode, Integer cardId, String userId, Integer rechargeNum){
+    public void saveCardCstBill(String cardCstBatchId, String proNum, Integer cardType, String cardCode, String cstCode, Integer cardId, String userId, Integer rechargeNum){
         CardCstBill cardCstBill = new CardCstBill();
         cardCstBill.setId(TimestampGenerator.generateSerialNumber());
+        cardCstBill.setCardCstBatchId(cardCstBatchId);
         cardCstBill.setProNum(proNum);
         cardCstBill.setCardType(cardType);
         cardCstBill.setCardId(cardId);
@@ -377,9 +389,10 @@ public class CardServiceImpl implements CardService {
         logger.info("新增卡账单成功:" + JSONObject.toJSONString(cardCstBillList));
     }
 
-    public List<CardCstBill> addCardCstBill(List<CardCstBill> cardCstBillList, String proNum, Integer cardType, String cardCode, String cstCode, Integer cardId, String userId, Integer rechargeNum){
+    public CardCstBill addCardCstBill(String cardCstBatchId, String proNum, Integer cardType, String cardCode, String cstCode, Integer cardId, String userId, Integer rechargeNum){
         CardCstBill cardCstBill = new CardCstBill();
         cardCstBill.setId(TimestampGenerator.generateSerialNumber());
+        cardCstBill.setCardCstBatchId(cardCstBatchId);
         cardCstBill.setProNum(proNum);
         cardCstBill.setCardType(cardType);
         cardCstBill.setCardId(cardId);
@@ -392,11 +405,10 @@ public class CardServiceImpl implements CardService {
         cardCstBill.setUpdateTime(new Date());
         cardCstBill.setUpdateBy(userId);
         cardCstBill.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-        cardCstBillList.add(cardCstBill);
-        return cardCstBillList;
+        return cardCstBill;
     }
 
-    public List<CardCstBatch> addCardCstBatch(List<CardCstBatch> cardCstBatchList, String proNum, Integer cardType, String cardCode, String cstCode, Integer cardId, String userId, Integer totalNum, String expDate){
+    public CardCstBatch addCardCstBatch(String proNum, Integer cardType, String cardCode, String cstCode, Integer cardId, String userId, Integer totalNum, String expDate){
         CardCstBatch batch = new CardCstBatch();
         batch.setId(TimestampGenerator.generateSerialNumber());
         batch.setProNum(proNum);
@@ -408,12 +420,11 @@ public class CardServiceImpl implements CardService {
         batch.setApplyNum(0);
         batch.setExpDate(expDate);
         batch.setCreateTime(new Date());
-        batch.setCreateBy("");
+        batch.setCreateBy(userId);
         batch.setUpdateTime(new Date());
-        batch.setUpdateBy("");
+        batch.setUpdateBy(userId);
         batch.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-        cardCstBatchList.add(batch);
-        return cardCstBatchList;
+        return batch;
     }
 
     public List<CardCstBatch> savaCardBatch(List<CardCstBatch> cardCstBatchListByCardIdAndExpDate, List<CardCstBatch> cardCstBatchList, Card card, String cstCode, String expDate, String cardCode, Integer cardId){

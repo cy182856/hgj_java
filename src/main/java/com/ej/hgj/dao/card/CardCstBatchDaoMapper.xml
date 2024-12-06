@@ -42,7 +42,10 @@
         <if test="proNum != null and proNum != ''">
             and pro_num = #{proNum}
         </if>
-        <if test="cardId != null and cardId != ''">
+        <if test="cardType != null and cardType != ''">
+            and card_type = #{cardType}
+        </if>
+        <if test="cardId != null">
             and card_id = #{cardId}
         </if>
         <if test="expDate != null and expDate != ''">
