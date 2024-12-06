@@ -66,7 +66,7 @@
                 #{cstCode,jdbcType=VARCHAR}
             </foreach>
         </if>
-        order by update_time desc
+        order by exp_date
     </select>
 
     <!-- 批量插入-->

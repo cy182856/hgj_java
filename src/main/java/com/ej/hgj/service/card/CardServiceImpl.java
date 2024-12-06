@@ -175,19 +175,14 @@ public class CardServiceImpl implements CardService {
             cardCst.setCardId(cardId);
             cardCst.setCstCodeList(cstCodeList);
             List<CardCst> cardCstRechargeList = cardCstDaoMapper.batchRechargeCstList(cardCst);
-
             // 需要新增卡客户集合
             List<CardCst> cardCstList1 = new ArrayList<>();
-
             // 需要新增卡批次集合
             List<CardCstBatch> cardCstBatchList1 = new ArrayList<>();
-
             // 需要新增卡账单集合
             List<CardCstBill> cardCstBillList1 = new ArrayList<>();
-
             // 需要更新卡批次数量的客户编号
             List<String> updateCardBatchTotalNumList = new ArrayList<>();
-
             // 判断需要充值的客户不为空
             if(!cardCstRechargeList.isEmpty()){
                 for(CardCst cstRecharge : cardCstRechargeList){
@@ -240,8 +235,12 @@ public class CardServiceImpl implements CardService {
 
                             // 客户有卡批次
                             }else {
+                                // 查询卡批次信息
+                                CardCstBatch cardCstBatch1 = cstBatchListFilter.get(0);
                                 // 更新卡批次次数
                                 updateCardBatchTotalNumList.add(cstCode);
+                                // 新增账单
+                                cardCstBillList1 = addCardCstBill(cardCstBillList1 ,card.getProNum(),card.getType(),cardCstBatch1.getCardCode(),cstCode,cardId,userId,totalNum);
                             }
                         // 整个卡批次无数据
                         }else{
@@ -260,13 +259,11 @@ public class CardServiceImpl implements CardService {
                     cardCstDaoMapper.insertList(cardCstList1);
                     logger.info("新增卡成功:"+ JSONObject.toJSONString(cardCstList1));
                 }
-
                 // 新增卡批次
                 if (!cardCstBatchList1.isEmpty()) {
                     cardCstBatchDaoMapper.insertList(cardCstBatchList1);
-                    logger.info("新增卡批次:" + JSONObject.toJSONString(cardCstBatchList1));
+                    logger.info("新增卡批次成功:" + JSONObject.toJSONString(cardCstBatchList1));
                 }
-
                 // 更新卡批次次数
                 if(!updateCardBatchTotalNumList.isEmpty()) {
                     CardCstBatch cardCstBatchParamRecharge = new CardCstBatch();
@@ -280,7 +277,6 @@ public class CardServiceImpl implements CardService {
                     cardCstBatchDaoMapper.batchRecharge(cardCstBatchParamRecharge);
                     logger.info("卡充值成功:" + JSONObject.toJSONString(updateCardBatchTotalNumList));
                 }
-
                 // 新增账单
                 if(!cardCstBillList1.isEmpty()) {
                     cardCstBillDaoMapper.insertList(cardCstBillList1);
