@@ -168,4 +168,8 @@ public class Constant {
 
     // 卡充值最大数限制
     public static String CARD_RECHARGE_MAX_NUM = "card_recharge_max_num";
+
+    // 泳池门禁码N秒内刷卡限制，单位毫秒
+    public static String SWIM_ACCESS_CONTROL_SECOND = "swim_access_control_second";
+
 }

@@ -6,6 +6,7 @@ import com.ej.hgj.dao.config.ProNeighConfDaoMapper;
 import com.ej.hgj.dao.coupon.CouponGrantDaoMapper;
 import com.ej.hgj.dao.house.HgjHouseDaoMapper;
 import com.ej.hgj.dao.opendoor.OpenDoorCodeDaoMapper;
+import com.ej.hgj.dao.opendoor.OpenDoorCodeServiceDaoMapper;
 import com.ej.hgj.dao.opendoor.OpenDoorLogDaoMapper;
 import com.ej.hgj.dao.opendoor.OpenDoorQuickCodeDaoMapper;
 import com.ej.hgj.entity.api.HgjHouseFloor;
@@ -15,6 +16,7 @@ import com.ej.hgj.entity.api.QuickCodeInfo;
 import com.ej.hgj.entity.config.ProNeighConfig;
 import com.ej.hgj.entity.coupon.CouponGrant;
 import com.ej.hgj.entity.opendoor.OpenDoorCode;
+import com.ej.hgj.entity.opendoor.OpenDoorCodeService;
 import com.ej.hgj.entity.opendoor.OpenDoorLog;
 import com.ej.hgj.entity.opendoor.OpenDoorQuickCode;
 import com.ej.hgj.service.api.ControlService;
@@ -23,6 +25,8 @@ import com.ej.hgj.utils.TimestampGenerator;
 import com.ej.hgj.vo.QrCodeLogResVo;
 import com.ej.hgj.vo.QrCodeResVo;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +47,8 @@ import java.util.List;
 @RequestMapping("/control")
 public class ControlController {
 
+    Logger logger = LoggerFactory.getLogger(getClass());
+
     @Value("${upload.path}")
     private String uploadPath;
 
@@ -60,6 +66,9 @@ public class ControlController {
 
     @Autowired
     private OpenDoorQuickCodeDaoMapper openDoorQuickCodeDaoMapper;
+
+    @Autowired
+    private OpenDoorCodeServiceDaoMapper openDoorCodeServiceDaoMapper;
 
     /**
      * 单元楼层客户信息查询
@@ -131,7 +140,6 @@ public class ControlController {
         return ajaxResult;
     }
 
-
     /**
      * 生成二维码
      * @param qrCodeResVo
@@ -154,8 +162,10 @@ public class ControlController {
         Integer floor = qrCodeResVo.getFloor();
         String room = qrCodeResVo.getRoom();
         String houseId = qrCodeResVo.getHouseId();
-        if(type == null || StringUtils.isBlank(cardNo) || StringUtils.isBlank(qrCode)||
-                startTime == null || endTime == null || phone == null ){
+        String serviceName = qrCodeResVo.getServiceName();
+        String facePic = qrCodeResVo.getFacePic();
+        if(type == null || StringUtils.isBlank(serviceName) || StringUtils.isBlank(cardNo) || StringUtils.isBlank(qrCode)||
+                startTime == null || endTime == null || phone == null || StringUtils.isBlank(facePic)){
             ajaxResult.setResCode(0);
             ajaxResult.setResMsg("请求参数错误");
             return ajaxResult;
@@ -172,43 +182,47 @@ public class ControlController {
                     ajaxResult.setResMsg("请求参数错误");
                     return ajaxResult;
                 }
-                OpenDoorCode openDoorCodePram = new OpenDoorCode();
-                openDoorCodePram.setCardNo(cardNo);
-                List<OpenDoorCode> list = openDoorCodeDaoMapper.getList(openDoorCodePram);
+                OpenDoorCodeService openDoorCodeServicePram = new OpenDoorCodeService();
+                openDoorCodeServicePram.setCardNo(cardNo);
+                List<OpenDoorCodeService> list = openDoorCodeServiceDaoMapper.getList(openDoorCodeServicePram);
                 if(!list.isEmpty()){
                     ajaxResult.setResCode(0);
                     ajaxResult.setResMsg("卡号重复");
                     return ajaxResult;
                 }
                 ProNeighConfig byNeighNo = proNeighConfDaoMapper.getByNeighNo(neighNo);
-                OpenDoorCode openDoorCode = new OpenDoorCode();
-                openDoorCode.setId(TimestampGenerator.generateSerialNumber());
-                openDoorCode.setProNum(byNeighNo.getProjectNum());
-                openDoorCode.setProName(byNeighNo.getProjectName());
-                openDoorCode.setType(2);
-                openDoorCode.setExpDate(expDate);
-                openDoorCode.setStartTime(startTime);
-                openDoorCode.setEndTime(endTime);
-                openDoorCode.setCardNo(cardNo);
-                openDoorCode.setQrCodeContent(qrCode);
-                openDoorCode.setNeighNo(neighNo);
-                openDoorCode.setUnitNum(unitNum.toString());
-                openDoorCode.setFloors(floor.toString());
-                openDoorCode.setCstCode(cstCode);
-                openDoorCode.setCstName(cstName);
-                openDoorCode.setPhone(phone.toString());
-                openDoorCode.setResCode(room);
+                OpenDoorCodeService openDoorCodeService = new OpenDoorCodeService();
+                openDoorCodeService.setId(TimestampGenerator.generateSerialNumber());
+                openDoorCodeService.setProNum(byNeighNo.getProjectNum());
+                openDoorCodeService.setProName(byNeighNo.getProjectName());
+                openDoorCodeService.setType(2);
+                openDoorCodeService.setServiceName(serviceName);
+                openDoorCodeService.setExpDate(expDate);
+                openDoorCodeService.setStartTime(startTime);
+                openDoorCodeService.setEndTime(endTime);
+                openDoorCodeService.setCardNo(cardNo);
+                openDoorCodeService.setQrCodeContent(qrCode);
+                openDoorCodeService.setNeighNo(neighNo);
+                openDoorCodeService.setUnitNum(unitNum.toString());
+                openDoorCodeService.setFloors(floor.toString());
+                openDoorCodeService.setCstCode(cstCode);
+                openDoorCodeService.setCstName(cstName);
+                openDoorCodeService.setPhone(phone.toString());
+                openDoorCodeService.setResCode(room);
                 // 截取房间号
                 String[] resCodeSplit = room.split("-");
                 String addressNumber = unitNum+resCodeSplit[2];
-                openDoorCode.setAddressNum(addressNumber);
-                openDoorCode.setHouseId(houseId);
-                openDoorCode.setCreateTime(new Date());
-                openDoorCode.setUpdateTime(new Date());
-                openDoorCode.setDeleteFlag(Constant.DELETE_FLAG_NOT);
-                openDoorCodeDaoMapper.save(openDoorCode);
+                openDoorCodeService.setAddressNum(addressNumber);
+                openDoorCodeService.setHouseId(houseId);
+                String facePicPath = saveFacePic(cardNo, facePic);
+                openDoorCodeService.setFacePicPath(facePicPath);
+                openDoorCodeService.setCreateTime(new Date());
+                openDoorCodeService.setUpdateTime(new Date());
+                openDoorCodeService.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+                openDoorCodeServiceDaoMapper.save(openDoorCodeService);
                 ajaxResult.setResCode(1);
                 ajaxResult.setResMsg("成功");
+                logger.info("-------------------客服直接创建二维码成功-------------");
             }
 
             // 客服通过快速码创建的二维码
@@ -217,12 +231,6 @@ public class ControlController {
                 if(quickCode == null){
                     ajaxResult.setResCode(0);
                     ajaxResult.setResMsg("快速通行码为空");
-                    return ajaxResult;
-                }
-                String facePic = qrCodeResVo.getFacePic();
-                if(StringUtils.isBlank(facePic)){
-                    ajaxResult.setResCode(0);
-                    ajaxResult.setResMsg("人脸图像为空");
                     return ajaxResult;
                 }
                 OpenDoorQuickCode openDoorQuickCodePram = new OpenDoorQuickCode();
@@ -241,13 +249,15 @@ public class ControlController {
                 byQuickCode.setCardNo(cardNo);
                 byQuickCode.setQrCodeContent(qrCode);
                 byQuickCode.setPhone(phone.toString());
-                String facePicPath = saveFacePic(cardNo, qrCode);
+                String facePicPath = saveFacePic(cardNo, facePic);
                 byQuickCode.setFacePicPath(facePicPath);
+                byQuickCode.setServiceName(serviceName);
                 byQuickCode.setIsExpire(0);
                 byQuickCode.setUpdateTime(new Date());
                 openDoorQuickCodeDaoMapper.updateByQuickCode(byQuickCode);
                 ajaxResult.setResCode(1);
                 ajaxResult.setResMsg("成功");
+                logger.info("-------------------客服通过快速码创建二维码成功-------------");
             }
         }catch (Exception e){
             e.printStackTrace();

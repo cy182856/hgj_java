@@ -165,7 +165,7 @@
             delete_flag = 1,
             update_time = NOW(),
         </set>
-        where SUBSTR(exp_date,1,4) = #{expDate}
+        where #{expDate} > SUBSTR(exp_date,1,4)
     </update>
 
 </mapper>

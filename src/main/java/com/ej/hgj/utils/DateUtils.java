@@ -35,6 +35,7 @@ public abstract class DateUtils {
     public static long NANO_ONE_DAY;
     public static SimpleDateFormat sdfYmdHms = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public static SimpleDateFormat sdf_Ymd = new SimpleDateFormat("yyyy-MM-dd");
+    public static SimpleDateFormat sdf_Ym = new SimpleDateFormat("yyyy-MM");
     public static SimpleDateFormat sdfYmd = new SimpleDateFormat("yyyyMMdd");
     public static SimpleDateFormat sdfY = new SimpleDateFormat("yyyy");
 
@@ -48,6 +49,11 @@ public abstract class DateUtils {
     public static String strYmd(Date date){
         String ymd = DateUtils.sdf_Ymd.format(date);
         return ymd;
+    }
+
+    public static String strYm(){
+        String ym = DateUtils.sdf_Ym.format(new Date());
+        return ym;
     }
 
     public static String strYmd(){

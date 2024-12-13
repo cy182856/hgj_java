@@ -134,6 +134,12 @@
                     #{proNum,jdbcType=INTEGER}
                 </foreach>
             </if>
+            <if test="cstCodeList != null and cstCodeList.size() > 0">
+                and cst.code in
+                <foreach collection="cstCodeList" item="cstCode" index="index" open="(" close=")" separator=",">
+                    #{cstCode,jdbcType=VARCHAR}
+                </foreach>
+            </if>
         )t
         where 1=1
         <if test="intoStatus == 1">

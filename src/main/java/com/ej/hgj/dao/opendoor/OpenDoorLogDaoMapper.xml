@@ -84,6 +84,17 @@
               AND card_no = #{cardNo} AND event_time = #{eventTime} AND DATE(create_time) = CURDATE()
         </select>
 
+        <select id="getByCardNo" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.opendoor.OpenDoorLog">
+            SELECT
+            <include refid="Base_Column_List" />
+            FROM
+            t_open_door_log
+            WHERE
+            is_unlock = 2
+            AND card_no = #{cardNo} AND DATE(create_time) = CURDATE()
+            ORDER BY event_time
+        </select>
+
     <!-- 保存-->
     <insert id="save" parameterType="com.ej.hgj.entity.opendoor.OpenDoorLog" >
         insert into  t_open_door_log(

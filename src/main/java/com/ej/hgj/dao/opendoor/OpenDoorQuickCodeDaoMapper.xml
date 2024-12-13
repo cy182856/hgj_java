@@ -6,6 +6,7 @@
         <result column="id" jdbcType="VARCHAR" property="id"/>
         <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
         <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
+        <result column="service_name" jdbcType="VARCHAR" property="serviceName"/>
         <result column="card_no" jdbcType="VARCHAR" property="cardNo"/>
         <result column="exp_date" jdbcType="VARCHAR" property="expDate"/>
         <result column="start_time" jdbcType="BIGINT" property="startTime"/>
@@ -38,7 +39,7 @@
         <result column="res_code" jdbcType="VARCHAR" property="room"/>
     </resultMap>
     <sql id="Base_Column_List" >
-        id, pro_num, pro_name, card_no, exp_date, start_time, end_time,
+        id, pro_num, pro_name, service_name, card_no, exp_date, start_time, end_time,
         address_num, unit_num, floors, phone,
         quick_code, wx_open_id, cst_code, cst_name, res_code,
         neigh_no, house_id, face_pic_path, is_expire, create_time,
@@ -143,6 +144,9 @@
             </if>
             <if test="phone != null">
                 phone = #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="serviceName != null">
+                service_name = #{serviceName,jdbcType=VARCHAR},
             </if>
             <if test="facePicPath != null">
                 face_pic_path = #{facePicPath,jdbcType=VARCHAR},

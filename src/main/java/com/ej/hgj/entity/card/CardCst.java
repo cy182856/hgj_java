@@ -73,4 +73,6 @@ public class CardCst {
 
     private String endExpDate;
 
+    private String resName;
+
 }

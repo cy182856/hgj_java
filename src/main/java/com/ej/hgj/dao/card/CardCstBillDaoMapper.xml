@@ -57,6 +57,9 @@
         <if test="cardId != null and cardId != ''">
             and a.card_id = #{cardId}
         </if>
+        <if test="billType != null">
+            and a.bill_type = #{billType}
+        </if>
         <if test="cardCode != null and cardCode != ''">
             and a.card_code = #{cardCode}
         </if>

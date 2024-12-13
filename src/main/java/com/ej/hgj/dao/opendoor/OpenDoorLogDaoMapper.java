@@ -18,6 +18,8 @@ public interface OpenDoorLogDaoMapper {
 
     List<OpenDoorLog> getByCardNoAndEventTime(OpenDoorLog openDoorLog);
 
+    List<OpenDoorLog> getByCardNo(OpenDoorLog openDoorLog);
+
     List<OpenDoorLog> getList(OpenDoorLog openDoorLog);
 
     void save(OpenDoorLog openDoorLog);

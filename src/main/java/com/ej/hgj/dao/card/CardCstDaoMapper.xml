@@ -21,6 +21,8 @@
         <result column="card_name" jdbcType="VARCHAR" property="cardName"/>
         <result column="card_type_name" jdbcType="VARCHAR" property="cardTypeName"/>
         <result column="exp_num" jdbcType="INTEGER" property="expNum"/>
+        <result column="res_name" jdbcType="VARCHAR" property="resName"/>
+
     </resultMap>
     <sql id="Base_Column_List" >
         id, pro_num, card_id, card_type, card_code, cst_code, is_exp, create_time, update_time, create_by, update_by, delete_flag
@@ -48,7 +50,21 @@
         <if test="endExpDate != null and endExpDate != ''">
             and exp_date &lt;= #{endExpDate}
         </if>
-        )as exp_num
+        )as exp_num,
+        (
+        select
+        GROUP_CONCAT(t.res_name SEPARATOR ',')
+        from
+        (
+        select
+        hu.*
+        from s_rcr rcr
+        left join s_contract con on con.id = rcr.ctt_id
+        left join s_house hu on hu.id = rcr.res_id
+        where rcr.is_affect = 1 and rcr.cst_id in ( select id from s_cst where code = a.cst_code)
+        ) t
+        order by t.res_code
+        ) as res_name
         from t_card_cst a
         left join s_cst s on s.`code` = a.cst_code
         left join t_pro_config pc on pc.project_num = a.pro_num
@@ -76,6 +92,7 @@
         <if test="cardType != null">
             and a.card_type = #{cardType}
         </if>
+        -- order by a.card_type asc , a.update_time desc
         )t
         where 1=1
         <if test="expNum == 0">
@@ -84,7 +101,10 @@
         <if test="expNum == 1">
             and t.exp_num > 0
         </if>
-        order by t.card_type asc , t.update_time desc
+        <if test="resName != null and resName != ''">
+            and t.res_name like CONCAT('%', #{resName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        order by t.res_name
     </select>
 
     <!--    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.card.CardCst">-->
@@ -278,7 +298,6 @@
         <include refid="Base_Column_List" />
         from t_card_cst
         where delete_flag = 0
-        and is_exp = 1
         and pro_num = #{proNum,jdbcType=VARCHAR}
         and card_id = #{cardId,jdbcType=INTEGER}
         and card_type = #{cardType,jdbcType=INTEGER}

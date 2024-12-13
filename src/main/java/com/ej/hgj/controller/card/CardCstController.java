@@ -303,16 +303,16 @@ public class CardCstController {
                            CardCst cardCst){
         AjaxResult ajaxResult = new AjaxResult();
         HashMap map = new HashMap();
-        String startTime = cardCst.getStartTime();
-        String endTime = cardCst.getEndTime();
-        if(StringUtils.isNotBlank(startTime)){
-            cardCst.setStartYear(startTime.substring(0,4));
-            cardCst.setStartYearMonth(startTime.substring(0,7));
-        }
-        if(StringUtils.isNotBlank(endTime)){
-            cardCst.setEndYear(endTime.substring(0,4));
-            cardCst.setEndYearMonth(endTime.substring(0,7));
-        }
+        //String startTime = cardCst.getStartTime();
+        //String endTime = cardCst.getEndTime();
+//        if(StringUtils.isNotBlank(startTime)){
+//            cardCst.setStartYear(startTime.substring(0,4));
+//            cardCst.setStartYearMonth(startTime.substring(0,7));
+//        }
+//        if(StringUtils.isNotBlank(endTime)){
+//            cardCst.setEndYear(endTime.substring(0,4));
+//            cardCst.setEndYearMonth(endTime.substring(0,7));
+//        }
         PageHelper.offsetPage((page-1) * limit,limit);
         List<CardCst> list = cardCstDaoMapper.getList(cardCst);
         PageInfo<CardCst> pageInfo = new PageInfo<>(list);

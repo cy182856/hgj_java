@@ -80,7 +80,7 @@ public class CardTaskService {
         }
 
         // 删除无效卡批次
-        cardCstBatchDaoMapper.deleteByExpDate(year-1+"");
+        cardCstBatchDaoMapper.deleteByExpDate(year+"");
         logger.info("----------------------发卡定时任务处理结束--------------------------- ");
     }
 
@@ -90,6 +90,8 @@ public class CardTaskService {
         List<HgjCst> hgjCstList = hgjCstDaoMapper.findByProNum(card.getProNum());
         // 根据卡id查询所有发卡客户
         CardCst cardCstParam = new CardCst();
+        cardCstParam.setProNum(card.getProNum());
+        cardCstParam.setCardType(card.getType());
         cardCstParam.setCardId(cardId);
         List<CardCst> cardCstListByCardId = cardCstDaoMapper.getList(cardCstParam);
         // 根据卡id、有效年月查询所有发卡客户批次

@@ -53,5 +53,8 @@ public class QrCodeResVo {
     // 房屋ID
     private String houseId;
 
+    // 客服姓名
+    private String serviceName;
+
 
 }
