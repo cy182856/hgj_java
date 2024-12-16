@@ -24,4 +24,6 @@ public interface OpenDoorQuickCodeDaoMapper {
 
     void updateByQuickCode(OpenDoorQuickCode openDoorQuickCode);
 
+    void deleteQuickCode();
+
 }

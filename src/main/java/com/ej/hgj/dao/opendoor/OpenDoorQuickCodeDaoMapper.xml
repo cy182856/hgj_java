@@ -161,4 +161,9 @@
         where quick_code=#{quickCode}
     </update>
 
+    <!-- 删除前一天未使用快速通行码-->
+    <update id="deleteQuickCode" parameterType="java.lang.String" >
+        delete from t_open_door_quick_code where is_expire = 1 and DATE_SUB(CURDATE(), INTERVAL 1 DAY) >= exp_date
+    </update>
+
 </mapper>
