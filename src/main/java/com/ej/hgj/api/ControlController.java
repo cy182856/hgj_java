@@ -5,20 +5,14 @@ import com.ej.hgj.constant.api.AjaxResultApi;
 import com.ej.hgj.dao.config.ProNeighConfDaoMapper;
 import com.ej.hgj.dao.coupon.CouponGrantDaoMapper;
 import com.ej.hgj.dao.house.HgjHouseDaoMapper;
-import com.ej.hgj.dao.opendoor.OpenDoorCodeDaoMapper;
-import com.ej.hgj.dao.opendoor.OpenDoorCodeServiceDaoMapper;
-import com.ej.hgj.dao.opendoor.OpenDoorLogDaoMapper;
-import com.ej.hgj.dao.opendoor.OpenDoorQuickCodeDaoMapper;
+import com.ej.hgj.dao.opendoor.*;
 import com.ej.hgj.entity.api.HgjHouseFloor;
 import com.ej.hgj.entity.api.HgjHouseRoomInfo;
 import com.ej.hgj.entity.api.HgjHouseUnit;
 import com.ej.hgj.entity.api.QuickCodeInfo;
 import com.ej.hgj.entity.config.ProNeighConfig;
 import com.ej.hgj.entity.coupon.CouponGrant;
-import com.ej.hgj.entity.opendoor.OpenDoorCode;
-import com.ej.hgj.entity.opendoor.OpenDoorCodeService;
-import com.ej.hgj.entity.opendoor.OpenDoorLog;
-import com.ej.hgj.entity.opendoor.OpenDoorQuickCode;
+import com.ej.hgj.entity.opendoor.*;
 import com.ej.hgj.service.api.ControlService;
 import com.ej.hgj.utils.DateUtils;
 import com.ej.hgj.utils.TimestampGenerator;
@@ -31,9 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -70,6 +62,9 @@ public class ControlController {
     @Autowired
     private OpenDoorCodeServiceDaoMapper openDoorCodeServiceDaoMapper;
 
+    @Autowired
+    private ExternalPersonInfoDaoMapper externalPersonInfoDaoMapper;
+
     /**
      * 单元楼层客户信息查询
      * @param neighNo
@@ -99,6 +94,7 @@ public class ControlController {
             ajaxResult.setResCode(1);
             ajaxResult.setResMsg("成功");
             ajaxResult.setData(map);
+            logger.info("-----单元楼层客户信息查询成功----");
         }catch (Exception e){
             e.printStackTrace();
             ajaxResult.setResCode(0);
@@ -114,6 +110,7 @@ public class ControlController {
      */
     @RequestMapping(value = "/quickCode/check",method = RequestMethod.GET)
     public AjaxResultApi quickCodeCheck(@RequestParam("quickCode") String quickCode){
+        logger.info("quickCodeCheck请求参数|quickCode:" + quickCode);
         AjaxResultApi ajaxResult = new AjaxResultApi();
         if(StringUtils.isBlank(quickCode)){
             ajaxResult.setResCode(0);
@@ -128,14 +125,17 @@ public class ControlController {
                 ajaxResult.setResCode(1);
                 ajaxResult.setResMsg("成功");
                 ajaxResult.setData(map);
+                logger.info("------快速通行码验证成功------");
             }else {
                 ajaxResult.setResCode(0);
                 ajaxResult.setResMsg("快速通行码无效");
+                logger.info("------快速通行码无效----------");
             }
         }catch (Exception e){
             e.printStackTrace();
             ajaxResult.setResCode(0);
             ajaxResult.setResMsg(e.toString());
+            logger.info("------快速通行码验证失败----------");
         }
         return ajaxResult;
     }
@@ -146,7 +146,7 @@ public class ControlController {
      * @return
      */
     @RequestMapping(value = "/qrCode/create",method = RequestMethod.POST)
-    public AjaxResultApi save(@RequestBody QrCodeResVo qrCodeResVo){
+    public AjaxResultApi qrCodeCreate(@RequestBody QrCodeResVo qrCodeResVo){
         AjaxResultApi ajaxResult = new AjaxResultApi();
         String neighNo = qrCodeResVo.getNeighNo();
         Integer type = qrCodeResVo.getType();
@@ -164,6 +164,9 @@ public class ControlController {
         String houseId = qrCodeResVo.getHouseId();
         String serviceName = qrCodeResVo.getServiceName();
         String facePic = qrCodeResVo.getFacePic();
+        logger.info("qrCodeCreate请求参数|neighNo：" + neighNo + "|type:" + type + "|cardNo:" + cardNo + "|qrCode:" + qrCode + "|expDate:" + expDate +
+                "|startTime:" + startTime + "|endTime:" + endTime + "|phone:" + phone + "|cstCode:" + cstCode + "|cstName:" + cstName +
+                "|unitNum:" + unitNum + "|floor:" + floor + "|room:" + room + "|houseId:" + houseId + "|serviceName:" + serviceName);
         if(type == null || StringUtils.isBlank(serviceName) || StringUtils.isBlank(cardNo) || StringUtils.isBlank(qrCode)||
                 startTime == null || endTime == null || phone == null || StringUtils.isBlank(facePic)){
             ajaxResult.setResCode(0);
@@ -233,14 +236,14 @@ public class ControlController {
                     ajaxResult.setResMsg("快速通行码为空");
                     return ajaxResult;
                 }
-                OpenDoorQuickCode openDoorQuickCodePram = new OpenDoorQuickCode();
-                openDoorQuickCodePram.setCardNo(cardNo);
-                List<OpenDoorQuickCode> list = openDoorQuickCodeDaoMapper.getList(openDoorQuickCodePram);
-                if(!list.isEmpty()){
-                    ajaxResult.setResCode(0);
-                    ajaxResult.setResMsg("卡号重复");
-                    return ajaxResult;
-                }
+//                OpenDoorQuickCode openDoorQuickCodePram = new OpenDoorQuickCode();
+//                openDoorQuickCodePram.setCardNo(cardNo);
+//                List<OpenDoorQuickCode> list = openDoorQuickCodeDaoMapper.getList(openDoorQuickCodePram);
+//                if(!list.isEmpty()){
+//                    ajaxResult.setResCode(0);
+//                    ajaxResult.setResMsg("卡号重复");
+//                    return ajaxResult;
+//                }
                 // 根据快速码更新数据
                 OpenDoorQuickCode byQuickCode = openDoorQuickCodeDaoMapper.getByQuickCode(quickCode.toString());
                 byQuickCode.setQuickCode(byQuickCode.getQuickCode());
@@ -277,7 +280,106 @@ public class ControlController {
         return controlService.saveOpenDoorLog(qrCodeLogResVo);
     }
 
-    public String saveFacePic(String cardNo, String content) {
+
+    /**
+     * 保存外部人员信息
+     * @param externalPersonInfo
+     * @return
+     */
+    @RequestMapping(value = "/save/personInfo",method = RequestMethod.POST)
+    public AjaxResultApi savePersonInfo(@RequestBody ExternalPersonInfo externalPersonInfo){
+        AjaxResultApi ajaxResult = new AjaxResultApi();
+        String userName = externalPersonInfo.getUserName();
+        String phone = externalPersonInfo.getPhone();
+        String idCard = externalPersonInfo.getIdCard();
+        String belComp = externalPersonInfo.getBelComp();
+        String facePic = externalPersonInfo.getFacePic();
+        logger.info("savePersonInfo请求参数|userName：" + userName + "|phone:" + phone + "|idCard:" + idCard + "|belComp:" + belComp);
+        if(StringUtils.isBlank(userName) || StringUtils.isBlank(phone) || StringUtils.isBlank(idCard)||
+                StringUtils.isBlank(belComp) || StringUtils.isBlank(facePic)){
+            ajaxResult.setResCode(0);
+            ajaxResult.setResMsg("请求参数错误");
+            return ajaxResult;
+        }
+        ExternalPersonInfo personInfo = new ExternalPersonInfo();
+        personInfo.setPhone(phone);
+        List<ExternalPersonInfo> list = externalPersonInfoDaoMapper.getList(personInfo);
+        if(list != null && list.size() > 0){
+            ajaxResult.setResCode(0);
+            ajaxResult.setResMsg("手机号重复");
+            return ajaxResult;
+        }
+        try {
+            ExternalPersonInfo epi = new ExternalPersonInfo();
+            String id = TimestampGenerator.generateSerialNumber();
+            epi.setId(id);
+            epi.setUserName(userName);
+            epi.setPhone(phone);
+            epi.setIdCard(idCard);
+            epi.setBelComp(belComp);
+            String facePicPath = saveFacePic(id, facePic);
+            epi.setFacePicPath(facePicPath);
+            epi.setCreateTime(new Date());
+            epi.setUpdateTime(new Date());
+            epi.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+            externalPersonInfoDaoMapper.save(epi);
+            ajaxResult.setResCode(1);
+            ajaxResult.setResMsg("成功");
+            logger.info("-------------------外部人员信息保存成功-------------");
+        }catch (Exception e){
+            e.printStackTrace();
+            ajaxResult.setResCode(0);
+            ajaxResult.setResMsg(e.toString());
+        }
+        return ajaxResult;
+    }
+
+    /**
+     * 查询外部人员信息
+     * @param externalPersonInfo
+     * @return
+     */
+    @RequestMapping(value = "/query/personInfo",method = RequestMethod.GET)
+    public AjaxResultApi queryPersonInfo(ExternalPersonInfo externalPersonInfo){
+        AjaxResultApi ajaxResult = new AjaxResultApi();
+        HashMap map = new HashMap();
+        try {
+            List<ExternalPersonInfo> list = externalPersonInfoDaoMapper.getList(externalPersonInfo);
+            for(ExternalPersonInfo o : list){
+                if(StringUtils.isNotBlank(o.getFacePicPath())){
+                    // 获取图片路径
+                    String imgPath = o.getFacePicPath();
+                    String base64Img = "";
+                    try {
+                        // 创建BufferedReader对象，从本地文件中读取
+                        BufferedReader reader = new BufferedReader(new FileReader(imgPath));
+                        // 逐行读取文件内容
+                        String line = "";
+                        while ((line = reader.readLine()) != null) {
+                            base64Img += line;
+                        }
+                        // 关闭文件
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    o.setFacePic(base64Img);
+                }
+            }
+            map.put("list", list);
+            ajaxResult.setResCode(1);
+            ajaxResult.setResMsg("成功");
+            ajaxResult.setData(map);
+            logger.info("-----查询外部人员信息成功----");
+        }catch (Exception e){
+            e.printStackTrace();
+            ajaxResult.setResCode(0);
+            ajaxResult.setResMsg(e.toString());
+        }
+        return ajaxResult;
+    }
+
+    public String saveFacePic(String fileName, String content) {
         String path = "";
         //目录不存在则直接创建
         File filePath = new File(uploadPath + "/facepic");
@@ -291,7 +393,7 @@ public class ControlController {
             ymdFile.mkdirs();
         }
         //在年月日文件夹下面创建txt文本存储图片base64码
-        File txtFile = new File(ymdFile.getPath() + "/" + cardNo + ".txt");
+        File txtFile = new File(ymdFile.getPath() + "/" + fileName + ".txt");
         if (!txtFile.exists()) {
             try {
                 txtFile.createNewFile();

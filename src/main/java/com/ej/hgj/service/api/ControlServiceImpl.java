@@ -93,6 +93,7 @@ public class ControlServiceImpl implements ControlService {
         String deviceNo = qrCodeLogResVo.getDeviceNo();
         Integer isUnlock = qrCodeLogResVo.getIsUnlock();
         Long eventTime = qrCodeLogResVo.getEventTime();
+        logger.info("saveOpenDoorLog请求参数|neighNo：" + neighNo + "|cardNo:" + cardNo + "|deviceNo:" + deviceNo + "|isUnlock:" + isUnlock + "|eventTime:" + eventTime );
         if(StringUtils.isBlank(neighNo) || StringUtils.isBlank(cardNo) ||
                 StringUtils.isBlank(deviceNo)|| isUnlock == null || eventTime == null ){
             ajaxResult.setResCode(0);
