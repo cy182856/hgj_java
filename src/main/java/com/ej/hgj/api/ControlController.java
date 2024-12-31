@@ -3,7 +3,6 @@ package com.ej.hgj.api;
 import com.ej.hgj.constant.Constant;
 import com.ej.hgj.constant.api.AjaxResultApi;
 import com.ej.hgj.dao.config.ProNeighConfDaoMapper;
-import com.ej.hgj.dao.coupon.CouponGrantDaoMapper;
 import com.ej.hgj.dao.house.HgjHouseDaoMapper;
 import com.ej.hgj.dao.opendoor.*;
 import com.ej.hgj.entity.api.HgjHouseFloor;
@@ -11,13 +10,12 @@ import com.ej.hgj.entity.api.HgjHouseRoomInfo;
 import com.ej.hgj.entity.api.HgjHouseUnit;
 import com.ej.hgj.entity.api.QuickCodeInfo;
 import com.ej.hgj.entity.config.ProNeighConfig;
-import com.ej.hgj.entity.coupon.CouponGrant;
 import com.ej.hgj.entity.opendoor.*;
 import com.ej.hgj.service.api.ControlService;
 import com.ej.hgj.utils.DateUtils;
 import com.ej.hgj.utils.TimestampGenerator;
-import com.ej.hgj.vo.QrCodeLogResVo;
-import com.ej.hgj.vo.QrCodeResVo;
+import com.ej.hgj.vo.QrCodeLogReqVo;
+import com.ej.hgj.vo.QrCodeReqVo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,31 +140,32 @@ public class ControlController {
 
     /**
      * 生成二维码
-     * @param qrCodeResVo
+     * @param qrCodeReqVo
      * @return
      */
     @RequestMapping(value = "/qrCode/create",method = RequestMethod.POST)
-    public AjaxResultApi qrCodeCreate(@RequestBody QrCodeResVo qrCodeResVo){
+    public AjaxResultApi qrCodeCreate(@RequestBody QrCodeReqVo qrCodeReqVo){
         AjaxResultApi ajaxResult = new AjaxResultApi();
-        String neighNo = qrCodeResVo.getNeighNo();
-        Integer type = qrCodeResVo.getType();
-        String cardNo = qrCodeResVo.getCardNo();
-        String qrCode = qrCodeResVo.getQrCode();
-        String expDate = qrCodeResVo.getExpDate();
-        Long startTime = qrCodeResVo.getStartTime();
-        Long endTime = qrCodeResVo.getEndTime();
-        Long phone = qrCodeResVo.getPhone();
-        String cstCode = qrCodeResVo.getCstCode();
-        String cstName = qrCodeResVo.getCstName();
-        Integer unitNum = qrCodeResVo.getUnitNum();
-        Integer floor = qrCodeResVo.getFloor();
-        String room = qrCodeResVo.getRoom();
-        String houseId = qrCodeResVo.getHouseId();
-        String serviceName = qrCodeResVo.getServiceName();
-        String facePic = qrCodeResVo.getFacePic();
+        String neighNo = qrCodeReqVo.getNeighNo();
+        Integer type = qrCodeReqVo.getType();
+        String cardNo = qrCodeReqVo.getCardNo();
+        String qrCode = qrCodeReqVo.getQrCode();
+        String expDate = qrCodeReqVo.getExpDate();
+        Long startTime = qrCodeReqVo.getStartTime();
+        Long endTime = qrCodeReqVo.getEndTime();
+        Long phone = qrCodeReqVo.getPhone();
+        String cstCode = qrCodeReqVo.getCstCode();
+        String cstName = qrCodeReqVo.getCstName();
+        Integer unitNum = qrCodeReqVo.getUnitNum();
+        Integer floor = qrCodeReqVo.getFloor();
+        String room = qrCodeReqVo.getRoom();
+        String houseId = qrCodeReqVo.getHouseId();
+        String serviceName = qrCodeReqVo.getServiceName();
+        String facePic = qrCodeReqVo.getFacePic();
+        String personPhone = qrCodeReqVo.getPersonPhone();
         logger.info("qrCodeCreate请求参数|neighNo：" + neighNo + "|type:" + type + "|cardNo:" + cardNo + "|qrCode:" + qrCode + "|expDate:" + expDate +
                 "|startTime:" + startTime + "|endTime:" + endTime + "|phone:" + phone + "|cstCode:" + cstCode + "|cstName:" + cstName +
-                "|unitNum:" + unitNum + "|floor:" + floor + "|room:" + room + "|houseId:" + houseId + "|serviceName:" + serviceName);
+                "|unitNum:" + unitNum + "|floor:" + floor + "|room:" + room + "|houseId:" + houseId + "|serviceName:" + serviceName + "|personPhone:" + personPhone);
         if(type == null || StringUtils.isBlank(serviceName) || StringUtils.isBlank(cardNo) || StringUtils.isBlank(qrCode)||
                 startTime == null || endTime == null || phone == null || StringUtils.isBlank(facePic)){
             ajaxResult.setResCode(0);
@@ -198,7 +197,7 @@ public class ControlController {
                 openDoorCodeService.setId(TimestampGenerator.generateSerialNumber());
                 openDoorCodeService.setProNum(byNeighNo.getProjectNum());
                 openDoorCodeService.setProName(byNeighNo.getProjectName());
-                openDoorCodeService.setType(2);
+                openDoorCodeService.setType(3);
                 openDoorCodeService.setServiceName(serviceName);
                 openDoorCodeService.setExpDate(expDate);
                 openDoorCodeService.setStartTime(startTime);
@@ -230,7 +229,7 @@ public class ControlController {
 
             // 客服通过快速码创建的二维码
             if(type == 4){
-                Integer quickCode = qrCodeResVo.getQuickCode();
+                Integer quickCode = qrCodeReqVo.getQuickCode();
                 if(quickCode == null){
                     ajaxResult.setResCode(0);
                     ajaxResult.setResMsg("快速通行码为空");
@@ -262,6 +261,46 @@ public class ControlController {
                 ajaxResult.setResMsg("成功");
                 logger.info("-------------------客服通过快速码创建二维码成功-------------");
             }
+            // 客服创建的通码
+            if(type == 5){
+                if(StringUtils.isBlank(neighNo) || StringUtils.isBlank(expDate) || StringUtils.isBlank(personPhone)){
+                    ajaxResult.setResCode(0);
+                    ajaxResult.setResMsg("请求参数错误");
+                    return ajaxResult;
+                }
+                OpenDoorCodeService openDoorCodeServicePram = new OpenDoorCodeService();
+                openDoorCodeServicePram.setCardNo(cardNo);
+                List<OpenDoorCodeService> list = openDoorCodeServiceDaoMapper.getList(openDoorCodeServicePram);
+                if(!list.isEmpty()){
+                    ajaxResult.setResCode(0);
+                    ajaxResult.setResMsg("卡号重复");
+                    return ajaxResult;
+                }
+                ProNeighConfig byNeighNo = proNeighConfDaoMapper.getByNeighNo(neighNo);
+                OpenDoorCodeService openDoorCodeService = new OpenDoorCodeService();
+                openDoorCodeService.setId(TimestampGenerator.generateSerialNumber());
+                openDoorCodeService.setProNum(byNeighNo.getProjectNum());
+                openDoorCodeService.setProName(byNeighNo.getProjectName());
+                openDoorCodeService.setType(5);
+                openDoorCodeService.setServiceName(serviceName);
+                openDoorCodeService.setExpDate(expDate);
+                openDoorCodeService.setStartTime(startTime);
+                openDoorCodeService.setEndTime(endTime);
+                openDoorCodeService.setCardNo(cardNo);
+                openDoorCodeService.setQrCodeContent(qrCode);
+                openDoorCodeService.setNeighNo(neighNo);
+                openDoorCodeService.setPhone(phone.toString());
+                String facePicPath = saveFacePic(cardNo, facePic);
+                openDoorCodeService.setFacePicPath(facePicPath);
+                openDoorCodeService.setPersonPhone(personPhone);
+                openDoorCodeService.setCreateTime(new Date());
+                openDoorCodeService.setUpdateTime(new Date());
+                openDoorCodeService.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+                openDoorCodeServiceDaoMapper.save(openDoorCodeService);
+                ajaxResult.setResCode(1);
+                ajaxResult.setResMsg("成功");
+                logger.info("-------------------客服创建通码成功-------------");
+            }
         }catch (Exception e){
             e.printStackTrace();
             ajaxResult.setResCode(0);
@@ -276,7 +315,7 @@ public class ControlController {
      * @return
      */
     @RequestMapping(value = "/openDoor/log",method = RequestMethod.POST)
-    public AjaxResultApi save(@RequestBody QrCodeLogResVo qrCodeLogResVo){
+    public AjaxResultApi save(@RequestBody QrCodeLogReqVo qrCodeLogResVo){
         return controlService.saveOpenDoorLog(qrCodeLogResVo);
     }
 

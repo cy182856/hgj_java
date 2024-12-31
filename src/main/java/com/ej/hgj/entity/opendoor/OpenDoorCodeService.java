@@ -49,6 +49,8 @@ public class OpenDoorCodeService {
 
     private String facePicPath;
 
+    private String personPhone;
+
     private String createBy;
 
     private String updateBy;

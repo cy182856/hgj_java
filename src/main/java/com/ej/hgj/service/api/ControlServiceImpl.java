@@ -8,45 +8,22 @@ import com.ej.hgj.dao.card.*;
 import com.ej.hgj.dao.config.ConstantConfDaoMapper;
 import com.ej.hgj.dao.coupon.CouponGrantDaoMapper;
 import com.ej.hgj.dao.coupon.CouponSubDetailDaoMapper;
-import com.ej.hgj.dao.cst.CstPayPerDaoMapper;
-import com.ej.hgj.dao.cst.HgjCstDaoMapper;
-import com.ej.hgj.dao.menu.mini.MenuMiniDaoMapper;
-import com.ej.hgj.dao.opendoor.OpenDoorCodeDaoMapper;
 import com.ej.hgj.dao.opendoor.OpenDoorLogDaoMapper;
-import com.ej.hgj.entity.active.CouponQrCode;
 import com.ej.hgj.entity.card.*;
 import com.ej.hgj.entity.config.ConstantConfig;
-import com.ej.hgj.entity.coupon.CouponGrant;
-import com.ej.hgj.entity.coupon.CouponSubDetail;
-import com.ej.hgj.entity.cst.CstMenu;
-import com.ej.hgj.entity.cst.HgjCst;
-import com.ej.hgj.entity.menu.mini.MenuMini;
-import com.ej.hgj.entity.opendoor.OpenDoorCode;
 import com.ej.hgj.entity.opendoor.OpenDoorLog;
-import com.ej.hgj.enums.QrRespEnum;
-import com.ej.hgj.enums.QrSceneEnum;
-import com.ej.hgj.enums.ScanQrEnum;
-import com.ej.hgj.request.GetTempQrcodeRequest;
-import com.ej.hgj.request.GetTempQrcodeResult;
-import com.ej.hgj.service.cst.CstService;
-import com.ej.hgj.utils.GenerateUniqueIdUtil;
 import com.ej.hgj.utils.HttpClientUtil;
 import com.ej.hgj.utils.TimestampGenerator;
-import com.ej.hgj.utils.wechat.WechatPubNumUtils;
-import com.ej.hgj.vo.QrCodeLogResVo;
+import com.ej.hgj.vo.QrCodeLogReqVo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -86,7 +63,7 @@ public class ControlServiceImpl implements ControlService {
 
     @Override
     //@Transactional(rollbackFor = Exception.class)
-    public AjaxResultApi saveOpenDoorLog(QrCodeLogResVo qrCodeLogResVo){
+    public AjaxResultApi saveOpenDoorLog(QrCodeLogReqVo qrCodeLogResVo){
         AjaxResultApi ajaxResult = new AjaxResultApi();
         String neighNo = qrCodeLogResVo.getNeighNo();
         String cardNo = qrCodeLogResVo.getCardNo();

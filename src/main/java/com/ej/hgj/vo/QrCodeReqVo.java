@@ -3,7 +3,7 @@ package com.ej.hgj.vo;
 import lombok.Data;
 
 @Data
-public class QrCodeResVo {
+public class QrCodeReqVo {
 
     // 小区号
     private String neighNo;
@@ -55,6 +55,9 @@ public class QrCodeResVo {
 
     // 客服姓名
     private String serviceName;
+
+    // 外部人员电话
+    private String personPhone;
 
 
 }
