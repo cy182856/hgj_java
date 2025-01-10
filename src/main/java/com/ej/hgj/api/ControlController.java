@@ -224,7 +224,7 @@ public class ControlController {
                 openDoorCodeServiceDaoMapper.save(openDoorCodeService);
                 ajaxResult.setResCode(1);
                 ajaxResult.setResMsg("成功");
-                logger.info("-------------------客服直接创建二维码成功-------------");
+                logger.info("-------------------客服创建二维码成功-------------");
             }
 
             // 客服通过快速码创建的二维码
@@ -300,6 +300,52 @@ public class ControlController {
                 ajaxResult.setResCode(1);
                 ajaxResult.setResMsg("成功");
                 logger.info("-------------------客服创建通码成功-------------");
+            }
+            // 客服直接创建的二维码,不需要快速码验证，临时二维码
+            if(type == 6){
+                if(StringUtils.isBlank(neighNo) || StringUtils.isBlank(expDate) ||
+                        StringUtils.isBlank(houseId) || StringUtils.isBlank(cstCode) ||
+                        StringUtils.isBlank(cstName) || unitNum == null || floor == null||
+                        StringUtils.isBlank(room)){
+                    ajaxResult.setResCode(0);
+                    ajaxResult.setResMsg("请求参数错误");
+                    return ajaxResult;
+                }
+                OpenDoorCodeService openDoorCodeServicePram = new OpenDoorCodeService();
+                openDoorCodeServicePram.setCardNo(cardNo);
+                ProNeighConfig byNeighNo = proNeighConfDaoMapper.getByNeighNo(neighNo);
+                OpenDoorCodeService openDoorCodeService = new OpenDoorCodeService();
+                openDoorCodeService.setId(TimestampGenerator.generateSerialNumber());
+                openDoorCodeService.setProNum(byNeighNo.getProjectNum());
+                openDoorCodeService.setProName(byNeighNo.getProjectName());
+                openDoorCodeService.setType(6);
+                openDoorCodeService.setServiceName(serviceName);
+                openDoorCodeService.setExpDate(expDate);
+                openDoorCodeService.setStartTime(startTime);
+                openDoorCodeService.setEndTime(endTime);
+                openDoorCodeService.setCardNo(cardNo);
+                openDoorCodeService.setQrCodeContent(qrCode);
+                openDoorCodeService.setNeighNo(neighNo);
+                openDoorCodeService.setUnitNum(unitNum.toString());
+                openDoorCodeService.setFloors(floor.toString());
+                openDoorCodeService.setCstCode(cstCode);
+                openDoorCodeService.setCstName(cstName);
+                openDoorCodeService.setPhone(phone.toString());
+                openDoorCodeService.setResCode(room);
+                // 截取房间号
+                String[] resCodeSplit = room.split("-");
+                String addressNumber = unitNum+resCodeSplit[2];
+                openDoorCodeService.setAddressNum(addressNumber);
+                openDoorCodeService.setHouseId(houseId);
+                String facePicPath = saveFacePic(cardNo, facePic);
+                openDoorCodeService.setFacePicPath(facePicPath);
+                openDoorCodeService.setCreateTime(new Date());
+                openDoorCodeService.setUpdateTime(new Date());
+                openDoorCodeService.setDeleteFlag(Constant.DELETE_FLAG_NOT);
+                openDoorCodeServiceDaoMapper.save(openDoorCodeService);
+                ajaxResult.setResCode(1);
+                ajaxResult.setResMsg("成功");
+                logger.info("-------------------客服创建临时二维码成功-------------");
             }
         }catch (Exception e){
             e.printStackTrace();

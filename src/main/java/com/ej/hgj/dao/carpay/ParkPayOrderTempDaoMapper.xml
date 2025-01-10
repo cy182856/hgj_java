@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.carpay.ParkPayOrderTempDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.carpay.ParkPayOrderTemp">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="order_id" jdbcType="VARCHAR" property="orderId"/>
+        <result column="park_order_no" jdbcType="VARCHAR" property="parkOrderNo"/>
+        <result column="pay_order_no" jdbcType="VARCHAR" property="payOrderNo"/>
+        <result column="create_code" jdbcType="VARCHAR" property="createCode"/>
+        <result column="create_msg" jdbcType="VARCHAR" property="createMsg"/>
+        <result column="pay_call_back_code" jdbcType="VARCHAR" property="payCallBackCode"/>
+        <result column="pay_call_back_msg" jdbcType="VARCHAR" property="payCallBackMsg"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, order_id, park_order_no, pay_order_no, create_code, create_msg, pay_call_back_code, pay_call_back_msg, remark, create_time, update_time, create_by, update_by, delete_flag
+    </sql>
+
+    <!-- 根据订单号查询-->
+    <select id="getParkPayOrderTemp" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_park_pay_order_temp
+        where delete_flag = 0
+        and order_id = #{orderId,jdbcType=VARCHAR}
+    </select>
+
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.carpay.ParkPayOrderTemp" >
+        insert into  t_park_pay_order_temp(
+        <if test="id != null">
+            id,
+        </if>
+        <if test="orderId != null">
+            order_id,
+        </if>
+        <if test="parkOrderNo != null" >
+            park_order_no,
+        </if>
+        <if test="payOrderNo != null" >
+            pay_order_no,
+        </if>
+        <if test="createCode != null" >
+            create_code,
+        </if>
+        <if test="createMsg != null" >
+            create_msg,
+        </if>
+        <if test="payCallBackCode != null" >
+            pay_call_back_code,
+        </if>
+        <if test="payCallBackMsg != null" >
+            pay_call_back_msg,
+        </if>
+        <if test="remark != null" >
+            remark,
+        </if>
+        <if test="createTime != null">
+            create_time,
+        </if>
+        <if test="createBy != null">
+            create_by,
+        </if>
+        <if test="updateTime != null">
+            update_time,
+        </if>
+        <if test="updateBy != null">
+            update_by,
+        </if>
+        <if test="deleteFlag != null">
+            delete_flag
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="orderId != null" >
+                #{orderId,jdbcType=VARCHAR},
+            </if>
+            <if test="parkOrderNo != null" >
+                #{parkOrderNo,jdbcType=VARCHAR},
+            </if>
+            <if test="payOrderNo != null" >
+                #{payOrderNo,jdbcType=VARCHAR},
+            </if>
+            <if test="createCode != null" >
+                #{createCode,jdbcType=VARCHAR},
+            </if>
+            <if test="createMsg != null" >
+                #{createMsg,jdbcType=VARCHAR},
+            </if>
+            <if test="payCallBackCode != null" >
+                #{payCallBackCode,jdbcType=VARCHAR},
+            </if>
+            <if test="payCallBackMsg != null" >
+                #{payCallBackMsg,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null" >
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.carpay.ParkPayOrderTemp" >
+        update
+        t_park_pay_order_temp
+        <set>
+            <if test="payCallBackCode != null">
+                pay_call_back_code = #{payCallBackCode,jdbcType=VARCHAR},
+            </if>
+            <if test="payCallBackMsg != null">
+                pay_call_back_msg = #{payCallBackMsg,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 更新-->
+<!--    <update id="update" parameterType="com.ej.hgj.entity.bill.PaymentRecord" >-->
+<!--        update-->
+<!--        t_payment_record-->
+<!--        <set>-->
+<!--            <if test="transactionId != null">-->
+<!--                transaction_id = #{transactionId,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="tradeType != null">-->
+<!--                trade_type = #{tradeType,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="tradeState != null">-->
+<!--                trade_state = #{tradeState,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="tradeStateDesc != null">-->
+<!--                trade_state_desc = #{tradeStateDesc,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="bankType != null">-->
+<!--                bank_type = #{bankType,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="successTime != null">-->
+<!--                success_time = #{successTime,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="paymentStatus != null">-->
+<!--                payment_status = #{paymentStatus,jdbcType=INTEGER},-->
+<!--            </if>-->
+<!--            <if test="updateTime != null">-->
+<!--                update_time = #{updateTime,jdbcType=TIMESTAMP},-->
+<!--            </if>-->
+<!--        </set>-->
+<!--        where id = #{id,jdbcType=VARCHAR}-->
+<!--    </update>-->
+
+    <!-- 更新支付记录状态为支付中-->
+<!--    <update id="updatePayRecord" parameterType="com.ej.hgj.entity.bill.PaymentRecord" >-->
+<!--        update-->
+<!--        t_payment_record-->
+<!--        <set>-->
+<!--            <if test="paymentStatus != null">-->
+<!--                payment_status = #{paymentStatus,jdbcType=INTEGER},-->
+<!--            </if>-->
+<!--            <if test="updateTime != null">-->
+<!--                update_time = #{updateTime,jdbcType=TIMESTAMP},-->
+<!--            </if>-->
+<!--        </set>-->
+<!--        where id = #{id,jdbcType=VARCHAR} and payment_status = 0-->
+<!--    </update>-->
+
+</mapper>
