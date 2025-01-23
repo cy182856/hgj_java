@@ -71,4 +71,10 @@ public class ParkPayOrder {
     private String endTime;
 
     private String proName;
+
+    private String cardCode;
+
+    private String createMsg;
+
+    private String payCallBackMsg;
 }

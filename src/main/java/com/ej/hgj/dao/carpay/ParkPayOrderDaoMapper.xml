@@ -31,6 +31,9 @@
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
 
         <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
+        <result column="card_code" jdbcType="VARCHAR" property="cardCode"/>
+        <result column="create_msg" jdbcType="VARCHAR" property="createMsg"/>
+        <result column="pay_call_back_msg" jdbcType="VARCHAR" property="payCallBackMsg"/>
     </resultMap>
     <sql id="Base_Column_List" >
         id, pro_num, park_order_no, card_cst_batch_id, car_code, wx_open_id, cst_code, cst_name, pay_amount, amount_total, ip_item_name,transaction_id,trade_type,
@@ -48,10 +51,12 @@
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.carpay.ParkPayOrder">
         SELECT
-        a.*,b.project_name as pro_name
+        a.*,b.project_name as pro_name,c.card_code,d.create_msg,d.pay_call_back_msg
         FROM
         t_park_pay_order a
         left join t_pro_config b on b.project_num = a.pro_num
+        left join t_card_cst_batch c on c.id = a.card_cst_batch_id and c.delete_flag = 0 and card_type = 2
+        left join t_park_pay_order_temp d on d.order_id = a.id
         WHERE a.delete_flag = 0
         <if test="carCode != null and carCode != ''">
             and a.car_code = #{carCode}
@@ -59,8 +64,14 @@
         <if test="orderStatus != null">
             and a.order_status = #{orderStatus}
         </if>
+        <if test="isDeduction != null">
+            and a.is_deduction = #{isDeduction}
+        </if>
         <if test="proNum != null and proNum != ''">
             and a.pro_num = #{proNum}
+        </if>
+        <if test="cardCode != null and cardCode != ''">
+            and c.card_code = #{cardCode}
         </if>
         <if test="cstName != null">
             and a.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
