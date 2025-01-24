@@ -5,6 +5,7 @@ import org.springframework.util.Assert;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public abstract class DateUtils {
@@ -38,6 +39,8 @@ public abstract class DateUtils {
     public static SimpleDateFormat sdf_Ym = new SimpleDateFormat("yyyy-MM");
     public static SimpleDateFormat sdfYmd = new SimpleDateFormat("yyyyMMdd");
     public static SimpleDateFormat sdfY = new SimpleDateFormat("yyyy");
+
+    public static DateTimeFormatter formatter_ymd_hms = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     // 获取系统时间 年月日时分秒
     public static String strYmdHms(){

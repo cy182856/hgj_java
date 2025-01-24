@@ -28,6 +28,8 @@ public class ParkPayOrder {
 
     private BigDecimal payAmount;
 
+    private BigDecimal actAmount;
+
     private Integer amountTotal;
 
     private String ipItemName;
@@ -45,6 +47,8 @@ public class ParkPayOrder {
     private String successTime;
 
     private Integer isDeduction;
+
+    private Integer deductionNum;
 
     private String inTime;
 

@@ -15,6 +15,7 @@ import com.ej.hgj.entity.user.User;
 import com.ej.hgj.service.cstInto.CstIntoService;
 import com.ej.hgj.service.role.RoleService;
 import com.ej.hgj.sy.dao.house.SyHouseDaoMapper;
+import com.ej.hgj.utils.DateUtils;
 import com.ej.hgj.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -25,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +54,14 @@ public class CarPayController {
         HashMap map = new HashMap();
         PageHelper.offsetPage((page-1) * limit,limit);
         List<ParkPayOrder> list = parkPayOrderDaoMapper.getList(parkPayOrder);
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        for(ParkPayOrder p : list){
+            if(StringUtils.isNotBlank(p.getSuccessTime())) {
+                ZonedDateTime zonedDateTime = ZonedDateTime.parse(p.getSuccessTime(), formatter);
+                String formatted = zonedDateTime.format(DateUtils.formatter_ymd_hms);
+                p.setSuccessTime(formatted);
+            }
+        }
         //logger.info("list:"+ JSON.toJSONString(list));
         PageInfo<ParkPayOrder> pageInfo = new PageInfo<>(list);
         //计算总页数
