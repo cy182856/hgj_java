@@ -1,11 +1,24 @@
 package com.ej.hgj.task.service;
 
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.config.ConstantConfDaoMapper;
+import com.ej.hgj.dao.cstInto.CstIntoDaoMapper;
 import com.ej.hgj.dao.material.MaterialApplyDaoMapper;
+import com.ej.hgj.dao.message.MsgTemplateDaoMapper;
 import com.ej.hgj.dao.repair.RepairLogDaoMapper;
+import com.ej.hgj.dao.wechat.WechatPubDaoMapper;
+import com.ej.hgj.dao.wechat.WechatPubUserDaoMapper;
 import com.ej.hgj.entity.config.ConstantConfig;
+import com.ej.hgj.entity.cstInto.CstInto;
+import com.ej.hgj.entity.message.MsgTemplate;
 import com.ej.hgj.entity.repair.RepairLog;
+import com.ej.hgj.entity.wechat.Miniprogram;
+import com.ej.hgj.entity.wechat.TempleMessage;
+import com.ej.hgj.entity.wechat.WechatPub;
+import com.ej.hgj.entity.wechat.WechatPubUser;
 import com.ej.hgj.entity.workord.Material;
 import com.ej.hgj.entity.workord.MaterialApply;
 import com.ej.hgj.entity.workord.ReturnVisit;
@@ -13,10 +26,7 @@ import com.ej.hgj.entity.workord.WorkOrd;
 import com.ej.hgj.sy.dao.workord.MaterialDaoMapper;
 import com.ej.hgj.sy.dao.workord.ReturnVisitDaoMapper;
 import com.ej.hgj.sy.dao.workord.WorkOrdDaoMapper;
-import com.ej.hgj.utils.DateUtils;
-import com.ej.hgj.utils.GenerateUniqueIdUtil;
-import com.ej.hgj.utils.SyPostClient;
-import com.github.pagehelper.Constant;
+import com.ej.hgj.utils.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +62,18 @@ public class RepairTaskService {
     @Autowired
     private ConstantConfDaoMapper constantConfDaoMapper;
 
+    @Autowired
+    private WechatPubDaoMapper wechatPubDaoMapper;
+
+    @Autowired
+    private MsgTemplateDaoMapper msgTemplateDaoMapper;
+
+    @Autowired
+    private CstIntoDaoMapper cstIntoDaoMapper;
+
+    @Autowired
+    private WechatPubUserDaoMapper wechatPubUserDaoMapper;
+
     @Transactional
     public void repairWoStaSubUpdate() {
         logger.info("----------------------已提交工单定时任务处理开始--------------------------- ");
@@ -78,6 +100,21 @@ public class RepairTaskService {
                         repairLog1.setRepairStatus("WOSta_Proc");
                         repairLog1.setUpdateTime(new Date());
                         repairLogDaoMapper.update(repairLog1);
+
+                        // 处理中工单发送模板消息
+                        try {
+                            // 查询报修信息
+                            String repairNum = workOrd.getWoNo();
+                            RepairLog findByRepNum = repairLogDaoMapper.getByRepNum(repairNum);
+                            // 根据项目号查询公众号
+                            WechatPub wechatPub = wechatPubDaoMapper.getByProNum(findByRepNum.getProjectNum());
+                            String accessToken = JSONUtil.parseObj(HttpUtil.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="+wechatPub.getAppId()+"&secret=" + wechatPub.getAppSecret())).get("access_token").toString();
+                            repairWostaProcSendTempMsg(findByRepNum.getProjectNum(),findByRepNum.getWxOpenId(), accessToken,wechatPub.getProName(), repairNum);
+                            logger.info("--处理中工单模板消息发送成功--||" + "项目：" + findByRepNum.getProjectName() + "||客户：" + findByRepNum.getCstName() + "||报修单号：" + repairNum);
+                        }catch (Exception e){
+                            logger.info("--处理中工单模板消息发送失败--" + e);
+                        }
+
                     }else if("WOSta_Finish".equals(workOrd.getWorkOrdState())){
                         // 已完工报修单处理
                         repairFinish(workOrd);
@@ -229,6 +266,20 @@ public class RepairTaskService {
             repairLog1.setRepairStatus("WOSta_Finish");
             repairLog1.setUpdateTime(new Date());
             repairLogDaoMapper.update(repairLog1);
+
+            // 已完工工单发送模板消息
+            try {
+                // 查询报修信息
+                String repairNum = workOrd.getWoNo();
+                RepairLog findByRepNum = repairLogDaoMapper.getByRepNum(repairNum);
+                // 根据项目号查询公众号
+                WechatPub wechatPub = wechatPubDaoMapper.getByProNum(findByRepNum.getProjectNum());
+                String accessToken = JSONUtil.parseObj(HttpUtil.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="+wechatPub.getAppId()+"&secret=" + wechatPub.getAppSecret())).get("access_token").toString();
+                repairWostaFinishSendTempMsg(findByRepNum.getProjectNum(),findByRepNum.getWxOpenId(), accessToken, repairNum);
+                logger.info("--已完工工单模板消息发送成功--||" + "项目：" + findByRepNum.getProjectName() + "||客户：" + findByRepNum.getCstName() + "||报修单号：" + repairNum);
+            }catch (Exception e){
+                logger.info("--已完工工单模板消息发送失败--" + e);
+            }
         }
     }
 
@@ -284,5 +335,113 @@ public class RepairTaskService {
         String UserId = "\"UserId\":\"Sam\",";
         UserId += "}";
         return WOID + ReturnVisitWay + ReturnVisitDate + Object + ObjectName + SatisfiedVisit + Remark + TotalScore + VisitState + UserId;
+    }
+
+    public void repairWostaProcSendTempMsg(String proNum, String wxOpenId, String accessToken, String proName, String repairNum) throws Exception {
+        // 查询小程序配置
+        ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP_EJ_ZHSQ);
+        Miniprogram miniprogram = new Miniprogram(constantConfig.getAppId(), "subpages/repair/pages/repairQuery/repairQuery");
+        // 查询消息模板
+        MsgTemplate msgTemplate = msgTemplateDaoMapper.getByProNumAndKey(proNum, Constant.REPAIR_WOSTA_PROC_TEMPLATE);
+        if(msgTemplate != null) {
+            // 根据项目号，微信号查询已入住客户
+            CstInto cstInto = new CstInto();
+            cstInto.setProjectNum(proNum);
+            cstInto.setWxOpenId(wxOpenId);
+            cstInto.setIntoStatus(Constant.INTO_STATUS_Y);
+            List<CstInto> cstIntoList = cstIntoDaoMapper.getList(cstInto);
+            // 根据入住用户unionId获取公众号openId
+            if (!cstIntoList.isEmpty()) {
+                List<String> unionIdList = new ArrayList<>();
+                for (CstInto cst : cstIntoList) {
+                    if (StringUtils.isNotBlank(cst.getUnionId()))
+                        unionIdList.add(cst.getUnionId());
+                }
+                // 根据项目号，unionids集合查询公众号用户
+                if (!unionIdList.isEmpty()) {
+                    WechatPubUser wechatPubUser = new WechatPubUser();
+                    wechatPubUser.setProNum(proNum);
+                    wechatPubUser.setUnionIdList(unionIdList);
+                    List<WechatPubUser> wechatPubUserList = wechatPubUserDaoMapper.getList(wechatPubUser);
+                    if (!wechatPubUserList.isEmpty()) {
+                        for (WechatPubUser wp : wechatPubUserList) {
+                            TempleMessage modelMessage = new TempleMessage();
+                            modelMessage.setTouser(wp.getOpenid());
+                            modelMessage.setTemplate_id(msgTemplate.getTemplateId());
+                            modelMessage.setData("dataParam");
+                            modelMessage.setMiniprogram(miniprogram);
+                            String jsonMenu = JsonUtils.writeEntiry2JSON(modelMessage);
+                            String data = msgTemplate.getTemplateData();
+                            data = data.replace("param1", DateUtils.strYmdHms()).replace("param2", repairNum).replace("param3", proName);
+                            jsonMenu = jsonMenu.replace("\"dataParam\"", data);
+                            newSendModel(jsonMenu, accessToken);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void repairWostaFinishSendTempMsg(String proNum, String wxOpenId, String accessToken, String repairNum) throws Exception {
+        // 查询小程序配置
+        ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP_EJ_ZHSQ);
+        Miniprogram miniprogram = new Miniprogram(constantConfig.getAppId(), "subpages/repair/pages/repairQuery/repairQuery");
+        // 查询消息模板
+        MsgTemplate msgTemplate = msgTemplateDaoMapper.getByProNumAndKey(proNum, Constant.REPAIR_WOSTA_FINISH_TEMPLATE);
+        if(msgTemplate != null) {
+            // 根据项目号，微信号查询已入住客户
+            CstInto cstInto = new CstInto();
+            cstInto.setProjectNum(proNum);
+            cstInto.setWxOpenId(wxOpenId);
+            cstInto.setIntoStatus(Constant.INTO_STATUS_Y);
+            List<CstInto> cstIntoList = cstIntoDaoMapper.getList(cstInto);
+            // 根据入住用户unionId获取公众号openId
+            if (!cstIntoList.isEmpty()) {
+                List<String> unionIdList = new ArrayList<>();
+                for (CstInto cst : cstIntoList) {
+                    if (StringUtils.isNotBlank(cst.getUnionId()))
+                        unionIdList.add(cst.getUnionId());
+                }
+                // 根据项目号，unionids集合查询公众号用户
+                if (!unionIdList.isEmpty()) {
+                    WechatPubUser wechatPubUser = new WechatPubUser();
+                    wechatPubUser.setProNum(proNum);
+                    wechatPubUser.setUnionIdList(unionIdList);
+                    List<WechatPubUser> wechatPubUserList = wechatPubUserDaoMapper.getList(wechatPubUser);
+                    if (!wechatPubUserList.isEmpty()) {
+                        for (WechatPubUser wp : wechatPubUserList) {
+                            TempleMessage modelMessage = new TempleMessage();
+                            modelMessage.setTouser(wp.getOpenid());
+                            modelMessage.setTemplate_id(msgTemplate.getTemplateId());
+                            modelMessage.setData("dataParam");
+                            modelMessage.setMiniprogram(miniprogram);
+                            String jsonMenu = JsonUtils.writeEntiry2JSON(modelMessage);
+                            String data = msgTemplate.getTemplateData();
+                            data = data.replace("param1", repairNum).replace("param2", DateUtils.strYmdHms());
+                            jsonMenu = jsonMenu.replace("\"dataParam\"", data);
+                            newSendModel(jsonMenu, accessToken);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static int newSendModel(String jsonMenu, String accessToken) {
+        int result = -1;
+        String url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN".replace("ACCESS_TOKEN", accessToken);
+        jsonMenu = jsonMenu.replace("date", "Date").replace("money", "Money");
+        //}
+        JSONObject jsonObject = HttpClientUtil.sendPost(url, jsonMenu);
+        if (null != jsonObject) {
+            int errorCode = ((Integer) jsonObject.get("errcode"));
+            if (0 != errorCode) {
+                result = errorCode;
+            } else {
+                result = 0;
+            }
+        }
+
+        return result;
     }
 }

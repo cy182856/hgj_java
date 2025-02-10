@@ -137,6 +137,16 @@ public class Constant {
     public static final String GONGGAO_TEMPLATE = "gonggao_template";
 
     /**
+     * 处理中工单消息模版key
+     */
+    public static final String REPAIR_WOSTA_PROC_TEMPLATE = "repair_wosta_proc_template";
+
+    /**
+     * 已完工工单消息模版key
+     */
+    public static final String REPAIR_WOSTA_FINISH_TEMPLATE = "repair_wosta_finish_template";
+
+    /**
      * 公众号菜单父级ID,用于问卷调查新增问卷时添加公众号菜单
      */
     //public static final String WECHAT_PUB_MENU_PARENT_ID = "wechat_pub_menu_parent_id";

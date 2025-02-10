@@ -108,6 +108,9 @@
         <if test="cstCode != null">
             and c.cst_code = #{cstCode}
         </if>
+        <if test="wxOpenId != null">
+            and c.wx_open_id = #{wxOpenId}
+        </if>
         <if test="startTime != null and startTime != ''">
             and c.create_time >= #{startTime,jdbcType=VARCHAR}
         </if>

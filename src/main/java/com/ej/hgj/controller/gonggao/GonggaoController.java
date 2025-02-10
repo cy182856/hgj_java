@@ -347,39 +347,41 @@ public class GonggaoController {
     public void sendTempMsg(String proNum, String accessToken, String proName) throws Exception {
         // 查询小程序配置
         ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.MINI_PROGRAM_APP_EJ_ZHSQ);
-        Miniprogram miniprogram = new Miniprogram(constantConfig.getAppId(), "pages/main/main");// 查询消息模板
+        Miniprogram miniprogram = new Miniprogram(constantConfig.getAppId(), "pages/main/main");
         // 查询消息模板
         MsgTemplate msgTemplate = msgTemplateDaoMapper.getByProNumAndKey(proNum, Constant.GONGGAO_TEMPLATE);
-        // 根据项目号查询已入住客户
-        CstInto cstInto = new CstInto();
-        cstInto.setProjectNum(proNum);
-        cstInto.setIntoStatus(Constant.INTO_STATUS_Y);
-        List<CstInto> cstIntoList = cstIntoDaoMapper.getList(cstInto);
-        // 根据入住用户unionId获取公众号openId
-        if(!cstIntoList.isEmpty()) {
-            List<String> unionIdList = new ArrayList<>();
-            for (CstInto cst : cstIntoList) {
-                if (StringUtils.isNotBlank(cst.getUnionId()))
-                    unionIdList.add(cst.getUnionId());
-            }
-            // 根据项目号，unionids集合查询公众号用户
-            if (!unionIdList.isEmpty()) {
-                WechatPubUser wechatPubUser = new WechatPubUser();
-                wechatPubUser.setProNum(proNum);
-                wechatPubUser.setUnionIdList(unionIdList);
-                List<WechatPubUser> wechatPubUserList = wechatPubUserDaoMapper.getList(wechatPubUser);
-                if (!wechatPubUserList.isEmpty()) {
-                    for (WechatPubUser wp : wechatPubUserList) {
-                        TempleMessage modelMessage = new TempleMessage();
-                        modelMessage.setTouser(wp.getOpenid());
-                        modelMessage.setTemplate_id(msgTemplate.getTemplateId());
-                        modelMessage.setData("dataParam");
-                        modelMessage.setMiniprogram(miniprogram);
-                        String jsonMenu = JsonUtils.writeEntiry2JSON(modelMessage);
-                        String data = msgTemplate.getTemplateData();
-                        data = data.replace("param1",proName).replace("param2",DateUtils.strYmdHms()).replace("param3","新公告通知");
-                        jsonMenu = jsonMenu.replace("\"dataParam\"",data);
-                        newSendModel(jsonMenu, accessToken);
+        if(msgTemplate != null) {
+            // 根据项目号查询已入住客户
+            CstInto cstInto = new CstInto();
+            cstInto.setProjectNum(proNum);
+            cstInto.setIntoStatus(Constant.INTO_STATUS_Y);
+            List<CstInto> cstIntoList = cstIntoDaoMapper.getList(cstInto);
+            // 根据入住用户unionId获取公众号openId
+            if (!cstIntoList.isEmpty()) {
+                List<String> unionIdList = new ArrayList<>();
+                for (CstInto cst : cstIntoList) {
+                    if (StringUtils.isNotBlank(cst.getUnionId()))
+                        unionIdList.add(cst.getUnionId());
+                }
+                // 根据项目号，unionids集合查询公众号用户
+                if (!unionIdList.isEmpty()) {
+                    WechatPubUser wechatPubUser = new WechatPubUser();
+                    wechatPubUser.setProNum(proNum);
+                    wechatPubUser.setUnionIdList(unionIdList);
+                    List<WechatPubUser> wechatPubUserList = wechatPubUserDaoMapper.getList(wechatPubUser);
+                    if (!wechatPubUserList.isEmpty()) {
+                        for (WechatPubUser wp : wechatPubUserList) {
+                            TempleMessage modelMessage = new TempleMessage();
+                            modelMessage.setTouser(wp.getOpenid());
+                            modelMessage.setTemplate_id(msgTemplate.getTemplateId());
+                            modelMessage.setData("dataParam");
+                            modelMessage.setMiniprogram(miniprogram);
+                            String jsonMenu = JsonUtils.writeEntiry2JSON(modelMessage);
+                            String data = msgTemplate.getTemplateData();
+                            data = data.replace("param1", proName).replace("param2", DateUtils.strYmdHms()).replace("param3", "新公告通知");
+                            jsonMenu = jsonMenu.replace("\"dataParam\"", data);
+                            newSendModel(jsonMenu, accessToken);
+                        }
                     }
                 }
             }

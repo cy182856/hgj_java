@@ -36,4 +36,6 @@ public class MsgTemplate {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
+    private String proName;
+
 }

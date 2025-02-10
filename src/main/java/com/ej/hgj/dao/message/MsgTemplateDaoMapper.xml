@@ -15,6 +15,8 @@
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+
+        <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
     </resultMap>
     <sql id="Base_Column_List" >
         id, pro_num, template_key, template_id, template_data, status, description, create_time, update_time, create_by,
@@ -36,5 +38,45 @@
         from t_msg_template
         where delete_flag = 0 and status = 0 and pro_num = #{proNum} and template_key = #{templateKey}
     </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.message.MsgTemplate">
+        select
+        a.*,b.project_name as pro_name
+        from t_msg_template a
+        left join t_pro_config b on b.project_num = a.pro_num
+        where a.delete_flag = 0
+        <if test="proNum != null">
+            and a.pro_num = #{proNum}
+        </if>
+        <if test="status != null">
+            and a.status = #{status}
+        </if>
+        <if test="description != null and description != ''">
+            and a.description like CONCAT('%', #{description,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        order by a.update_time desc
+    </select>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.message.MsgTemplate" >
+        update
+        t_msg_template
+        <set>
+            <if test="status != null">
+                status = #{status,jdbcType=INTEGER},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="deleteFlag != null">
+                delete_flag = #{deleteFlag,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
 
 </mapper>

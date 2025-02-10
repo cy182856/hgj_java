@@ -5,10 +5,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
+import com.ej.hgj.dao.message.MsgTemplateDaoMapper;
 import com.ej.hgj.dao.wechat.WechatPubDaoMapper;
 import com.ej.hgj.dao.wechat.WechatPubMenuDaoMapper;
 import com.ej.hgj.dao.wechat.WechatPubUserDaoMapper;
 import com.ej.hgj.entity.gonggao.Gonggao;
+import com.ej.hgj.entity.message.MsgTemplate;
 import com.ej.hgj.entity.wechat.WechatPub;
 import com.ej.hgj.entity.wechat.WechatPubMenu;
 import com.ej.hgj.entity.wechat.WechatPubUser;
@@ -48,6 +50,9 @@ public class WechatServiceController {
 
     @Autowired
     private WechatPubUserDaoMapper wechatPubUserDaoMapper;
+
+    @Autowired
+    private MsgTemplateDaoMapper msgTemplateDaoMapper;
 
     @RequestMapping(value = "/addMenu",method = RequestMethod.POST)
     public AjaxResult addMenu(@RequestBody WechatPubVo wechatPubVo) throws Exception {
@@ -381,6 +386,71 @@ public class WechatServiceController {
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         ajaxResult.setData(map);
         //logger.info("responseMsg:"+ JSON.toJSONString(ajaxResult));
+        return ajaxResult;
+    }
+
+    @RequestMapping(value = "/msgTempList",method = RequestMethod.GET)
+    public AjaxResult msgTempList(@RequestParam(value = "page",defaultValue = "1") int page,
+                               @RequestParam(value = "limit",defaultValue = "10") int limit,
+                               MsgTemplate msgTemplate){
+        AjaxResult ajaxResult = new AjaxResult();
+        HashMap map = new HashMap();
+        PageHelper.offsetPage((page-1) * limit,limit);
+        List<MsgTemplate> list = msgTemplateDaoMapper.getList(msgTemplate);
+        //logger.info("list:"+ JSON.toJSONString(list));
+        PageInfo<MsgTemplate> pageInfo = new PageInfo<>(list);
+        //计算总页数
+        int pageNumTotal = (int) Math.ceil((double)pageInfo.getTotal()/(double)limit);
+        if(page > pageNumTotal){
+            PageInfo<Gonggao> entityPageInfo = new PageInfo<>();
+            entityPageInfo.setList(new ArrayList<>());
+            entityPageInfo.setTotal(pageInfo.getTotal());
+            entityPageInfo.setPageNum(page);
+            entityPageInfo.setPageSize(limit);
+            map.put("pageInfo",entityPageInfo);
+        }else {
+            map.put("pageInfo",pageInfo);
+        }
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        ajaxResult.setData(map);
+        //logger.info("responseMsg:"+ JSON.toJSONString(ajaxResult));
+        return ajaxResult;
+    }
+
+    /**
+     * 关闭模版消息
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/closeMsg",method = RequestMethod.GET)
+    public AjaxResult closeMsg(@RequestParam(required=false, value = "id") String id){
+        AjaxResult ajaxResult = new AjaxResult();
+        MsgTemplate msgTemplate = new MsgTemplate();
+        msgTemplate.setId(Integer.valueOf(id));
+        msgTemplate.setStatus(1);
+        msgTemplate.setUpdateTime(new Date());
+        msgTemplateDaoMapper.update(msgTemplate);
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        return ajaxResult;
+    }
+
+    /**
+     * 开启模版消息
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/openMsg",method = RequestMethod.GET)
+    public AjaxResult openMsg(@RequestParam(required=false, value = "id") String id){
+        AjaxResult ajaxResult = new AjaxResult();
+        MsgTemplate msgTemplate = new MsgTemplate();
+        msgTemplate.setId(Integer.valueOf(id));
+        msgTemplate.setStatus(0);
+        msgTemplate.setUpdateTime(new Date());
+        msgTemplateDaoMapper.update(msgTemplate);
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;
     }
 
