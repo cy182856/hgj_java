@@ -10,10 +10,12 @@ import com.ej.hgj.entity.api.HgjHouseRoomInfo;
 import com.ej.hgj.entity.api.HgjHouseUnit;
 import com.ej.hgj.entity.api.QuickCodeInfo;
 import com.ej.hgj.entity.config.ProNeighConfig;
+import com.ej.hgj.entity.file.FileMessage;
 import com.ej.hgj.entity.opendoor.*;
 import com.ej.hgj.service.api.ControlService;
 import com.ej.hgj.utils.DateUtils;
 import com.ej.hgj.utils.TimestampGenerator;
+import com.ej.hgj.utils.file.FileSendClient;
 import com.ej.hgj.vo.QrCodeLogReqVo;
 import com.ej.hgj.vo.QrCodeReqVo;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +26,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,6 +45,9 @@ public class ControlController {
 
     @Value("${upload.path}")
     private String uploadPath;
+
+    @Value("${upload.path.remote}")
+    private String uploadPathRemote;
 
     @Autowired
     private HgjHouseDaoMapper hgjHouseDaoMapper;
@@ -172,7 +179,10 @@ public class ControlController {
             ajaxResult.setResMsg("请求参数错误");
             return ajaxResult;
         }
-
+        // 远程文件夹地址
+        String folderPathRemote = uploadPathRemote + "/facepic/" + new SimpleDateFormat("yyyyMMdd").format(new Date());
+        // 远程文件地址
+        String filePathRemote = folderPathRemote + "/" + cardNo + ".txt";
         try {
             // 客服直接创建的二维码
             if(type == 3){
@@ -216,8 +226,7 @@ public class ControlController {
                 String addressNumber = unitNum+resCodeSplit[2];
                 openDoorCodeService.setAddressNum(addressNumber);
                 openDoorCodeService.setHouseId(houseId);
-                String facePicPath = saveFacePic(cardNo, facePic);
-                openDoorCodeService.setFacePicPath(facePicPath);
+                openDoorCodeService.setFacePicPath(filePathRemote);
                 openDoorCodeService.setCreateTime(new Date());
                 openDoorCodeService.setUpdateTime(new Date());
                 openDoorCodeService.setDeleteFlag(Constant.DELETE_FLAG_NOT);
@@ -225,6 +234,9 @@ public class ControlController {
                 ajaxResult.setResCode(1);
                 ajaxResult.setResMsg("成功");
                 logger.info("-------------------客服创建二维码成功-------------");
+                // 发送文件
+                sendRemoteFile(cardNo, facePic, folderPathRemote);
+                logger.info("-------------------文件发送成功------------------");
             }
 
             // 客服通过快速码创建的二维码
@@ -251,8 +263,7 @@ public class ControlController {
                 byQuickCode.setCardNo(cardNo);
                 byQuickCode.setQrCodeContent(qrCode);
                 byQuickCode.setPhone(phone.toString());
-                String facePicPath = saveFacePic(cardNo, facePic);
-                byQuickCode.setFacePicPath(facePicPath);
+                byQuickCode.setFacePicPath(filePathRemote);
                 byQuickCode.setServiceName(serviceName);
                 byQuickCode.setIsExpire(0);
                 byQuickCode.setUpdateTime(new Date());
@@ -260,6 +271,9 @@ public class ControlController {
                 ajaxResult.setResCode(1);
                 ajaxResult.setResMsg("成功");
                 logger.info("-------------------客服通过快速码创建二维码成功-------------");
+                // 发送文件
+                sendRemoteFile(cardNo, facePic, folderPathRemote);
+                logger.info("-------------------文件发送成功------------------");
             }
             // 客服创建的通码
             if(type == 5){
@@ -290,8 +304,7 @@ public class ControlController {
                 openDoorCodeService.setQrCodeContent(qrCode);
                 openDoorCodeService.setNeighNo(neighNo);
                 openDoorCodeService.setPhone(phone.toString());
-                String facePicPath = saveFacePic(cardNo, facePic);
-                openDoorCodeService.setFacePicPath(facePicPath);
+                openDoorCodeService.setFacePicPath(filePathRemote);
                 openDoorCodeService.setPersonPhone(personPhone);
                 openDoorCodeService.setCreateTime(new Date());
                 openDoorCodeService.setUpdateTime(new Date());
@@ -300,6 +313,9 @@ public class ControlController {
                 ajaxResult.setResCode(1);
                 ajaxResult.setResMsg("成功");
                 logger.info("-------------------客服创建通码成功-------------");
+                // 发送文件
+                sendRemoteFile(cardNo, facePic, folderPathRemote);
+                logger.info("-------------------文件发送成功------------------");
             }
             // 客服直接创建的二维码,不需要快速码验证，临时二维码
             if(type == 6){
@@ -337,8 +353,7 @@ public class ControlController {
                 String addressNumber = unitNum+resCodeSplit[2];
                 openDoorCodeService.setAddressNum(addressNumber);
                 openDoorCodeService.setHouseId(houseId);
-                String facePicPath = saveFacePic(cardNo, facePic);
-                openDoorCodeService.setFacePicPath(facePicPath);
+                openDoorCodeService.setFacePicPath(filePathRemote);
                 openDoorCodeService.setCreateTime(new Date());
                 openDoorCodeService.setUpdateTime(new Date());
                 openDoorCodeService.setDeleteFlag(Constant.DELETE_FLAG_NOT);
@@ -346,6 +361,9 @@ public class ControlController {
                 ajaxResult.setResCode(1);
                 ajaxResult.setResMsg("成功");
                 logger.info("-------------------客服创建临时二维码成功-------------");
+                // 发送文件
+                sendRemoteFile(cardNo, facePic, folderPathRemote);
+                logger.info("-------------------文件发送成功------------------");
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -402,8 +420,11 @@ public class ControlController {
             epi.setPhone(phone);
             epi.setIdCard(idCard);
             epi.setBelComp(belComp);
-            String facePicPath = saveFacePic(id, facePic);
-            epi.setFacePicPath(facePicPath);
+            // 远程文件夹地址
+            String folderPathRemote = uploadPathRemote + "/facepic/" + new SimpleDateFormat("yyyyMMdd").format(new Date());
+            // 远程文件地址
+            String filePathRemote = folderPathRemote + "/" + id + ".txt";
+            epi.setFacePicPath(filePathRemote);
             epi.setCreateTime(new Date());
             epi.setUpdateTime(new Date());
             epi.setDeleteFlag(Constant.DELETE_FLAG_NOT);
@@ -411,6 +432,9 @@ public class ControlController {
             ajaxResult.setResCode(1);
             ajaxResult.setResMsg("成功");
             logger.info("-------------------外部人员信息保存成功-------------");
+            // 发送文件
+            sendRemoteFile(id, facePic, folderPathRemote);
+            logger.info("-------------------文件发送成功------------------");
         }catch (Exception e){
             e.printStackTrace();
             ajaxResult.setResCode(0);
@@ -433,22 +457,29 @@ public class ControlController {
             for(ExternalPersonInfo o : list){
                 if(StringUtils.isNotBlank(o.getFacePicPath())){
                     // 获取图片路径
+//                    String imgPath = o.getFacePicPath();
+//                    String base64Img = "";
+//                    try {
+//                        // 创建BufferedReader对象，从本地文件中读取
+//                        BufferedReader reader = new BufferedReader(new FileReader(imgPath));
+//                        // 逐行读取文件内容
+//                        String line = "";
+//                        while ((line = reader.readLine()) != null) {
+//                            base64Img += line;
+//                        }
+//                        // 关闭文件
+//                        reader.close();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+                    // 获取图片路径
                     String imgPath = o.getFacePicPath();
-                    String base64Img = "";
-                    try {
-                        // 创建BufferedReader对象，从本地文件中读取
-                        BufferedReader reader = new BufferedReader(new FileReader(imgPath));
-                        // 逐行读取文件内容
-                        String line = "";
-                        while ((line = reader.readLine()) != null) {
-                            base64Img += line;
-                        }
-                        // 关闭文件
-                        reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    // 拼接远程文件地址
+                    String fileUrl = Constant.REMOTE_FILE_URL + "/" + imgPath;
+                    String fileContent = FileSendClient.downloadFileContent(fileUrl);
+                    if(StringUtils.isNotBlank(fileContent)) {
+                        o.setFacePic(fileContent);
                     }
-                    o.setFacePic(base64Img);
                 }
             }
             map.put("list", list);
@@ -472,7 +503,7 @@ public class ControlController {
             filePath.mkdirs();
         }
         //创建年月日文件夹
-        File ymdFile = new File(uploadPath + "/facepic" + File.separator + new SimpleDateFormat("yyyyMMdd").format(new Date()));
+        File ymdFile = new File(uploadPath + "/facepic/" + new SimpleDateFormat("yyyyMMdd").format(new Date()));
         //目录不存在则直接创建
         if (!ymdFile.exists()) {
             ymdFile.mkdirs();
@@ -496,5 +527,20 @@ public class ControlController {
             e.printStackTrace();
         }
         return path;
+    }
+
+    public void sendRemoteFile(String cardNo, String facePic, String folderPathRemote){
+        // 发送文件
+        try {
+            // 本地文件地址
+            String facePicPath = saveFacePic(cardNo, facePic);
+            // 读取文件
+            byte[] fileBytes = Files.readAllBytes(Paths.get(facePicPath));
+            // 创建文件消息对象
+            FileMessage fileMessage = new FileMessage(folderPathRemote, cardNo + ".txt", fileBytes);
+            FileSendClient.sendFile(fileMessage);
+        } catch (Exception e) {
+            logger.info("Error in Send: " + e.getMessage());
+        }
     }
 }

@@ -4,7 +4,9 @@ import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
 import com.ej.hgj.dao.adverts.AdvertsDaoMapper;
 import com.ej.hgj.entity.adverts.Adverts;
+import com.ej.hgj.entity.file.FileMessage;
 import com.ej.hgj.utils.TimestampGenerator;
+import com.ej.hgj.utils.file.FileSendClient;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +23,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -34,6 +38,9 @@ public class AdvertsController {
 
     @Value("${upload.path}")
     private String uploadPath;
+
+    @Value("${upload.path.remote}")
+    private String uploadPathRemote;
 
     @Autowired
     private AdvertsDaoMapper advertsDaoMapper;
@@ -51,17 +58,36 @@ public class AdvertsController {
         List<Adverts> list = advertsDaoMapper.getList(adverts);
         for(Adverts a : list){
             if(StringUtils.isNotBlank(a.getImgPath())){
-                String base64Image = "";
+//                String base64Image = "";
+//                try {
+//                    BufferedImage image = ImageIO.read(new File(a.getImgPath()));
+//                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                    ImageIO.write(image, "png", baos);
+//                    byte[] imageBytes = baos.toByteArray();
+//                    base64Image = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                a.setImgPath(base64Image);
+
+                // 远程文件读取
                 try {
-                    BufferedImage image = ImageIO.read(new File(a.getImgPath()));
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ImageIO.write(image, "png", baos);
-                    byte[] imageBytes = baos.toByteArray();
-                    base64Image = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
-                } catch (Exception e) {
+                    String base64Image = "";
+                    // 获取文件路径
+                    String imgPath = a.getImgPath();
+                    // 拼接远程文件地址
+                    String fileUrl = Constant.REMOTE_FILE_URL + "/" + imgPath;
+                    BufferedImage image = FileSendClient.downloadFileBufferedImage(fileUrl);
+                    if(image != null) {
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        ImageIO.write(image, "png", baos);
+                        byte[] imageBytes = baos.toByteArray();
+                        base64Image = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
+                        a.setImgPath(base64Image);
+                    }
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-                a.setImgPath(base64Image);
             }
         }
         //logger.info("list:"+ JSON.toJSONString(list));
@@ -108,17 +134,36 @@ public class AdvertsController {
     @PostMapping("/file/upload")
     public AjaxResult upload(@RequestParam("file") MultipartFile file, String advertsId) throws IOException {
         AjaxResult ajaxResult = new AjaxResult();
-        String imgPath = uploadFile(file, advertsId);
+        //获取文件名
+        String fileName = file.getOriginalFilename();
+        int lastIndex = fileName.lastIndexOf('.');
+        String fileExtension = fileName.substring(lastIndex + 1);
+        // 远程文件夹地址
+        String folderPathRemote = uploadPathRemote+"/adverts";
+        // 远程文件地址
+        String filePathRemote = folderPathRemote + "/" + advertsId + "." + fileExtension;
         Adverts adverts = advertsDaoMapper.getById(advertsId);
-        adverts.setImgPath(imgPath);
+        adverts.setImgPath(filePathRemote);
         adverts.setUpdateTime(new Date());
         advertsDaoMapper.update(adverts);
+        // 发送文件
+        try {
+            // 本地文件地址
+            String imgPath = uploadFile(file, fileExtension, advertsId);
+            // 读取文件
+            byte[] fileBytes = Files.readAllBytes(Paths.get(imgPath));
+            // 创建文件消息对象
+            FileMessage fileMessage = new FileMessage(folderPathRemote, advertsId+"." + fileExtension, fileBytes);
+            FileSendClient.sendFile(fileMessage);
+        } catch (Exception e) {
+            logger.info("Error in Send: " + e.getMessage());
+        }
         ajaxResult.setCode(20000);
         ajaxResult.setMessage("成功");
         return ajaxResult;
     }
 
-    public String uploadFile(MultipartFile file, String id) {
+    public String uploadFile(MultipartFile file, String fileExtension, String id) {
         String path = "";
         if (file != null) {
             //目录不存在则直接创建
@@ -132,12 +177,8 @@ public class AdvertsController {
 //            if (!ymdFile.exists()) {
 //                ymdFile.mkdirs();
 //            }
-            //获取文件名
-            String fileName = file.getOriginalFilename();
-            int lastIndex = fileName.lastIndexOf('.');
-            String fileExtension = fileName.substring(lastIndex + 1);
             //path = ymdFile.getPath() + "/" + id+"."+fileExtension;
-            path = uploadPath + "/adverts" + "/" + id+"."+fileExtension;
+            path = uploadPath + "/adverts" + "/" + id +"."+ fileExtension;
             try {
                 file.transferTo(new File(path));
             } catch (IOException e) {

@@ -46,7 +46,7 @@
         from t_msg_template a
         left join t_pro_config b on b.project_num = a.pro_num
         where a.delete_flag = 0
-        <if test="proNum != null">
+        <if test="proNum != null and proNum != ''">
             and a.pro_num = #{proNum}
         </if>
         <if test="status != null">

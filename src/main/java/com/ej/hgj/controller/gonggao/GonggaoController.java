@@ -18,10 +18,12 @@ import com.ej.hgj.dao.wechat.WechatPubUserDaoMapper;
 import com.ej.hgj.entity.config.ConstantConfig;
 import com.ej.hgj.entity.config.ProConfig;
 import com.ej.hgj.entity.cstInto.CstInto;
+import com.ej.hgj.entity.file.FileMessage;
 import com.ej.hgj.entity.gonggao.Gonggao;
 import com.ej.hgj.entity.message.MsgTemplate;
 import com.ej.hgj.entity.wechat.*;
 import com.ej.hgj.utils.*;
+import com.ej.hgj.utils.file.FileSendClient;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +61,9 @@ public class GonggaoController {
 
     @Value("${upload.path}")
     private String uploadPath;
+
+    @Value("${upload.path.remote}")
+    private String uploadPathRemote;
 
     @Autowired
     private GonggaoTypeDaoMapper gonggaoTypeDaoMapper;
@@ -483,11 +488,15 @@ public class GonggaoController {
     public AjaxResult saveContent(@RequestBody Gonggao gonggao){
         AjaxResult ajaxResult = new AjaxResult();
         String gonggaoId = gonggao.getId();
+        // 远程文件夹地址
+        String folderPathRemote = uploadPathRemote+"/gonggao";
+
         if(StringUtils.isBlank(gonggaoId)){
             String id = TimestampGenerator.generateSerialNumber();
             gonggao.setId(id);
-            String filePath = saveGongGaoContent(id, gonggao.getContent());
-            gonggao.setFilePath(filePath);
+            // 远程文件地址
+            String filePathRemote = folderPathRemote + "/" + id +".html";
+            gonggao.setFilePath(filePathRemote);
             // 来源：1-公众号 2-编辑器
             gonggao.setSource(2);
             // 默认1,不显示  0-显示
@@ -496,16 +505,33 @@ public class GonggaoController {
             gonggao.setCreateTime(new Date());
             gonggao.setDeleteFlag(0);
             gonggaoDaoMapper.save(gonggao);
+            sendRemoteFile(id,gonggao.getContent(),folderPathRemote);
         }else {
-            String filePath = saveGongGaoContent(gonggaoId, gonggao.getContent());
-            gonggao.setFilePath(filePath);
+            // 远程文件地址
+            String filePathRemote = folderPathRemote + "/" + gonggaoId +".html";
+            gonggao.setFilePath(filePathRemote);
             gonggao.setUpdateTime(new Date());
             gonggaoDaoMapper.update(gonggao);
+            sendRemoteFile(gonggaoId,gonggao.getContent(),folderPathRemote);
         }
-
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         return ajaxResult;
+    }
+
+    public void sendRemoteFile(String id, String content, String folderPathRemote){
+        // 发送文件
+        try {
+            // 本地文件地址
+            String filePath = saveGongGaoContent(id, content);
+            // 读取文件
+            byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
+            // 创建文件消息对象
+            FileMessage fileMessage = new FileMessage(folderPathRemote, id +".html", fileBytes);
+            FileSendClient.sendFile(fileMessage);
+        } catch (Exception e) {
+            logger.info("Error in Send: " + e.getMessage());
+        }
     }
 
     public String saveGongGaoContent(String no, String content) {
@@ -570,7 +596,10 @@ public class GonggaoController {
         OutputStream os = null;
         InputStream is = null;
         try {
-            InputStream in = new FileInputStream(new File(gonggao.getFilePath()));
+            //InputStream in = new FileInputStream(new File(gonggao.getFilePath()));
+            // 拼接远程文件地址
+            String fileUrl = Constant.REMOTE_FILE_URL + "/" + gonggao.getFilePath();
+            InputStream in = FileSendClient.downloadFileInputStream(fileUrl);
             // 取得输出流
             os = response.getOutputStream();
             response.setContentType("application/vnd.ms-excel");

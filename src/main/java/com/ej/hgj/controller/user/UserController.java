@@ -15,9 +15,11 @@ import com.ej.hgj.entity.build.Build;
 import com.ej.hgj.entity.config.ConstantConfig;
 import com.ej.hgj.entity.config.ProConfig;
 import com.ej.hgj.entity.corp.Corp;
+import com.ej.hgj.entity.file.FileMessage;
 import com.ej.hgj.entity.user.*;
 import com.ej.hgj.service.user.UserService;
 import com.ej.hgj.utils.*;
+import com.ej.hgj.utils.file.FileSendClient;
 import com.ej.hgj.utils.wechat.MyX509TrustManager;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -39,6 +41,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -49,6 +53,12 @@ import java.util.stream.Collectors;
 public class UserController {
 
     Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Value("${upload.path}")
+    private String uploadPath;
+
+    @Value("${upload.path.remote}")
+    private String uploadPathRemote;
 
     @Autowired
     private UserService userService;
@@ -67,9 +77,6 @@ public class UserController {
 
     @Autowired
     private UserDaoMapper userDaoMapper;
-
-    @Value("${upload.path}")
-    private String uploadPath;
 
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(@RequestParam(value = "page",defaultValue = "1") int page,
@@ -100,19 +107,37 @@ public class UserController {
 
             // 企微二维码
             if(StringUtils.isNotBlank(user1.getQrCode())){
-                String base64Image = "";
-                try {
-                    BufferedImage image = ImageIO.read(new File(user1.getQrCode()));
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ImageIO.write(image, "png", baos);
-                    byte[] imageBytes = baos.toByteArray();
-                    base64Image = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                user1.setQrCode(base64Image);
-            }
+//                String base64Image = "";
+//                try {
+//                    BufferedImage image = ImageIO.read(new File(user1.getQrCode()));
+//                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                    ImageIO.write(image, "png", baos);
+//                    byte[] imageBytes = baos.toByteArray();
+//                    base64Image = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                user1.setQrCode(base64Image);
 
+                  // 远程文件读取
+//                try {
+//                    String base64Image = "";
+//                    // 获取文件路径
+//                    String imgPath = user1.getQrCode();
+//                    // 拼接远程文件地址
+//                    String fileUrl = Constant.REMOTE_FILE_URL + "/" + imgPath;
+//                    BufferedImage image = FileSendClient.downloadFileBufferedImage(fileUrl);
+//                    if(image != null) {
+//                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                        ImageIO.write(image, "png", baos);
+//                        byte[] imageBytes = baos.toByteArray();
+//                        base64Image = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
+//                        user1.setQrCode(base64Image);
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+            }
         }
         //logger.info("list:"+ JSON.toJSONString(list));
         PageInfo<User> pageInfo = new PageInfo<>(list);
@@ -199,17 +224,36 @@ public class UserController {
     @PostMapping("/file/upload")
     public AjaxResult upload(@RequestParam("file") MultipartFile file, String userKey) throws IOException {
         AjaxResult ajaxResult = new AjaxResult();
-        String qrCodePath = uploadFile(file, userKey);
+        //获取文件名
+        String fileName = file.getOriginalFilename();
+        int lastIndex = fileName.lastIndexOf('.');
+        String fileExtension = fileName.substring(lastIndex + 1);
+        // 远程文件夹地址
+        String folderPathRemote = uploadPathRemote+"/user/" + new SimpleDateFormat("yyyyMMdd").format(new Date());
+        // 远程文件地址
+        String filePathRemote = folderPathRemote + "/" + userKey+"." + fileExtension;
         User user = userDaoMapper.getById(userKey);
-        user.setQrCode(qrCodePath);
+        user.setQrCode(filePathRemote);
         user.setUpdateTime(new Date());
         userDaoMapper.updateById(user);
+        // 发送文件
+        try {
+            // 本地文件地址
+            String qrCodePath = uploadFile(file, fileExtension, userKey);
+            // 读取文件
+            byte[] fileBytes = Files.readAllBytes(Paths.get(qrCodePath));
+            // 创建文件消息对象
+            FileMessage fileMessage = new FileMessage(folderPathRemote, userKey+"." + fileExtension, fileBytes);
+            FileSendClient.sendFile(fileMessage);
+        } catch (Exception e) {
+            logger.info("Error in Send: " + e.getMessage());
+        }
         ajaxResult.setCode(20000);
         ajaxResult.setMessage("成功");
         return ajaxResult;
     }
 
-    public String uploadFile(MultipartFile file, String id) {
+    public String uploadFile(MultipartFile file, String fileExtension, String id) {
         String path = "";
         if (file != null) {
             //目录不存在则直接创建
@@ -218,16 +262,12 @@ public class UserController {
                 filePath.mkdirs();
             }
             //创建年月日文件夹
-            File ymdFile = new File(uploadPath + "/user" + File.separator + new SimpleDateFormat("yyyyMMdd").format(new Date()));
+            File ymdFile = new File(uploadPath + "/user/" + new SimpleDateFormat("yyyyMMdd").format(new Date()));
             //目录不存在则直接创建
             if (!ymdFile.exists()) {
                 ymdFile.mkdirs();
             }
             String uploadPath = ymdFile.getPath();
-            //获取文件名
-            String fileName = file.getOriginalFilename();
-            int lastIndex = fileName.lastIndexOf('.');
-            String fileExtension = fileName.substring(lastIndex + 1);
             path = uploadPath + "/" + id+"."+fileExtension;
             try {
                 file.transferTo(new File(path));

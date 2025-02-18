@@ -106,11 +106,13 @@ public class RepairTaskService {
                             // 查询报修信息
                             String repairNum = workOrd.getWoNo();
                             RepairLog findByRepNum = repairLogDaoMapper.getByRepNum(repairNum);
-                            // 根据项目号查询公众号
-                            WechatPub wechatPub = wechatPubDaoMapper.getByProNum(findByRepNum.getProjectNum());
-                            String accessToken = JSONUtil.parseObj(HttpUtil.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="+wechatPub.getAppId()+"&secret=" + wechatPub.getAppSecret())).get("access_token").toString();
-                            repairWostaProcSendTempMsg(findByRepNum.getProjectNum(),findByRepNum.getWxOpenId(), accessToken,wechatPub.getProName(), repairNum);
-                            logger.info("--处理中工单模板消息发送成功--||" + "项目：" + findByRepNum.getProjectName() + "||客户：" + findByRepNum.getCstName() + "||报修单号：" + repairNum);
+                            if(findByRepNum != null && StringUtils.isNotBlank(findByRepNum.getWxOpenId())) {
+                                // 根据项目号查询公众号
+                                WechatPub wechatPub = wechatPubDaoMapper.getByProNum(findByRepNum.getProjectNum());
+                                String accessToken = JSONUtil.parseObj(HttpUtil.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + wechatPub.getAppId() + "&secret=" + wechatPub.getAppSecret())).get("access_token").toString();
+                                repairWostaProcSendTempMsg(findByRepNum.getProjectNum(), findByRepNum.getWxOpenId(), accessToken, wechatPub.getProName(), repairNum);
+                                logger.info("--处理中工单模板消息发送成功--||" + "项目：" + findByRepNum.getProjectName() + "||客户：" + findByRepNum.getCstName() + "||报修单号：" + repairNum);
+                            }
                         }catch (Exception e){
                             logger.info("--处理中工单模板消息发送失败--" + e);
                         }
@@ -272,11 +274,13 @@ public class RepairTaskService {
                 // 查询报修信息
                 String repairNum = workOrd.getWoNo();
                 RepairLog findByRepNum = repairLogDaoMapper.getByRepNum(repairNum);
-                // 根据项目号查询公众号
-                WechatPub wechatPub = wechatPubDaoMapper.getByProNum(findByRepNum.getProjectNum());
-                String accessToken = JSONUtil.parseObj(HttpUtil.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="+wechatPub.getAppId()+"&secret=" + wechatPub.getAppSecret())).get("access_token").toString();
-                repairWostaFinishSendTempMsg(findByRepNum.getProjectNum(),findByRepNum.getWxOpenId(), accessToken, repairNum);
-                logger.info("--已完工工单模板消息发送成功--||" + "项目：" + findByRepNum.getProjectName() + "||客户：" + findByRepNum.getCstName() + "||报修单号：" + repairNum);
+                if(findByRepNum != null && StringUtils.isNotBlank(findByRepNum.getWxOpenId())) {
+                    // 根据项目号查询公众号
+                    WechatPub wechatPub = wechatPubDaoMapper.getByProNum(findByRepNum.getProjectNum());
+                    String accessToken = JSONUtil.parseObj(HttpUtil.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + wechatPub.getAppId() + "&secret=" + wechatPub.getAppSecret())).get("access_token").toString();
+                    repairWostaFinishSendTempMsg(findByRepNum.getProjectNum(), findByRepNum.getWxOpenId(), accessToken, repairNum);
+                    logger.info("--已完工工单模板消息发送成功--||" + "项目：" + findByRepNum.getProjectName() + "||客户：" + findByRepNum.getCstName() + "||报修单号：" + repairNum);
+                }
             }catch (Exception e){
                 logger.info("--已完工工单模板消息发送失败--" + e);
             }

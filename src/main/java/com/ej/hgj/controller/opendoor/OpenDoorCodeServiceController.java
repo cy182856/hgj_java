@@ -8,6 +8,7 @@ import com.ej.hgj.entity.opendoor.OpenDoorCode;
 import com.ej.hgj.entity.opendoor.OpenDoorCodeService;
 import com.ej.hgj.entity.opendoor.OpenDoorQuickCode;
 import com.ej.hgj.entity.visit.VisitLog;
+import com.ej.hgj.utils.file.FileSendClient;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -46,24 +47,35 @@ public class OpenDoorCodeServiceController {
         List<OpenDoorCodeService> list = openDoorCodeServiceDaoMapper.getList(openDoorCodeService);
         for(OpenDoorCodeService o : list){
             if(StringUtils.isNotBlank(o.getFacePicPath())){
+//                // 获取图片路径
+//                String imgPath = o.getFacePicPath();
+//                String base64Img = "";
+//                try {
+//                    // 创建BufferedReader对象，从本地文件中读取
+//                    BufferedReader reader = new BufferedReader(new FileReader(imgPath));
+//                    // 逐行读取文件内容
+//                    String line = "";
+//                    while ((line = reader.readLine()) != null) {
+//                        base64Img += line;
+//                    }
+//                    // 关闭文件
+//                    reader.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                base64Img = "data:image/jpeg;base64," + base64Img;
+//                o.setFacePicPath(base64Img);
+
                 // 获取图片路径
                 String imgPath = o.getFacePicPath();
                 String base64Img = "";
-                try {
-                    // 创建BufferedReader对象，从本地文件中读取
-                    BufferedReader reader = new BufferedReader(new FileReader(imgPath));
-                    // 逐行读取文件内容
-                    String line = "";
-                    while ((line = reader.readLine()) != null) {
-                        base64Img += line;
-                    }
-                    // 关闭文件
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                // 拼接远程文件地址
+                String fileUrl = Constant.REMOTE_FILE_URL + "/" + imgPath;
+                String fileContent = FileSendClient.downloadFileContent(fileUrl);
+                if(StringUtils.isNotBlank(fileContent)) {
+                    base64Img = "data:image/jpeg;base64," + fileContent;
+                    o.setFacePicPath(base64Img);
                 }
-                base64Img = "data:image/jpeg;base64," + base64Img;
-                o.setFacePicPath(base64Img);
             }
         }
         PageInfo<OpenDoorCodeService> pageInfo = new PageInfo<>(list);

@@ -19,6 +19,7 @@ import com.ej.hgj.entity.opendoor.OpenDoorCodeService;
 import com.ej.hgj.utils.HttpClientUtil;
 import com.ej.hgj.utils.MyX509TrustManager;
 import com.ej.hgj.utils.TimestampGenerator;
+import com.ej.hgj.utils.file.FileSendClient;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -62,25 +63,35 @@ public class FeedbackController {
             if(StringUtils.isNotBlank(f.getImage())){
                 // 获取图片路径
                 String imgPath = f.getImage();
-                String base64Img = "";
-                try {
-                    // 创建BufferedReader对象，从本地文件中读取
-                    BufferedReader reader = new BufferedReader(new FileReader(imgPath));
-                    // 逐行读取文件内容
-                    String line = "";
-                    while ((line = reader.readLine()) != null) {
-                        base64Img += line;
+                // 拼接远程文件地址
+                String fileUrl = Constant.REMOTE_FILE_URL + "/" + imgPath;
+                String fileContent = FileSendClient.downloadFileContent(fileUrl);
+                if(StringUtils.isNotBlank(fileContent)) {
+                    String[] fileList = fileContent.split(",");
+                    for(int i = 0; i<fileList.length; i++){
+                        fileList[i] = "data:image/jpeg;base64," + fileList[i];
                     }
-                    // 关闭文件
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    f.setFileList(fileList);
                 }
-                String[] fileList = base64Img.split(",");
-                for(int i = 0; i<fileList.length; i++){
-                    fileList[i] = "data:image/jpeg;base64," + fileList[i];
-                }
-                f.setFileList(fileList);
+//                String base64Img = "";
+//                try {
+//                    // 创建BufferedReader对象，从本地文件中读取
+//                    BufferedReader reader = new BufferedReader(new FileReader(imgPath));
+//                    // 逐行读取文件内容
+//                    String line = "";
+//                    while ((line = reader.readLine()) != null) {
+//                        base64Img += line;
+//                    }
+//                    // 关闭文件
+//                    reader.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+                //String[] fileList = base64Img.split(",");
+//                for(int i = 0; i<fileList.length; i++){
+//                    fileList[i] = "data:image/jpeg;base64," + fileList[i];
+//                }
+//                f.setFileList(fileList);
                 //base64Img = "data:image/jpeg;base64," + base64Img;
                 //f.setImage(base64Img);
             }

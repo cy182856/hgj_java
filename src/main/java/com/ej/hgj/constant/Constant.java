@@ -41,6 +41,10 @@ public class Constant {
 
     public static final String RESP_MESSAGE_TYPE_TEXT = "text";
 
+    // 远程文件服务器地址
+    public static final String REMOTE_FILE_URL = "http://192.168.5.250:18566";
+    //public static final String REMOTE_FILE_URL = "http://192.168.23.28:18566";
+
     /**上海朴由科技有限公司  菜单C1点击事件返回**/
     public static final String PY_CLICK_TEXT = "感谢您的关注！\n" +
             "\n" +
