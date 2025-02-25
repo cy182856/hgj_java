@@ -21,6 +21,8 @@ public interface UserDaoMapper {
 
     List<User> queryUserList(@Param("userName") String userName, @Param("password") String password);
 
+    List<User> queryUserByMobile(@Param("mobile") String mobile);
+
     List<User> queryUserByUserId(@Param("userId") String userId);
 
     List<User> queryUserListByUserId(@Param("userId") String userId);

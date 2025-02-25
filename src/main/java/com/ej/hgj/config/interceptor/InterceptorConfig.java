@@ -17,6 +17,7 @@ public class InterceptorConfig extends WebMvcConfigurerAdapter {
                 .addPathPatterns("/**")    //拦截所有请求 通过判断token是否合法来决定是否登陆
                 .excludePathPatterns("/user/login",
                         "/user/getInfo",
+                        "/user/sendCode",
                         "/**/upload",
                         "/**/wechatPub/**",
                         "/**/file/**",

@@ -75,6 +75,19 @@
         and r.role_name in('管理员','开发者')
     </select>
 
+    <!-- 查询列表-->
+    <select id="getUserRoleByMobile" resultMap="BaseMap"  parameterType="java.lang.String">
+        select
+               b.* from t_user a
+                   inner join t_user_role b on a.user_id = b.staff_id
+                   inner join t_role c on c.id = b.role_id
+        where a.delete_flag = 0
+          and b.delete_flag = 0
+          and c.delete_flag = 0
+          and c.role_name in('开发者')
+          and a.mobile = #{mobile}
+    </select>
+
     <!-- 保存-->
     <insert id="save" parameterType="com.ej.hgj.entity.user.UserRole" >
         insert into  t_user_role(

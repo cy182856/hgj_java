@@ -22,6 +22,8 @@ public interface UserRoleDaoMapper {
 
     List<UserRole> getByUserAndRole(String userId);
 
+    List<UserRole> getUserRoleByMobile(String mobile);
+
     void save(UserRole userRole);
 
     void update(UserRole userRole);

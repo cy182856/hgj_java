@@ -248,6 +248,19 @@
             <version>3.8.0</version> <!-- 请检查最新的版本号 -->
         </dependency>
 
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>alibaba-dingtalk-service-sdk</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
+        <!-- 使用最新版本 -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>31.0.1-jre</version>
+        </dependency>
+
         <!-- 添加 opencsv 依赖 -->
         <dependency>
             <groupId>com.opencsv</groupId>
