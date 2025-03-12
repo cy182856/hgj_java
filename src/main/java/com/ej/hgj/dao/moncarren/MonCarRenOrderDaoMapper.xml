@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.moncarren.MonCarRenOrderDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.moncarren.MonCarRenOrder">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
+        <result column="car_code" jdbcType="VARCHAR" property="carCode"/>
+        <result column="car_type_no" jdbcType="VARCHAR" property="carTypeNo"/>
+        <result column="wx_open_id" jdbcType="VARCHAR" property="wxOpenId"/>
+        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
+        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
+        <result column="pay_amount" jdbcType="DECIMAL" property="payAmount"/>
+        <result column="amount_total" jdbcType="INTEGER" property="amountTotal"/>
+        <result column="ip_item_name" jdbcType="VARCHAR" property="ipItemName"/>
+        <result column="transaction_id" jdbcType="VARCHAR" property="transactionId"/>
+        <result column="trade_type" jdbcType="VARCHAR" property="tradeType"/>
+        <result column="trade_state" jdbcType="VARCHAR" property="tradeState"/>
+        <result column="trade_state_desc" jdbcType="VARCHAR" property="tradeStateDesc"/>
+        <result column="bank_type" jdbcType="VARCHAR" property="bankType"/>
+        <result column="success_time" jdbcType="VARCHAR" property="successTime"/>
+        <result column="begin_time" jdbcType="VARCHAR" property="beginTime"/>
+        <result column="end_time" jdbcType="VARCHAR" property="endTime"/>
+        <result column="month_num" jdbcType="INTEGER" property="monthNum"/>
+        <result column="renew_begin_time" jdbcType="VARCHAR" property="renewBeginTime"/>
+        <result column="renew_end_time" jdbcType="VARCHAR" property="renewEndTime"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="user_tel" jdbcType="VARCHAR" property="userTel"/>
+        <result column="user_address" jdbcType="VARCHAR" property="userAddress"/>
+        <result column="rule_id" jdbcType="VARCHAR" property="ruleId"/>
+        <result column="rule_name" jdbcType="VARCHAR" property="ruleName"/>
+        <result column="rule_type" jdbcType="VARCHAR" property="ruleType"/>
+        <result column="rule_count" jdbcType="VARCHAR" property="ruleCount"/>
+        <result column="rule_amount" jdbcType="VARCHAR" property="ruleAmount"/>
+        <result column="order_status" jdbcType="INTEGER" property="orderStatus"/>
+        <result column="call_back_code" jdbcType="VARCHAR" property="callBackCode"/>
+        <result column="call_back_msg" jdbcType="VARCHAR" property="callBackMsg"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+
+        <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, pro_num, car_code, car_type_no, wx_open_id, cst_code, cst_name, pay_amount, amount_total, ip_item_name,transaction_id,trade_type,
+        trade_state, trade_state_desc, bank_type, success_time, begin_time, end_time, month_num, renew_begin_time, renew_end_time, user_name, user_tel,
+        user_address, rule_id, rule_name, rule_type, rule_count, rule_amount, order_status, call_back_code, call_back_msg, create_time, update_time, create_by, update_by, delete_flag
+    </sql>
+
+    <!-- 根据key查询-->
+    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_mon_car_ren_order
+        where delete_flag = 0 and id = #{id,jdbcType=VARCHAR}
+    </select>
+
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.moncarren.MonCarRenOrder">
+        SELECT
+        a.*,b.project_name as pro_name
+        FROM
+        t_mon_car_ren_order a
+        left join t_pro_config b on b.project_num = a.pro_num
+        WHERE a.delete_flag = 0
+        <if test="carCode != null and carCode != ''">
+            and a.car_code = #{carCode}
+        </if>
+        <if test="orderStatus != null">
+            and a.order_status = #{orderStatus}
+        </if>
+        <if test="proNum != null and proNum != ''">
+            and a.pro_num = #{proNum}
+        </if>
+        <if test="cstName != null">
+            and a.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="cstCode != null">
+            and a.cst_code = #{cstCode}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and a.create_time >= #{startDate,jdbcType=VARCHAR}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and a.create_time &lt;= #{endDate,jdbcType=VARCHAR}
+        </if>
+        order by a.update_time desc
+    </select>
+
+</mapper>
