@@ -93,4 +93,10 @@ public class MonCarRenOrder {
     private String endDate;
 
     private String proName;
+
+    private Integer invoiceStatus;
+
+    private String resCode;
+
+    private String resMsg;
 }

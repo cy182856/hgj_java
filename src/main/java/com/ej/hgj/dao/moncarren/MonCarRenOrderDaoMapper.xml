@@ -42,6 +42,9 @@
         <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
 
         <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
+        <result column="invoice_status" jdbcType="VARCHAR" property="invoiceStatus"/>
+        <result column="res_code" jdbcType="VARCHAR" property="resCode"/>
+        <result column="res_msg" jdbcType="VARCHAR" property="resMsg"/>
     </resultMap>
     <sql id="Base_Column_List" >
         id, pro_num, car_code, car_type_no, wx_open_id, cst_code, cst_name, pay_amount, amount_total, ip_item_name,transaction_id,trade_type,
@@ -61,16 +64,23 @@
     <!-- 查询列表-->
     <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.moncarren.MonCarRenOrder">
         SELECT
-        a.*,b.project_name as pro_name
+        a.*,b.project_name as pro_name,c.invoice_status,c.res_code,c.res_msg
         FROM
         t_mon_car_ren_order a
         left join t_pro_config b on b.project_num = a.pro_num
+        left join t_mon_car_ren_invoice c on c.order_id = a.id
         WHERE a.delete_flag = 0
         <if test="carCode != null and carCode != ''">
             and a.car_code = #{carCode}
         </if>
         <if test="orderStatus != null">
             and a.order_status = #{orderStatus}
+        </if>
+        <if test="resCode != null and resCode == 1 ">
+            and c.res_code = '01'
+        </if>
+        <if test="resCode != null and resCode == 2 ">
+            and c.res_code = '02'
         </if>
         <if test="proNum != null and proNum != ''">
             and a.pro_num = #{proNum}
@@ -80,6 +90,12 @@
         </if>
         <if test="cstCode != null">
             and a.cst_code = #{cstCode}
+        </if>
+        <if test="invoiceStatus != null and invoiceStatus != '' and invoiceStatus != 0 ">
+            and c.invoice_status = #{invoiceStatus}
+        </if>
+        <if test="invoiceStatus == 0">
+            and c.invoice_status is null
         </if>
         <if test="startDate != null and startDate != ''">
             and a.create_time >= #{startDate,jdbcType=VARCHAR}

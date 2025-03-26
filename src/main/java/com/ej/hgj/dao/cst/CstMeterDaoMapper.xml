@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.cst.CstMeterDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.cst.CstMeter">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
+        <result column="account_date" jdbcType="VARCHAR" property="accountDate"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+
+        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
+
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, pro_num, `user_id`, cst_code, account_date, create_time, update_time, create_by, update_by, delete_flag
+    </sql>
+
+    <!-- 根据id查询-->
+    <select id="getById" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_cst_meter
+        where delete_flag = 0 and id = #{id}
+    </select>
+
+    <!-- 根据客户号、电表客户编号查询-->
+    <select id="getByCstCodeAndUserId" resultMap="BaseMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from t_cst_meter
+        where delete_flag = 0 and cst_code = #{cstCode} and user_id = #{userId}
+    </select>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.cst.CstMeter">
+        select
+        b.id,b.user_id,b.account_date,b.create_time,b.update_time,a.cst_name,a.code as cst_code
+        from s_cst a
+        left join t_cst_meter b on b.cst_code = a.code and b.delete_flag = 0
+        where a.org_id = '10000'
+        <if test="userId != null and userId != ''">
+            and b.user_id = #{userId,jdbcType=VARCHAR}
+        </if>
+        <if test="cstCode != null and cstCode != ''">
+            and a.code = #{cstCode,jdbcType=VARCHAR}
+        </if>
+        <if test="cstName != null and cstName != ''">
+            and a.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        order by b.update_time desc
+    </select>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.cst.CstMeter" >
+        update
+        t_cst_meter
+        <set>
+            <if test="proNum != null">
+                pro_num = #{proNum,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="cstCode != null">
+                cst_code = #{cstCode,jdbcType=VARCHAR},
+            </if>
+            <if test="accountDate != null">
+                account_date = #{accountDate,jdbcType=VARCHAR},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id=#{id,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 保存-->
+    <insert id="save" parameterType="com.ej.hgj.entity.cst.CstMeter" >
+        insert into  t_cst_meter(
+        <if test="id != null">
+            id,
+        </if>
+        <if test="proNum != null">
+            pro_num,
+        </if>
+        <if test="userId != null">
+            user_id,
+        </if>
+        <if test="cstCode != null">
+            cst_code,
+        </if>
+        <if test="accountDate != null">
+            account_date,
+        </if>
+        <if test="createTime != null">
+            create_time,
+        </if>
+        <if test="createBy != null">
+            create_by,
+        </if>
+        <if test="updateTime != null">
+            update_time,
+        </if>
+        <if test="updateBy != null">
+            update_by,
+        </if>
+        <if test="deleteFlag != null">
+            delete_flag
+        </if>
+        )
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="proNum != null" >
+                #{proNum,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null" >
+                #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="cstCode != null" >
+                #{cstCode,jdbcType=VARCHAR},
+            </if>
+            <if test="accountDate != null" >
+                #{accountDate,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=INTEGER}
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 删除-->
+    <update id="delete" parameterType="java.lang.String" >
+        update t_cst_meter set delete_flag = 1 where id=#{id}
+    </update>
+
+</mapper>
