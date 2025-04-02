@@ -16,6 +16,8 @@ public interface CstService {
 
     GetTempQrcodeResult cstIntoQrcode(GetTempQrcodeRequest getTempQrcodeRequest);
 
+    GetTempQrcodeResult cstIntoStaffQrcode(GetTempQrcodeRequest getTempQrcodeRequest);
+
     void saveCstMenu(HgjCst hgjCst);
 
 

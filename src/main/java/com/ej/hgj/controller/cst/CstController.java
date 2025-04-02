@@ -240,6 +240,85 @@ public class CstController {
         return ajaxResult;
     }
 
+    /**
+     * 员工入住二维码
+     * @param intoVo
+     * @return
+     */
+    @RequestMapping(value = "/createIntoStaffQrCode",method = RequestMethod.POST)
+    public AjaxResult createIntoStaffQrCode(@RequestBody IntoVo intoVo){
+        AjaxResult ajaxResult = new AjaxResult();
+        logger.info("生成入住二维码参数:"+JSONObject.toJSONString(intoVo));
+        String cstCode = intoVo.getCstCode();
+        String orgId = intoVo.getOrgId();
+        if(StringUtils.isBlank(cstCode)){
+            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+            ajaxResult.setMessage("该客户编号不能为空");
+            return ajaxResult;
+        }
+        if(StringUtils.isBlank(orgId)){
+            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+            ajaxResult.setMessage("项目号不能为空");
+            return ajaxResult;
+        }
+        if(!orgId.equals("10000")){
+            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+            ajaxResult.setMessage("项目号错误");
+            return ajaxResult;
+        }
+        // 二维码生成次数限制
+        ConstantConfig constantConfig = constantConfDaoMapper.getByKey(Constant.QR_CREATE_NUM);
+        int num = Integer.valueOf(constantConfig.getConfigValue());
+        // 查询当前客户当天二维码生成次数
+        List<CstInto> cstIntoList = cstIntoDaoMapper.getByCstCodeAndTime(intoVo.getCstCode());
+        if(!cstIntoList.isEmpty() && cstIntoList.size() >= num){
+            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+            ajaxResult.setMessage("该客户二维码生成次数已用完");
+            return ajaxResult;
+        }
+        HashMap map = new HashMap();
+        GetTempQrcodeRequest getTempQrcodeRequest = new GetTempQrcodeRequest();
+        // 1-员工
+        getTempQrcodeRequest.setCstIntoId("1," + cstCode);
+        getTempQrcodeRequest.setProNum(intoVo.getOrgId());
+        GetTempQrcodeResult getTempQrcodeResult = cstService.cstIntoStaffQrcode(getTempQrcodeRequest);
+        map.put("imgUrl", getTempQrcodeResult.getImgUrl());
+        Date date = new Date();
+        // 二维码创建时间
+        map.put("qrCreateTime", DateUtils.wechatPubFormat(date));
+        // 员工默认入住所有房间
+        List<String> houseList = new ArrayList<>();
+        HgjHouse hgjHouse = new HgjHouse();
+        hgjHouse.setCstCode(cstCode);
+        List<HgjHouse> list = hgjHouseDaoMapper.getListByCstCode(hgjHouse);
+        if(!list.isEmpty()){
+            for(HgjHouse house : list){
+                houseList.add(house.getResName());
+            }
+        }else{
+            ajaxResult.setCode(Constant.FAIL_RESULT_CODE);
+            ajaxResult.setMessage("未查到房间信息无法生成入住二维码");
+            return ajaxResult;
+        }
+        if(!houseList.isEmpty()){
+            String houses = houseList.stream().collect(Collectors.joining(","));
+            map.put("houseList", houses);
+        }
+        // 计算截止时间
+        ConstantConfig config = constantConfDaoMapper.getByKey("qr_default_second");
+        Long qrDefaultSecond = Long.valueOf(config.getConfigValue());
+        Long longQrCreateTime = date.getTime();
+        Date cutOffDate = new Date(longQrCreateTime + qrDefaultSecond * 1000);
+        map.put("qrCutOffTime", DateUtils.wechatPubFormat(cutOffDate));
+        // 入住二维码角色
+        map.put("intoRole","员工");
+
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        ajaxResult.setData(map);
+        return ajaxResult;
+    }
+
     @RequestMapping(value = "/saveCstMenu",method = RequestMethod.POST)
     public AjaxResult saveRoleMenu(@RequestBody HgjCst hgjCst){
         AjaxResult ajaxResult = new AjaxResult();

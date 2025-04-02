@@ -47,7 +47,7 @@
             and project_num = #{projectNum,jdbcType=VARCHAR}
         </if>
         <if test="configKey != null">
-            and config_key like CONCAT('%', #{configKey,jdbcType=VARCHAR},'%') ESCAPE '/'
+            and config_key = #{configKey,jdbcType=VARCHAR}
         </if>
         <if test="configValue != null">
             and config_value like CONCAT('%', #{configValue,jdbcType=VARCHAR},'%') ESCAPE '/'
@@ -60,5 +60,23 @@
         </if>
         order by update_time desc
     </select>
+
+    <!-- 更新-->
+    <update id="update" parameterType="com.ej.hgj.entity.config.ConstantConfig" >
+        update
+        t_constant_config
+        <set>
+            <if test="configValue != null">
+                config_value = #{configValue,jdbcType=VARCHAR},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id=#{id,jdbcType=VARCHAR}
+    </update>
 
 </mapper>

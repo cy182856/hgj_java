@@ -8,7 +8,10 @@ import com.ej.hgj.dao.repair.RepairLogDaoMapper;
 import com.ej.hgj.entity.config.ConstantConfig;
 import com.ej.hgj.entity.house.HgjHouse;
 import com.ej.hgj.entity.repair.RepairLog;
+import com.ej.hgj.entity.role.Role;
 import com.ej.hgj.service.house.HouseService;
+import com.ej.hgj.utils.TimestampGenerator;
+import com.ej.hgj.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -16,7 +19,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -59,4 +64,15 @@ public class ConstantConfigController {
         return ajaxResult;
     }
 
+    @RequestMapping(value = "/update",method = RequestMethod.POST)
+    public AjaxResult update(HttpServletRequest request, @RequestBody ConstantConfig constantConfig){
+        String userId = TokenUtils.getUserId(request);
+        AjaxResult ajaxResult = new AjaxResult();
+        constantConfig.setUpdateTime(new Date());
+        constantConfig.setUpdateBy(userId);
+        constantConfDaoMapper.update(constantConfig);
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        return ajaxResult;
+    }
 }
