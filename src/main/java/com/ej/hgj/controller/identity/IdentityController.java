@@ -73,4 +73,16 @@ public class IdentityController {
         return ajaxResult;
     }
 
+    @RequestMapping(value = "/selectByProNum",method = RequestMethod.GET)
+    public AjaxResult selectByProNum(@RequestParam(required=false, value = "proNum") String proNum){
+        AjaxResult ajaxResult = new AjaxResult();
+        HashMap map = new HashMap();
+        List<Identity> list = identityDaoMapper.getListByProNum(proNum);
+        map.put("list",list);
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        ajaxResult.setData(map);
+        return ajaxResult;
+    }
+
 }

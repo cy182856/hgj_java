@@ -1,5 +1,6 @@
 package com.ej.hgj.dao.moncarren;
 
+import com.ej.hgj.entity.cstInto.CstInto;
 import com.ej.hgj.entity.moncarren.MonCarRenOrder;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
@@ -14,5 +15,6 @@ public interface MonCarRenOrderDaoMapper {
 
     List<MonCarRenOrder> getList(MonCarRenOrder monCarRenOrder);
 
+    void deleteByOrderStatusAndCreateTime();
 
 }

@@ -209,6 +209,17 @@ public class CardCstController {
     }
 
     /**
+     * 扣减
+     * @param cardCst
+     * @return
+     */
+    @RequestMapping(value = "/cardDeduct",method = RequestMethod.POST)
+    public AjaxResult cardDeduct(HttpServletRequest request, @RequestBody CardCst cardCst){
+        String userId = TokenUtils.getUserId(request);
+        return cardService.cardDeduct(cardCst, userId);
+    }
+
+    /**
      * 按标签批量续期
      * @param cardCst
      * @return

@@ -11,5 +11,6 @@ public interface CardService {
 
     AjaxResult cardRecharge(CardCst cardCst, String userId);
 
+    AjaxResult cardDeduct(CardCst cardCst, String userId);
 
 }

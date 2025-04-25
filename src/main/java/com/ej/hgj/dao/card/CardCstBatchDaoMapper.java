@@ -22,7 +22,11 @@ public interface CardCstBatchDaoMapper {
 
     void batchRecharge(CardCstBatch cardCstBatch);
 
+    void batchDeduct(CardCstBatch cardCstBatch);
+
     void recharge(CardCstBatch cardCstBatch);
+
+    void deduct(CardCstBatch cardCstBatch);
 
     void deleteByExpDate(String expDate);
 

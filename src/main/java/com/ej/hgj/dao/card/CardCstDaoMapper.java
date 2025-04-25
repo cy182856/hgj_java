@@ -30,5 +30,4 @@ public interface CardCstDaoMapper {
 
     List<CardCst> batchRechargeCstList(CardCst cardCst);
 
-
 }

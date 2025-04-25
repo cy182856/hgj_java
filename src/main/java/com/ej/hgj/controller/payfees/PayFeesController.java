@@ -1,12 +1,11 @@
-package com.ej.hgj.controller.moncarren;
+package com.ej.hgj.controller.payfees;
 
 import com.ej.hgj.constant.AjaxResult;
 import com.ej.hgj.constant.Constant;
-import com.ej.hgj.dao.carrenew.CarRenewOrderDaoMapper;
-import com.ej.hgj.dao.moncarren.MonCarRenOrderDaoMapper;
+import com.ej.hgj.dao.carpay.ParkPayOrderDaoMapper;
+import com.ej.hgj.dao.payfees.PaymentRecordDaoMapper;
 import com.ej.hgj.entity.carpay.ParkPayOrder;
-import com.ej.hgj.entity.carrenew.CarRenewOrder;
-import com.ej.hgj.entity.moncarren.MonCarRenOrder;
+import com.ej.hgj.entity.payfees.PaymentRecord;
 import com.ej.hgj.entity.user.User;
 import com.ej.hgj.utils.DateUtils;
 import com.github.pagehelper.PageHelper;
@@ -25,35 +24,36 @@ import java.util.List;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/monCarRen")
-public class MonCarRenController {
+@RequestMapping("/payFees")
+public class PayFeesController {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private MonCarRenOrderDaoMapper monCarRenOrderDaoMapper;
+    private PaymentRecordDaoMapper paymentRecordDaoMapper;
+
 
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public AjaxResult list(@RequestParam(value = "page",defaultValue = "1") int page,
                            @RequestParam(value = "limit",defaultValue = "10") int limit,
-                           MonCarRenOrder monCarRenOrder){
+                           PaymentRecord paymentRecord){
         AjaxResult ajaxResult = new AjaxResult();
-        if(StringUtils.isNotBlank(monCarRenOrder.getEndDate())){
-            monCarRenOrder.setEndDate(monCarRenOrder.getEndDate() + " 23:59:59");
+        if(StringUtils.isNotBlank(paymentRecord.getEndTime())){
+            paymentRecord.setEndTime(paymentRecord.getEndTime() + " 23:59:59");
         }
         HashMap map = new HashMap();
         PageHelper.offsetPage((page-1) * limit,limit);
-        List<MonCarRenOrder> list = monCarRenOrderDaoMapper.getList(monCarRenOrder);
+        List<PaymentRecord> list = paymentRecordDaoMapper.getList(paymentRecord);
         DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-        for(MonCarRenOrder m : list){
-            if(StringUtils.isNotBlank(m.getSuccessTime())) {
-                ZonedDateTime zonedDateTime = ZonedDateTime.parse(m.getSuccessTime(), formatter);
+        for(PaymentRecord p : list){
+            if(StringUtils.isNotBlank(p.getSuccessTime())) {
+                ZonedDateTime zonedDateTime = ZonedDateTime.parse(p.getSuccessTime(), formatter);
                 String formatted = zonedDateTime.format(DateUtils.formatter_ymd_hms);
-                m.setSuccessTime(formatted);
+                p.setSuccessTime(formatted);
             }
         }
         //logger.info("list:"+ JSON.toJSONString(list));
-        PageInfo<MonCarRenOrder> pageInfo = new PageInfo<>(list);
+        PageInfo<PaymentRecord> pageInfo = new PageInfo<>(list);
         //计算总页数
         int pageNumTotal = (int) Math.ceil((double)pageInfo.getTotal()/(double)limit);
         if(page > pageNumTotal){

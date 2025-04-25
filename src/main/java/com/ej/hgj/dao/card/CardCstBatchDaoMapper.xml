@@ -139,12 +139,48 @@
             </foreach>
     </update>
 
+    <!-- 批量扣减-->
+    <update id="batchDeduct" parameterType="com.ej.hgj.entity.card.CardCstBatch" >
+        update
+        t_card_cst_batch
+        <set>
+            total_num = total_num - #{rechargeNum},
+            update_time = #{updateTime,jdbcType=TIMESTAMP},
+            update_by = #{updateBy,jdbcType=VARCHAR},
+        </set>
+        where delete_flag = 0
+        and card_id = #{cardId,jdbcType=INTEGER}
+        and exp_date = #{expDate,jdbcType=VARCHAR}
+        and cst_code in
+        <foreach collection="cstCodeList" item="cstCode" index="index" open="(" close=")" separator=",">
+            #{cstCode,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+
     <!-- 充值-->
     <update id="recharge" parameterType="com.ej.hgj.entity.card.CardCstBatch" >
         update
         t_card_cst_batch
         <set>
             total_num = total_num + #{rechargeNum},
+            update_time = #{updateTime,jdbcType=TIMESTAMP},
+            update_by = #{updateBy,jdbcType=VARCHAR},
+        </set>
+        where delete_flag = 0
+        and card_id = #{cardId,jdbcType=INTEGER}
+        and exp_date = #{expDate,jdbcType=VARCHAR}
+        and pro_num = #{proNum,jdbcType=VARCHAR}
+        and cst_code = #{cstCode,jdbcType=VARCHAR}
+        and card_type = #{cardType,jdbcType=INTEGER}
+        and card_code = #{cardCode,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 扣减-->
+    <update id="deduct" parameterType="com.ej.hgj.entity.card.CardCstBatch" >
+        update
+        t_card_cst_batch
+        <set>
+            total_num = total_num - #{rechargeNum},
             update_time = #{updateTime,jdbcType=TIMESTAMP},
             update_by = #{updateBy,jdbcType=VARCHAR},
         </set>
