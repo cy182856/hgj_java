@@ -287,6 +287,10 @@ public class GonggaoController {
             gonggaoDaoMapper.update(gonggao);
         }else{
             gonggao.setId(TimestampGenerator.generateSerialNumber());
+            // 来源：1-公众号 2-编辑器 3-金数据
+            gonggao.setSource(3);
+            // 默认1,不显示  0-显示
+            gonggao.setIsShow(1);
             gonggao.setUpdateTime(new Date());
             gonggao.setCreateTime(new Date());
             gonggao.setDeleteFlag(0);
@@ -480,7 +484,7 @@ public class GonggaoController {
     }
 
     /**
-     * 编辑器保存
+     * 编辑器保存公告内容
      * @param gonggao
      * @return
      */

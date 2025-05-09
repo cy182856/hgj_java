@@ -44,7 +44,7 @@
         from t_gonggao g
             left join t_gonggao_type t on g.type = t.id
             left join t_pro_config pc ON pc.project_num = g.pro_num
-        where g.delete_flag = 0 and g.`source` = 2
+        where g.delete_flag = 0 and g.`source` = 3
         <if test="title != null and title != ''">
             and g.title like CONCAT('%', #{title,jdbcType=VARCHAR},'%') ESCAPE '/'
         </if>
