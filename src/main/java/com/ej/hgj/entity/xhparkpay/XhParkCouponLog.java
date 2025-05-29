@@ -1,4 +1,4 @@
-package com.ej.hgj.entity.opendoor;
+package com.ej.hgj.entity.xhparkpay;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -7,19 +7,25 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Data
-public class OpenDoorLog {
+public class XhParkCouponLog {
 
     private String id;
 
-    private String neighNo;
+    private String proNum;
 
-    private String cardNo;
+    private String couponNo;
 
-    private String deviceNo;
+    private String couponKey;
 
-    private Integer isUnlock;
+    private String cardCstBatchId;
 
-    private Long eventTime;
+    private String carCode;
+
+    private String wxOpenId;
+
+    private String cstCode;
+
+    private Integer deductionNum;
 
     private String createBy;
 
@@ -35,10 +41,15 @@ public class OpenDoorLog {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
-    private String openDoorTime;
+    private String startTime;
 
-    private String startDate;
+    private String endTime;
 
-    private String endDate;
+    private String proName;
 
+    private String cardCode;
+
+    private String cstName;
+
+    private String userName;
 }

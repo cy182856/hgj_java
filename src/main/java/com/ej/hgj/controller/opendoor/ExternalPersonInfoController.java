@@ -7,6 +7,7 @@ import com.ej.hgj.dao.opendoor.OpenDoorCodeServiceDaoMapper;
 import com.ej.hgj.entity.opendoor.ExternalPersonInfo;
 import com.ej.hgj.entity.opendoor.OpenDoorCodeService;
 import com.ej.hgj.entity.visit.VisitLog;
+import com.ej.hgj.utils.TokenUtils;
 import com.ej.hgj.utils.file.FileSendClient;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -16,10 +17,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -93,6 +96,22 @@ public class ExternalPersonInfoController {
         ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
         ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
         ajaxResult.setData(map);
+        return ajaxResult;
+    }
+
+    @RequestMapping(value = "/personInfo/delete",method = RequestMethod.GET)
+    public AjaxResult delete(HttpServletRequest request, @RequestParam(required=false, value = "id") String id){
+        String userId = TokenUtils.getUserId(request);
+        AjaxResult ajaxResult = new AjaxResult();
+        ExternalPersonInfo externalPersonInfo = new ExternalPersonInfo();
+        externalPersonInfo.setId(id);
+        externalPersonInfo.setDeleteFlag(1);
+        externalPersonInfo.setUpdateBy(userId);
+        externalPersonInfo.setUpdateTime(new Date());
+        externalPersonInfoDaoMapper.delete(externalPersonInfo);
+        ajaxResult.setCode(Constant.SUCCESS_RESULT_CODE);
+        ajaxResult.setMessage(Constant.SUCCESS_RESULT_MESSAGE);
+        logger.info("访客信息删除成功：" + id);
         return ajaxResult;
     }
 }

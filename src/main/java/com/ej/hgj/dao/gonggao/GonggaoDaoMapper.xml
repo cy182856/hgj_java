@@ -223,6 +223,9 @@
             <if test="title != null">
                 title = #{title,jdbcType=VARCHAR},
             </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
             <if test="updateTime != null">
                 update_time = #{updateTime,jdbcType=TIMESTAMP},
             </if>

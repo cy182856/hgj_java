@@ -40,6 +40,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.ConnectException;
@@ -281,9 +282,12 @@ public class GonggaoController {
     }
 
     @RequestMapping(value = "/save",method = RequestMethod.POST)
-    public AjaxResult save(@RequestBody Gonggao gonggao){
+    public AjaxResult save(HttpServletRequest request, @RequestBody Gonggao gonggao){
+        String userId = TokenUtils.getUserId(request);
         AjaxResult ajaxResult = new AjaxResult();
         if(gonggao.getId() != null){
+            gonggao.setUpdateBy(userId);
+            gonggao.setUpdateTime(new Date());
             gonggaoDaoMapper.update(gonggao);
         }else{
             gonggao.setId(TimestampGenerator.generateSerialNumber());
@@ -291,6 +295,8 @@ public class GonggaoController {
             gonggao.setSource(3);
             // 默认1,不显示  0-显示
             gonggao.setIsShow(1);
+            gonggao.setCreateBy(userId);
+            gonggao.setUpdateBy(userId);
             gonggao.setUpdateTime(new Date());
             gonggao.setCreateTime(new Date());
             gonggao.setDeleteFlag(0);

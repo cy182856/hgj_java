@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.hgj.dao.xhparkpay.XhParkCouponLogDaoMapper">
+
+    <resultMap id="BaseMap" type="com.ej.hgj.entity.xhparkpay.XhParkCouponLog">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="pro_num" jdbcType="VARCHAR" property="proNum"/>
+        <result column="coupon_no" jdbcType="VARCHAR" property="couponNo"/>
+        <result column="coupon_key" jdbcType="VARCHAR" property="couponKey"/>
+        <result column="card_cst_batch_id" jdbcType="VARCHAR" property="cardCstBatchId"/>
+        <result column="car_code" jdbcType="VARCHAR" property="carCode"/>
+        <result column="wx_open_id" jdbcType="VARCHAR" property="wxOpenId"/>
+        <result column="cst_code" jdbcType="VARCHAR" property="cstCode"/>
+        <result column="deduction_num" jdbcType="INTEGER" property="deductionNum"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="INTEGER" property="deleteFlag"/>
+
+        <result column="pro_name" jdbcType="VARCHAR" property="proName"/>
+        <result column="card_code" jdbcType="VARCHAR" property="cardCode"/>
+        <result column="cst_name" jdbcType="VARCHAR" property="cstName"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, pro_num, coupon_no, coupon_key, card_cst_batch_id, car_code, wx_open_id, cst_code, deduction_num, create_time, update_time, create_by,
+        update_by, delete_flag
+    </sql>
+
+    <!-- 查询列表-->
+    <select id="getList" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.xhparkpay.XhParkCouponLog">
+        SELECT
+        a.*,b.project_name as pro_name,c.card_code,d.cst_name,e.user_name
+        FROM
+        t_xh_park_coupon_log a
+        left join t_pro_config b on b.project_num = a.pro_num
+        left join t_card_cst_batch c on c.id = a.card_cst_batch_id and c.delete_flag = 0 and card_type = 2
+        left join s_cst d on d.code = a.cst_code
+        left join t_cst_into e on e.wx_open_id = a.wx_open_id and e.into_status = 1
+        WHERE a.delete_flag = 0
+        <if test="carCode != null and carCode != ''">
+            and a.car_code = #{carCode}
+        </if>
+        <if test="cardCode != null and cardCode != ''">
+            and c.card_code = #{cardCode}
+        </if>
+        <if test="proNum != null and proNum != ''">
+            and a.pro_num = #{proNum}
+        </if>
+        <if test="cardCode != null and cardCode != ''">
+            and c.card_code = #{cardCode}
+        </if>
+        <if test="cstName != null and cstName != ''">
+            and d.cst_name like CONCAT('%', #{cstName,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="couponKey != null and couponKey != ''">
+            and a.coupon_key like CONCAT('%', #{couponKey,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="cstCode != null and cstCode != ''">
+            and a.cst_code = #{cstCode}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            and a.create_time >= #{startTime,jdbcType=VARCHAR}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and a.create_time &lt;= #{endTime,jdbcType=VARCHAR}
+        </if>
+        order by a.update_time desc
+    </select>
+
+</mapper>

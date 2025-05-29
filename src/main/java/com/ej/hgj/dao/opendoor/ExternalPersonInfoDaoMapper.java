@@ -15,4 +15,6 @@ public interface ExternalPersonInfoDaoMapper {
 
     void save(ExternalPersonInfo externalPersonInfo);
 
+    void delete(ExternalPersonInfo externalPersonInfo);
+
 }

@@ -129,4 +129,22 @@
         </trim>
     </insert>
 
+    <!-- 删除-->
+    <update id="delete" parameterType="com.ej.hgj.entity.opendoor.ExternalPersonInfo" >
+        update
+        t_external_person_info
+        <set>
+            <if test="deleteFlag != null">
+                delete_flag = #{deleteFlag,jdbcType=INTEGER},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id=#{id,jdbcType=VARCHAR}
+    </update>
+
 </mapper>

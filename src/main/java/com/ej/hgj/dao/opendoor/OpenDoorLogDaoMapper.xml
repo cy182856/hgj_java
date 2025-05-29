@@ -42,6 +42,32 @@
         order by l.event_time desc
     </select>
 
+    <!-- 查询列表-->
+    <select id="getListAll" resultMap="BaseMap"  parameterType="com.ej.hgj.entity.opendoor.OpenDoorLog">
+        select
+        <include refid="Base_Column_List" />
+        from t_open_door_log
+        where delete_flag = 0
+        and id in (
+            select t.id from (
+            SELECT MAX(event_time),MAX(id)as id FROM t_open_door_log GROUP BY event_time
+            )t
+        )
+        <if test="cardNo != null and cardNo != ''">
+            and card_no like CONCAT('%', #{cardNo,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="deviceNo != null and deviceNo != ''">
+            and device_no like CONCAT('%', #{deviceNo,jdbcType=VARCHAR},'%') ESCAPE '/'
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and create_time >= #{startDate,jdbcType=VARCHAR}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and create_time &lt;= #{endDate,jdbcType=VARCHAR}
+        </if>
+        order by event_time desc
+    </select>
+
     <!-- 根据卡号查询-->
     <select id="getByCardNoList" resultMap="BaseMap"  parameterType="java.lang.String">
         select
