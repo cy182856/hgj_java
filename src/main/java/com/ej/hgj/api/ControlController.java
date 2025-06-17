@@ -383,7 +383,6 @@ public class ControlController {
         return controlService.saveOpenDoorLog(qrCodeLogResVo);
     }
 
-
     /**
      * 保存外部人员信息
      * @param externalPersonInfo

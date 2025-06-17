@@ -29,7 +29,7 @@ public class FileSendClient {
 
     static Logger logger = LoggerFactory.getLogger(FileSendClient.class);
 
-    private static final int TIMEOUT_SECONDS = 60;
+    private static final int TIMEOUT_SECONDS = 30;
 
     public static void sendFile(FileMessage fileMessage){
         String clientId = "6c476887-9258-d9xx966e-e0d3";
